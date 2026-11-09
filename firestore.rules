@@ -1,0 +1,86 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // Default deny all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Appointments Collection
+    match /appointments/{appointmentId} {
+      allow read: if true;
+      allow create: if true;
+      allow update, delete: if true;
+    }
+
+    // Services Catalog Collection
+    match /services/{serviceId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // Clients Directory Collection
+    match /clients/{clientId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // Transactions Collection
+    match /transactions/{transactionId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // Users Collection
+    match /users/{userId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // Offers / Posts Collection for Explorer
+    match /offers/{offerId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // Availability Schedules Collection
+    match /schedules/{scheduleId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // Promo Codes Collection
+    match /promoCodes/{promoCodeId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // Promo Code Usages History Collection
+    match /promoCodeUsages/{usageId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // Webhook Audit Logs Collection
+    match /webhookLogs/{logId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // System Settings & Subscription Pricing Collection
+    match /settings/{settingId} {
+      allow read: if true;
+      allow write: if true;
+    }
+  }
+}

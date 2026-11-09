@@ -1,0 +1,579 @@
+starting build "476d4cf0-5c7c-49ce-99d6-166504c7ba8d" using release legacy
+FETCHSOURCE
+Fetching storage object: gs://firebaseapphosting-sources-124384844626-us-east4/source-initial-0ac82d37.zip#1794258412861489
+Copying gs://firebaseapphosting-sources-124384844626-us-east4/source-initial-0ac82d37.zip#1794258412861489...
+/ [0 files][    0.0 B/  6.9 MiB]                                                / [1 files][  6.9 MiB/  6.9 MiB]                                                
+Operation completed over 1 objects/6.9 MiB.                                      
+Archive:  /tmp/source-archive.zip
+ extracting: /workspace/metadata.json  
+ extracting: /workspace/.env.example  
+ extracting: /workspace/.gitignore   
+   creating: /workspace/api/
+ extracting: /workspace/api/index.ts  
+ extracting: /workspace/bun.lock     
+ extracting: /workspace/firebase-applet-config.json  
+ extracting: /workspace/firebase-blueprint.json  
+ extracting: /workspace/firestore.rules  
+ extracting: /workspace/index.html   
+ extracting: /workspace/package-lock.json  
+ extracting: /workspace/package.json  
+   creating: /workspace/public/
+   creating: /workspace/public/assets/
+   creating: /workspace/public/assets/aistudio/
+ extracting: /workspace/public/assets/aistudio/DESIGN_cbf999d7.md  
+ extracting: /workspace/public/assets/aistudio/Paste_November_04__2026_-_10_23PM_f3327033  
+ extracting: /workspace/public/assets/aistudio/Paste_November_06__2026_-_11_38PM_5422ec9e  
+ extracting: /workspace/public/assets/aistudio/Paste_November_06__2026_-_11_43PM_44cc5ff3  
+ extracting: /workspace/public/assets/aistudio/Paste_November_06__2026_-_11_46PM_c0b5d7b7  
+ extracting: /workspace/public/assets/aistudio/code_01c71f67.html  
+ extracting: /workspace/public/assets/aistudio/code_01d86c09.html  
+ extracting: /workspace/public/assets/aistudio/code_01fc7046.html  
+ extracting: /workspace/public/assets/aistudio/code_08ccc903.html  
+ extracting: /workspace/public/assets/aistudio/code_5609bc2d.html  
+ extracting: /workspace/public/assets/aistudio/code_236533ce.html  
+ extracting: /workspace/public/assets/aistudio/code_0a23093f.html  
+ extracting: /workspace/public/assets/aistudio/code_547eb648.html  
+ extracting: /workspace/public/assets/aistudio/code_4e16fa3b.html  
+ extracting: /workspace/public/assets/aistudio/code_1e3b10c2.html  
+ extracting: /workspace/public/assets/aistudio/code_6b6462a2.html  
+ extracting: /workspace/public/assets/aistudio/code_a838dd63.html  
+ extracting: /workspace/public/assets/aistudio/code_d3b1542e.html  
+ extracting: /workspace/public/assets/aistudio/code_c74cacdd.html  
+ extracting: /workspace/public/assets/aistudio/screen_86b2efe7.png  
+ extracting: /workspace/public/assets/aistudio/screen_8530260a.png  
+ extracting: /workspace/public/assets/aistudio/screen_8773358f.png  
+ extracting: /workspace/public/assets/aistudio/screen_a5a3185d.png  
+ extracting: /workspace/public/assets/aistudio/screen_5abe2d5f.png  
+ extracting: /workspace/public/assets/aistudio/screen_0d6eca32.png  
+ extracting: /workspace/public/assets/aistudio/screen_ab8b4979.png  
+ extracting: /workspace/public/assets/aistudio/screen_60b04d88.png  
+ extracting: /workspace/public/assets/aistudio/screen_a1838716.png  
+ extracting: /workspace/public/assets/aistudio/screen_c4eae029.png  
+ extracting: /workspace/render.yaml  
+   creating: /workspace/src/
+ extracting: /workspace/src/App.tsx  
+ extracting: /workspace/server.js    
+ extracting: /workspace/server.ts    
+ extracting: /workspace/public/assets/aistudio/screen_ebc68219.png  
+ extracting: /workspace/public/assets/aistudio/screen_f5f2225f.png  
+   creating: /workspace/src/components/
+ extracting: /workspace/src/components/AiAssistantModal.tsx  
+ extracting: /workspace/src/components/Footer.tsx  
+ extracting: /workspace/public/assets/aistudio/screen_b65c2342.png  
+ extracting: /workspace/src/components/ProHeader.tsx  
+ extracting: /workspace/src/components/PublicHeader.tsx  
+   creating: /workspace/src/context/
+ extracting: /workspace/src/context/AppContext.tsx  
+   creating: /workspace/src/data/
+ extracting: /workspace/src/data/mockData.ts  
+ extracting: /workspace/src/components/ProSidebar.tsx  
+ extracting: /workspace/src/firebase.ts  
+ extracting: /workspace/src/main.tsx  
+   creating: /workspace/src/server/
+ extracting: /workspace/src/server/emailTemplateEngine.ts  
+ extracting: /workspace/src/index.css  
+ extracting: /workspace/src/components/Toast.tsx  
+   creating: /workspace/src/utils/
+ extracting: /workspace/src/utils/firebaseAuthErrors.ts  
+   creating: /workspace/src/views/
+ extracting: /workspace/src/views/AuthForgotPasswordView.tsx  
+ extracting: /workspace/src/views/AdminDashboardView.tsx  
+ extracting: /workspace/src/server/smtpBackend.ts  
+ extracting: /workspace/src/utils/dateUtils.ts  
+ extracting: /workspace/src/server/firebaseAdmin.ts  
+ extracting: /workspace/src/utils/firestoreError.ts  
+   creating: /workspace/src/types/
+ extracting: /workspace/src/types/index.ts  
+ extracting: /workspace/src/views/AuthSignInView.tsx  
+ extracting: /workspace/src/views/AuthSignUpView.tsx  
+ extracting: /workspace/src/views/AuthVerifyEmailView.tsx  
+ extracting: /workspace/src/views/ProClientsView.tsx  
+ extracting: /workspace/src/views/ProDisponibilitesView.tsx  
+ extracting: /workspace/src/views/ProAccueilView.tsx  
+ extracting: /workspace/src/views/ProCalendrierView.tsx  
+ extracting: /workspace/src/views/ProFacturationView.tsx  
+ extracting: /workspace/src/views/ProReservationsView.tsx  
+ extracting: /workspace/src/views/ProPromoCodesView.tsx  
+ extracting: /workspace/src/views/ProServicesView.tsx  
+ extracting: /workspace/src/views/ProServiceEditorView.tsx  
+ extracting: /workspace/src/views/ProSubscriptionView.tsx  
+ extracting: /workspace/src/views/PublicBookingView.tsx  
+ extracting: /workspace/src/views/PublicLandingView.tsx  
+ extracting: /workspace/src/views/PublicExplorerView.tsx  
+ extracting: /workspace/vercel.json  
+ extracting: /workspace/src/views/UserProfileView.tsx  
+ extracting: /workspace/tsconfig.json  
+ extracting: /workspace/public/assets/aistudio/Paste_November_09__2026_-_9_36PM_e60e2a91  
+ extracting: /workspace/public/assets/aistudio/Paste_November_09__2026_-_9_46PM_35d013d2  
+ extracting: /workspace/vite.config.ts  
+ extracting: /workspace/README.md    
+BUILD
+Starting Step #0 - "ubuntu"
+Step #0 - "ubuntu": Already have image (with digest): gcr.io/cloud-builders/gcloud
+Finished Step #0 - "ubuntu"
+Starting Step #1 - "preparer"
+Step #1 - "preparer": Pulling image: us-east4-docker.pkg.dev/serverless-runtimes/utilities/preparer:base_20260522_18_04_RC00
+Step #1 - "preparer": base_20260522_18_04_RC00: Pulling from serverless-runtimes/utilities/preparer
+Step #1 - "preparer": 9e26080316c5: Pulling fs layer
+Step #1 - "preparer": 9e26080316c5: Verifying Checksum
+Step #1 - "preparer": 9e26080316c5: Download complete
+Step #1 - "preparer": 9e26080316c5: Pull complete
+Step #1 - "preparer": Digest: sha256:df91c043d1811c1bfc55563e70b21ccb1f5864b0c8713334418a044ced6c3e75
+Step #1 - "preparer": Status: Downloaded newer image for us-east4-docker.pkg.dev/serverless-runtimes/utilities/preparer:base_20260522_18_04_RC00
+Step #1 - "preparer": us-east4-docker.pkg.dev/serverless-runtimes/utilities/preparer:base_20260522_18_04_RC00
+Step #1 - "preparer": 2026/11/09 21:07:36 WARNING: X_FIREBASE_SUPPORTED_HOSTS is a reserved key, removing it from the final environment variables
+Step #1 - "preparer": 2026/11/09 21:07:36 FIREBASE_CONFIG has no availability specified, applying the default of 'BUILD' and 'RUNTIME'
+Step #1 - "preparer": 2026/11/09 21:07:36 Final app hosting schema:
+Step #1 - "preparer": env:
+Step #1 - "preparer": - variable: FIREBASE_CONFIG
+Step #1 - "preparer":   value: '{"databaseURL":"","projectId":"gen-lang-client-0934022789","storageBucket":"gen-lang-client-0934022789.firebasestorage.app"}'
+Step #1 - "preparer":   availability:
+Step #1 - "preparer":   - BUILD
+Step #1 - "preparer":   - RUNTIME
+Step #1 - "preparer":   source: Firebase System
+Step #1 - "preparer": - variable: FIREBASE_WEBAPP_CONFIG
+Step #1 - "preparer":   value: '{"apiKey":"AIzaSyD_feQCUOYI6a27tLa1-CpyW13j0N56Zgg","appId":"1:124384844626:web:5baf60ef16a8f2781eb88b","authDomain":"gen-lang-client-0934022789.firebaseapp.com","databaseURL":"","messagingSenderId":"124384844626","projectId":"gen-lang-client-0934022789","storageBucket":"gen-lang-client-0934022789.firebasestorage.app"}'
+Step #1 - "preparer":   availability:
+Step #1 - "preparer":   - BUILD
+Step #1 - "preparer":   source: Firebase System
+Step #1 - "preparer": - variable: NG_TRUST_PROXY_HEADERS
+Step #1 - "preparer":   value: X-Forwarded-Host
+Step #1 - "preparer":   availability:
+Step #1 - "preparer":   - RUNTIME
+Step #1 - "preparer":   source: Firebase System
+Step #1 - "preparer": - variable: NG_ALLOWED_HOSTS
+Step #1 - "preparer":   value: reserveme-124384844626.us-east4.run.app,reserveme--gen-lang-client-0934022789.us-east4.hosted.app
+Step #1 - "preparer":   availability:
+Step #1 - "preparer":   - RUNTIME
+Step #1 - "preparer":   source: Firebase System
+Step #1 - "preparer": 
+Step #1 - "preparer": 2026/11/09 21:07:36 Final app hosting schema:
+Step #1 - "preparer": env:
+Step #1 - "preparer": - variable: FIREBASE_CONFIG
+Step #1 - "preparer":   value: '{"databaseURL":"","projectId":"gen-lang-client-0934022789","storageBucket":"gen-lang-client-0934022789.firebasestorage.app"}'
+Step #1 - "preparer":   availability:
+Step #1 - "preparer":   - BUILD
+Step #1 - "preparer":   - RUNTIME
+Step #1 - "preparer":   source: Firebase System
+Step #1 - "preparer": - variable: FIREBASE_WEBAPP_CONFIG
+Step #1 - "preparer":   value: '{"apiKey":"AIzaSyD_feQCUOYI6a27tLa1-CpyW13j0N56Zgg","appId":"1:124384844626:web:5baf60ef16a8f2781eb88b","authDomain":"gen-lang-client-0934022789.firebaseapp.com","databaseURL":"","messagingSenderId":"124384844626","projectId":"gen-lang-client-0934022789","storageBucket":"gen-lang-client-0934022789.firebasestorage.app"}'
+Step #1 - "preparer":   availability:
+Step #1 - "preparer":   - BUILD
+Step #1 - "preparer":   source: Firebase System
+Step #1 - "preparer": - variable: NG_TRUST_PROXY_HEADERS
+Step #1 - "preparer":   value: X-Forwarded-Host
+Step #1 - "preparer":   availability:
+Step #1 - "preparer":   - RUNTIME
+Step #1 - "preparer":   source: Firebase System
+Step #1 - "preparer": - variable: NG_ALLOWED_HOSTS
+Step #1 - "preparer":   value: reserveme-124384844626.us-east4.run.app,reserveme--gen-lang-client-0934022789.us-east4.hosted.app
+Step #1 - "preparer":   availability:
+Step #1 - "preparer":   - RUNTIME
+Step #1 - "preparer":   source: Firebase System
+Step #1 - "preparer": 
+Finished Step #1 - "preparer"
+Starting Step #2 - "pre-buildpack"
+Step #2 - "pre-buildpack": Already have image: us-east4-docker.pkg.dev/serverless-runtimes/google-24-full/builder/nodejs:nodejs_20261028_RC00
+Step #2 - "pre-buildpack": Preparing directory /layers
+Step #2 - "pre-buildpack": Preparing directory /workspace
+Step #2 - "pre-buildpack": Preparing directory /builder/home
+Step #2 - "pre-buildpack": Preparing directory /builder/outputs
+Step #2 - "pre-buildpack": Preparing directory /platform/env
+Step #2 - "pre-buildpack": Passing build environment variable X_GOOGLE_TARGET_PLATFORM to buildpacks
+Step #2 - "pre-buildpack": Passing build environment variable APPHOSTINGYAML_FILEPATH to buildpacks
+Step #2 - "pre-buildpack": Passing build environment variable FIREBASE_OUTPUT_BUNDLE_DIR to buildpacks
+Step #2 - "pre-buildpack": Passing build environment variable FIREBASE_APP_HOSTING to buildpacks
+Step #2 - "pre-buildpack": Passing build environment variable GOOGLE_RUNTIME to buildpacks
+Step #2 - "pre-buildpack": Passing build environment variable GOOGLE_RUNTIME_VERSION to buildpacks
+Step #2 - "pre-buildpack": Passing build environment variable X_GOOGLE_SKIP_RUNTIME_LAUNCH to buildpacks
+Step #2 - "pre-buildpack": Passing build environment variable NEXTJS_ADAPTER_VERSION to buildpacks
+Step #2 - "pre-buildpack": Passing build environment variable ANGULAR_ADAPTER_VERSION to buildpacks
+Step #2 - "pre-buildpack": Passing build environment variable GOOGLE_BUILDABLE to buildpacks
+Step #2 - "pre-buildpack": Passing build environment variable BUILDER_OUTPUT to buildpacks
+Finished Step #2 - "pre-buildpack"
+Starting Step #3 - "build"
+Step #3 - "build": Already have image: us-east4-docker.pkg.dev/serverless-runtimes/google-24-full/builder/nodejs:nodejs_20261028_RC00
+Step #3 - "build": Warning: No cached data will be used, no cache specified.
+Step #3 - "build": ===> ANALYZING
+Step #3 - "build": Image with name "us-east4-docker.pkg.dev/gen-lang-client-0934022789/firebaseapphosting-images/reserveme:build-2026-11-09-000" not found
+Step #3 - "build": ===> DETECTING
+Step #3 - "build": target distro name/version labels not found, reading /etc/os-release file
+Step #3 - "build": google.nodejs.runtime        1.0.0
+Step #3 - "build": google.nodejs.npm            1.1.1
+Step #3 - "build": google.nodejs.firebasebundle 0.0.1
+Step #3 - "build": ===> RESTORING
+Step #3 - "build": ===> BUILDING
+Step #3 - "build": target distro name/version labels not found, reading /etc/os-release file
+Step #3 - "build": === Node.js - Runtime Using Runner (google.nodejs.runtime@1.0.0) ===
+Step #3 - "build": Using runtime version from GOOGLE_RUNTIME_VERSION: 24.22.1
+Step #3 - "build": Using exact version 24.22.1 for Node.js
+Step #3 - "build": Adding image label google.runtime-version: nodejs24
+Step #3 - "build": Using exact version 24.22.1 for Node.js
+Step #3 - "build": ***** CACHE MISS: "nodejs"
+Step #3 - "build": Installing Node.js v24.22.1.
+Step #3 - "build": 2026/11/09 21:07:39 [DEBUG] GET https://dl.google.com/runtimes/ubuntu2404/nodejs/nodejs-24.22.1.tar.gz
+Step #3 - "build": Installing the heapsize.sh exec.d script.
+Step #3 - "build": === Node.js - Npm Using Runner (google.nodejs.npm@1.1.1) ===
+Step #3 - "build": ***** CACHE MISS: "npm_modules"
+Step #3 - "build": Installing application dependencies.
+Step #3 - "build": --------------------------------------------------------------------------------
+Step #3 - "build": Running "npm ci --quiet --no-fund --no-audit (NODE_ENV=development)"
+Step #3 - "build": npm error code EUSAGE
+Step #3 - "build": npm error
+Step #3 - "build": npm error `npm ci` can only install packages when your package.json and package-lock.json or npm-shrinkwrap.json are in sync. Please update your lock file with `npm install` before continuing.
+Step #3 - "build": npm error
+Step #3 - "build": npm error Missing: @tailwindcss/oxide-android-arm64@4.3.4 from lock file
+Step #3 - "build": npm error Missing: @tailwindcss/oxide-darwin-arm64@4.3.4 from lock file
+Step #3 - "build": npm error Missing: @tailwindcss/oxide-darwin-x64@4.3.4 from lock file
+Step #3 - "build": npm error Missing: @tailwindcss/oxide-freebsd-x64@4.3.4 from lock file
+Step #3 - "build": npm error Missing: @tailwindcss/oxide-linux-arm-gnueabihf@4.3.4 from lock file
+Step #3 - "build": npm error Missing: @tailwindcss/oxide-linux-arm64-gnu@4.3.4 from lock file
+Step #3 - "build": npm error Missing: @tailwindcss/oxide-linux-arm64-musl@4.3.4 from lock file
+Step #3 - "build": npm error Missing: @tailwindcss/oxide-linux-x64-musl@4.3.4 from lock file
+Step #3 - "build": npm error Missing: @tailwindcss/oxide-win32-arm64-msvc@4.3.4 from lock file
+Step #3 - "build": npm error Missing: @tailwindcss/oxide-win32-x64-msvc@4.3.4 from lock file
+Step #3 - "build": npm error Missing: @esbuild/aix-ppc64@0.28.2 from lock file
+Step #3 - "build": npm error Missing: @esbuild/android-arm@0.28.2 from lock file
+Step #3 - "build": npm error Missing: @esbuild/android-arm64@0.28.2 from lock file
+Step #3 - "build": npm error Missing: @esbuild/android-x64@0.28.2 from lock file
+Step #3 - "build": npm error Missing: @esbuild/darwin-arm64@0.28.2 from lock file
+Step #3 - "build": npm error Missing: @esbuild/darwin-x64@0.28.2 from lock file
+Step #3 - "build": npm error Missing: @esbuild/freebsd-arm64@0.28.2 from lock file
+Step #3 - "build": npm error Missing: @esbuild/freebsd-x64@0.28.2 from lock file
+Step #3 - "build": npm error Missing: @esbuild/linux-arm@0.28.2 from lock file
+Step #3 - "build": npm error Missing: @esbuild/linux-arm64@0.28.2 from lock file
+Step #3 - "build": npm error Missing: @esbuild/linux-ia32@0.28.2 from lock file
+Step #3 - "build": npm error Missing: @esbuild/linux-loong64@0.28.2 from lock file
+Step #3 - "build": npm error Missing: @esbuild/linux-mips64el@0.28.2 from lock file
+Step #3 - "build": npm error Missing: @esbuild/linux-ppc64@0.28.2 from lock file
+Step #3 - "build": npm error Missing: @esbuild/linux-riscv64@0.28.2 from lock file
+Step #3 - "build": npm error Missing: @esbuild/linux-s390x@0.28.2 from lock file
+Step #3 - "build": npm error Missing: @esbuild/netbsd-arm64@0.28.2 from lock file
+Step #3 - "build": npm error Missing: @esbuild/netbsd-x64@0.28.2 from lock file
+Step #3 - "build": npm error Missing: @esbuild/openbsd-arm64@0.28.2 from lock file
+Step #3 - "build": npm error Missing: @esbuild/openbsd-x64@0.28.2 from lock file
+Step #3 - "build": npm error Missing: @esbuild/openharmony-arm64@0.28.2 from lock file
+Step #3 - "build": npm error Missing: @esbuild/sunos-x64@0.28.2 from lock file
+Step #3 - "build": npm error Missing: @esbuild/win32-arm64@0.28.2 from lock file
+Step #3 - "build": npm error Missing: @esbuild/win32-ia32@0.28.2 from lock file
+Step #3 - "build": npm error Missing: @esbuild/win32-x64@0.28.2 from lock file
+Step #3 - "build": npm error Missing: lightningcss-android-arm64@1.33.0 from lock file
+Step #3 - "build": npm error Missing: lightningcss-darwin-arm64@1.33.0 from lock file
+Step #3 - "build": npm error Missing: lightningcss-darwin-x64@1.33.0 from lock file
+Step #3 - "build": npm error Missing: lightningcss-freebsd-x64@1.33.0 from lock file
+Step #3 - "build": npm error Missing: lightningcss-linux-arm-gnueabihf@1.33.0 from lock file
+Step #3 - "build": npm error Missing: lightningcss-linux-arm64-gnu@1.33.0 from lock file
+Step #3 - "build": npm error Missing: lightningcss-linux-arm64-musl@1.33.0 from lock file
+Step #3 - "build": npm error Missing: lightningcss-linux-x64-musl@1.33.0 from lock file
+Step #3 - "build": npm error Missing: lightningcss-win32-arm64-msvc@1.33.0 from lock file
+Step #3 - "build": npm error Missing: lightningcss-win32-x64-msvc@1.33.0 from lock file
+Step #3 - "build": npm error Missing: @rolldown/binding-android-arm-eabi@1.2.16 from lock file
+Step #3 - "build": npm error Missing: @rolldown/binding-android-arm64@1.2.16 from lock file
+Step #3 - "build": npm error Missing: @rolldown/binding-darwin-arm64@1.2.16 from lock file
+Step #3 - "build": npm error Missing: @rolldown/binding-darwin-x64@1.2.16 from lock file
+Step #3 - "build": npm error Missing: @rolldown/binding-freebsd-x64@1.2.16 from lock file
+Step #3 - "build": npm error Missing: @rolldown/binding-linux-arm-gnueabihf@1.2.16 from lock file
+Step #3 - "build": npm error Missing: @rolldown/binding-linux-arm64-gnu@1.2.16 from lock file
+Step #3 - "build": npm error Missing: @rolldown/binding-linux-arm64-musl@1.2.16 from lock file
+Step #3 - "build": npm error Missing: @rolldown/binding-linux-ppc64-gnu@1.2.16 from lock file
+Step #3 - "build": npm error Missing: @rolldown/binding-linux-s390x-gnu@1.2.16 from lock file
+Step #3 - "build": npm error Missing: @rolldown/binding-linux-x64-musl@1.2.16 from lock file
+Step #3 - "build": npm error Missing: @rolldown/binding-openharmony-arm64@1.2.16 from lock file
+Step #3 - "build": npm error Missing: @rolldown/binding-win32-arm64-msvc@1.2.16 from lock file
+Step #3 - "build": npm error Missing: @rolldown/binding-win32-x64-msvc@1.2.16 from lock file
+Step #3 - "build": npm error Missing: fsevents@2.3.3 from lock file
+Step #3 - "build": npm error Missing: @typescript/typescript-aix-ppc64@7.0.2 from lock file
+Step #3 - "build": npm error Missing: @typescript/typescript-darwin-arm64@7.0.2 from lock file
+Step #3 - "build": npm error Missing: @typescript/typescript-darwin-x64@7.0.2 from lock file
+Step #3 - "build": npm error Missing: @typescript/typescript-freebsd-arm64@7.0.2 from lock file
+Step #3 - "build": npm error Missing: @typescript/typescript-freebsd-x64@7.0.2 from lock file
+Step #3 - "build": npm error Missing: @typescript/typescript-linux-arm@7.0.2 from lock file
+Step #3 - "build": npm error Missing: @typescript/typescript-linux-arm64@7.0.2 from lock file
+Step #3 - "build": npm error Missing: @typescript/typescript-linux-loong64@7.0.2 from lock file
+Step #3 - "build": npm error Missing: @typescript/typescript-linux-mips64el@7.0.2 from lock file
+Step #3 - "build": npm error Missing: @typescript/typescript-linux-ppc64@7.0.2 from lock file
+Step #3 - "build": npm error Missing: @typescript/typescript-linux-riscv64@7.0.2 from lock file
+Step #3 - "build": npm error Missing: @typescript/typescript-linux-s390x@7.0.2 from lock file
+Step #3 - "build": npm error Missing: @typescript/typescript-netbsd-arm64@7.0.2 from lock file
+Step #3 - "build": npm error Missing: @typescript/typescript-netbsd-x64@7.0.2 from lock file
+Step #3 - "build": npm error Missing: @typescript/typescript-openbsd-arm64@7.0.2 from lock file
+Step #3 - "build": npm error Missing: @typescript/typescript-openbsd-x64@7.0.2 from lock file
+Step #3 - "build": npm error Missing: @typescript/typescript-sunos-x64@7.0.2 from lock file
+Step #3 - "build": npm error Missing: @typescript/typescript-win32-arm64@7.0.2 from lock file
+Step #3 - "build": npm error Missing: @typescript/typescript-win32-x64@7.0.2 from lock file
+Step #3 - "build": npm error
+Step #3 - "build": npm error Clean install a project
+Step #3 - "build": npm error
+Step #3 - "build": npm error Usage:
+Step #3 - "build": npm error npm ci
+Step #3 - "build": npm error
+Step #3 - "build": npm error Options:
+Step #3 - "build": npm error [--install-strategy <hoisted|nested|shallow|linked>] [--legacy-bundling]
+Step #3 - "build": npm error [--global-style] [--omit <dev|optional|peer> [--omit <dev|optional|peer> ...]]
+Step #3 - "build": npm error [--include <prod|dev|optional|peer> [--include <prod|dev|optional|peer> ...]]
+Step #3 - "build": npm error [--strict-peer-deps] [--foreground-scripts] [--ignore-scripts]
+Step #3 - "build": npm error [--allow-directory <all|none|root>] [--allow-file <all|none|root>]
+Step #3 - "build": npm error [--allow-git <all|none|root>] [--allow-remote <all|none|root>]
+Step #3 - "build": npm error [--allow-scripts <package-list> [--allow-scripts <package-list> ...]]
+Step #3 - "build": npm error [--strict-allow-scripts] [--dangerously-allow-all-scripts] [--no-audit]
+Step #3 - "build": npm error [--no-bin-links] [--no-fund] [--dry-run]
+Step #3 - "build": npm error [-w|--workspace <workspace-name> [-w|--workspace <workspace-name> ...]]
+Step #3 - "build": npm error [--workspaces] [--include-workspace-root] [--install-links]
+Step #3 - "build": npm error
+Step #3 - "build": npm error   --install-strategy
+Step #3 - "build": npm error     Sets the strategy for installing packages in node_modules.
+Step #3 - "build": npm error
+Step #3 - "build": npm error   --legacy-bundling
+Step #3 - "build": npm error     Instead of hoisting package installs in `node_modules`, install packages
+Step #3 - "build": npm error
+Step #3 - "build": npm error   --global-style
+Step #3 - "build": npm error     Only install direct dependencies in the top level `node_modules`,
+Step #3 - "build": npm error
+Step #3 - "build": npm error   --omit
+Step #3 - "build": npm error     Dependency types to omit from the installation tree on disk.
+Step #3 - "build": npm error
+Step #3 - "build": npm error   --include
+Step #3 - "build": npm error     Option that allows for defining which types of dependencies to install.
+Step #3 - "build": npm error
+Step #3 - "build": npm error   --strict-peer-deps
+Step #3 - "build": npm error     If set to `true`, and `--legacy-peer-deps` is not set, then _any_
+Step #3 - "build": npm error
+Step #3 - "build": npm error   --foreground-scripts
+Step #3 - "build": npm error     Run all build scripts (ie, `preinstall`, `install`, and
+Step #3 - "build": npm error
+Step #3 - "build": npm error   --ignore-scripts
+Step #3 - "build": npm error     If true, npm does not run scripts specified in package.json files.
+Step #3 - "build": npm error
+Step #3 - "build": npm error   --allow-directory
+Step #3 - "build": npm error     Limits the ability for npm to install dependencies from directories.
+Step #3 - "build": npm error
+Step #3 - "build": npm error   --allow-file
+Step #3 - "build": npm error     Limits the ability for npm to install dependencies from tarball files.
+Step #3 - "build": npm error
+Step #3 - "build": npm error   --allow-git
+Step #3 - "build": npm error     Limits the ability for npm to fetch dependencies from git references.
+Step #3 - "build": npm error
+Step #3 - "build": npm error   --allow-remote
+Step #3 - "build": npm error     Limits the ability for npm to fetch dependencies from urls.
+Step #3 - "build": npm error
+Step #3 - "build": npm error   --allow-scripts
+Step #3 - "build": npm error     Comma-separated list of packages whose install-time lifecycle scripts
+Step #3 - "build": npm error
+Step #3 - "build": npm error   --strict-allow-scripts
+Step #3 - "build": npm error     If `true`, turn the install-script policy from a warning into a hard
+Step #3 - "build": npm error
+Step #3 - "build": npm error   --dangerously-allow-all-scripts
+Step #3 - "build": npm error     If `true`, bypass the `allowScripts` policy entirely and run every
+Step #3 - "build": npm error
+Step #3 - "build": npm error   --audit
+Step #3 - "build": npm error     When "true" submit audit reports alongside the current npm command to the
+Step #3 - "build": npm error
+Step #3 - "build": npm error   --bin-links
+Step #3 - "build": npm error     Tells npm to create symlinks (or `.cmd` shims on Windows) for package
+Step #3 - "build": npm error
+Step #3 - "build": npm error   --fund
+Step #3 - "build": npm error     When "true" displays the message at the end of each `npm install`
+Step #3 - "build": npm error
+Step #3 - "build": npm error   --dry-run
+Step #3 - "build": npm error     Indicates that you don't want npm to make any changes and that it should
+Step #3 - "build": npm error
+Step #3 - "build": npm error   -w|--workspace
+Step #3 - "build": npm error     Enable running a command in the context of the configured workspaces of the
+Step #3 - "build": npm error
+Step #3 - "build": npm error   --workspaces
+Step #3 - "build": npm error     Set to true to run the command in the context of **all** configured
+Step #3 - "build": npm error
+Step #3 - "build": npm error   --include-workspace-root
+Step #3 - "build": npm error     Include the workspace root when workspaces are enabled for a command.
+Step #3 - "build": npm error
+Step #3 - "build": npm error   --install-links
+Step #3 - "build": npm error     When set file: protocol dependencies will be packed and installed as
+Step #3 - "build": npm error
+Step #3 - "build": npm error
+Step #3 - "build": npm error aliases: clean-install, ic, install-clean, isntall-clean
+Step #3 - "build": npm error
+Step #3 - "build": npm error Run "npm help ci" for more info
+Step #3 - "build": npm error A complete log of this run can be found in: /www-data-home/.npm/_logs/2026-11-09T21_07_42_742Z-debug-0.log
+Step #3 - "build": Done "npm ci --quiet --no-fund --no-audit (NODE_ENV=development)" (6.306641541s)
+Step #3 - "build": --------------------------------------------------------------------------------
+Step #3 - "build": failed to build: (error ID: 7fa33aaa):
+Step #3 - "build": npm error code EUSAGE
+Step #3 - "build": npm error
+Step #3 - "build": npm error `npm ci` can only install packages when your package.json and package-lock.json or npm-shrinkwrap.json are in sync. Please update your lock file with `npm install` before continuing.
+Step #3 - "build": npm error
+Step #3 - "build": npm error Missing: @tailwindcss/oxide-android-arm64@4.3.4 from lock file
+Step #3 - "build": npm error Missing: @tailwindcss/oxide-darwin-arm64@4.3.4 from lock file
+Step #3 - "build": npm error Missing: @tailwindcss/oxide-darwin-x64@4.3.4 from lock file
+Step #3 - "build": npm error Missing: @tailwindcss/oxide-freebsd-x64@4.3.4 from lock file
+Step #3 - "build": npm error Missing: @tailwindcss/oxide-linux-arm-gnueabihf@4.3.4 from lock file
+Step #3 - "build": npm error Missing: @tailwindcss/oxide-linux-arm64-gnu@4.3.4 from lock file
+Step #3 - "build": npm error Missing: @tailwindcss/oxide-linux-arm64-musl@4.3.4 from lock file
+Step #3 - "build": npm error Missing: @tailwindcss/oxide-linux-x64-musl@4.3.4 from lock file
+Step #3 - "build": npm error Missing: @tailwindcss/oxide-win32-arm64-msvc@4.3.4 from lock file
+Step #3 - "build": npm error Missing: @tailwindcss/oxide-win32-x64-msvc@4.3.4 from lock file
+Step #3 - "build": npm error Missing: @esbuild/aix-ppc64@0.28.2 from lock file
+Step #3 - "build": npm error Missing: @esbuild/android-arm@0.28.2 from lock file
+Step #3 - "build": npm error Missing: @esbuild/android-arm64@0.28.2 from lock file
+Step #3 - "build": npm error Missing: @esbuild/android-x64@0.28.2 from lock file
+Step #3 - "build": npm error Missing: @esbuild/darwin-arm64@0.28.2 from lock file
+Step #3 - "build": npm error Missing: @esbuild/darwin-x64@0.28.2 from lock file
+Step #3 - "build": npm error Missing: @esbuild/freebsd-arm64@0.28.2 from lock file
+Step #3 - "build": npm error Missing: @esbuild/freebsd-x64@0.28.2 from lock file
+Step #3 - "build": npm error Missing: @esbuild/linux-arm@0.28.2 from lock file
+Step #3 - "build": npm error Missing: @esbuild/linux-arm64@0.28.2 from lock file
+Step #3 - "build": npm error Missing: @esbuild/linux-ia32@0.28.2 from lock file
+Step #3 - "build": npm error Missing: @esbuild/linux-loong64@0.28.2 from lock file
+Step #3 - "build": npm error Missing: @esbuild/linux-mips64el@0.28.2 from lock file
+Step #3 - "build": npm error Missing: @esbuild/linux-ppc64@0.28.2 from lock file
+Step #3 - "build": npm error Missing: @esbuild/linux-riscv64@0.28.2 from lock file
+Step #3 - "build": npm error Missing: @esbuild/linux-s390x@0.28.2 from lock file
+Step #3 - "build": npm error Missing: @esbuild/netbsd-arm64@0.28.2 from lock file
+Step #3 - "build": npm error Missing: @esbuild/netbsd-x64@0.28.2 from lock file
+Step #3 - "build": npm error Missing: @esbuild/openbsd-arm64@0.28.2 from lock file
+Step #3 - "build": npm error Missing: @esbuild/openbsd-x64@0.28.2 from lock file
+Step #3 - "build": npm error Missing: @esbuild/openharmony-arm64@0.28.2 from lock file
+Step #3 - "build": npm error Missing: @esbuild/sunos-x64@0.28.2 from lock file
+Step #3 - "build": npm error Missing: @esbuild/win32-arm64@0.28.2 from lock file
+Step #3 - "build": npm error Missing: @esbuild/win32-ia32@0.28.2 from lock file
+Step #3 - "build": npm error Missing: @esbuild/win32-x64@0.28.2 from lock file
+Step #3 - "build": npm error Missing: lightningcss-android-arm64@1.33.0 from lock file
+Step #3 - "build": npm error Missing: lightningcss-darwin-arm64@1.33.0 from lock file
+Step #3 - "build": npm error Missing: lightningcss-darwin-x64@1.33.0 from lock file
+Step #3 - "build": npm error Missing: lightningcss-freebsd-x64@1.33.0 from lock file
+Step #3 - "build": npm error Missing: lightningcss-linux-arm-gnueabihf@1.33.0 from lock file
+Step #3 - "build": npm error Missing: lightningcss-linux-arm64-gnu@1.33.0 from lock file
+Step #3 - "build": npm error Missing: lightningcss-linux-arm64-musl@1.33.0 from lock file
+Step #3 - "build": npm error Missing: lightningcss-linux-x64-musl@1.33.0 from lock file
+Step #3 - "build": npm error Missing: lightningcss-win32-arm64-msvc@1.33.0 from lock file
+Step #3 - "build": npm error Missing: lightningcss-win32-x64-msvc@1.33.0 from lock file
+Step #3 - "build": npm error Missing: @rolldown/binding-android-arm-eabi@1.2.16 from lock file
+Step #3 - "build": npm error Missing: @rolldown/binding-android-arm64@1.2.16 from lock file
+Step #3 - "build": npm error Missing: @rolldown/binding-darwin-arm64@1.2.16 from lock file
+Step #3 - "build": npm error Missing: @rolldown/binding-darwin-x64@1.2.16 from lock file
+Step #3 - "build": npm error Missing: @rolldown/binding-freebsd-x64@1.2.16 from lock file
+Step #3 - "build": npm error Missing: @rolldown/binding-linux-arm-gnueabihf@1.2.16 from lock file
+Step #3 - "build": npm error Missing: @rolldown/binding-linux-arm64-gnu@1.2.16 from lock file
+Step #3 - "build": npm error Missing: @rolldown/binding-linux-arm64-musl@1.2.16 from lock file
+Step #3 - "build": npm error Missing: @rolldown/binding-linux-ppc64-gnu@1.2.16 from lock file
+Step #3 - "build": npm error Missing: @rolldown/binding-linux-s390x-gnu@1.2.16 from lock file
+Step #3 - "build": npm error Missing: @rolldown/binding-linux-x64-musl@1.2.16 from lock file
+Step #3 - "build": npm error Missing: @rolldown/binding-openharmony-arm64@1.2.16 from lock file
+Step #3 - "build": npm error Missing: @rolldown/binding-win32-arm64-msvc@1.2.16 from lock file
+Step #3 - "build": npm error Missing: @rolldown/binding-win32-x64-msvc@1.2.16 from lock file
+Step #3 - "build": npm error Missing: fsevents@2.3.3 from lock file
+Step #3 - "build": npm error Missing: @typescript/typescript-aix-ppc64@7.0.2 from lock file
+Step #3 - "build": npm error Missing: @typescript/typescript-darwin-arm64@7.0.2 from lock file
+Step #3 - "build": npm error Missing: @typescript/typescript-darwin-x64@7.0.2 from lock file
+Step #3 - "build": npm error Missing: @typescript/typescript-freebsd-arm64@7.0.2 from lock file
+Step #3 - "build": npm error Missing: @typescript/typescript-freebsd-x64@7.0.2 from lock file
+Step #3 - "build": npm error Missing: @typescript/typescript-linux-arm@7.0.2 from lock file
+Step #3 - "build": npm error Missing: @typescript/typescript-linux-arm64@7.0.2 from lock file
+Step #3 - "build": npm error Missing: @typescript/typescript-linux-loong64@7.0.2 from lock file
+Step #3 - "build": npm error Missing: @typescript/typescript-linux-mips64el@7.0.2 from lock file
+Step #3 - "build": npm error Missing: @typescript/typescript-linux-ppc64@7.0.2 from lock file
+Step #3 - "build": npm error Missing: @typescript/typescript-linux-riscv64@7.0.2 from lock file
+Step #3 - "build": npm error Missing: @typescript/typescript-linux-s390x@7.0.2 from lock file
+Step #3 - "build": npm error Missing: @typescript/typescript-netbsd-arm64@7.0.2 from lock file
+Step #3 - "build": npm error Missing: @typescript/typescript-netbsd-x64@7.0.2 from lock file
+Step #3 - "build": npm error Missing: @typescript/typescript-openbsd-arm64@7.0.2 from lock file
+Step #3 - "build": npm error Missing: @typescript/typescript-openbsd-x64@7.0.2 from lock file
+Step #3 - "build": npm error Missing: @typescript/typescript-sunos-x64@7.0.2 from lock file
+Step #3 - "build": npm error Missing: @typescript/typescript-win32-arm64@7.0.2 from lock file
+Step #3 - "build": npm error Missing: @typescript/typescript-win32-x64@7.0.2 from lock file
+Step #3 - "build": npm error
+Step #3 - "build": npm error Clean install a project
+Step #3 - "build": npm error
+Step #3 - "build": npm error Usage:
+Step #3 - "build": npm error npm ci
+Step #3 - "build": npm error
+Step #3 - "build": npm error Options:
+Step #3 - "build": npm error [--install-strategy <hoisted|nested|shallow|linked>] [--legacy-bundling]
+Step #3 - "build": npm error [--global-style] [--omit <dev|optional|peer> [--omit <dev|optional|peer> ...]]
+Step #3 - "build": npm error [--include <prod|dev|optional|peer> [--include <prod|dev|optional|peer> ...]]
+Step #3 - "build": npm error [--strict-peer-deps] [--foreground-scripts] [--ignore-scripts]
+Step #3 - "build": npm error [--allow-directory <all|none|root>] [--allow-file <all|none|root>]
+Step #3 - "build": npm error [--allow-git <all|none|root>] [--allow-remote <all|none|root>]
+Step #3 - "build": npm error [--allow-scripts <package-list> [--allow-scripts <package-list> ...]]
+Step #3 - "build": npm error [--strict-allow-scripts] [--dangerously-allow-all-scripts] [--no-audit]
+Step #3 - "build": npm error [--no-bin-links] [--no-fund] [--dry-run]
+Step #3 - "build": npm error [-w|--workspace <workspace-name> [-w|--workspace <workspace-name> ...]]
+Step #3 - "build": npm error [--workspaces] [--include-workspace-root] [--install-links]
+Step #3 - "build": npm error
+Step #3 - "build": npm error   --install-strategy
+Step #3 - "build": npm error     Sets the strategy for installing packages in node_modules.
+Step #3 - "build": npm error
+Step #3 - "build": npm error   --legacy-bundling
+Step #3 - "build": npm error     Instead of hoisting package installs in `node_modules`, install packages
+Step #3 - "build": npm error
+Step #3 - "build": npm error   --global-style
+Step #3 - "build": npm error     Only install direct dependencies in the top level `node_modules`,
+Step #3 - "build": npm error
+Step #3 - "build": npm error   --omit
+Step #3 - "build": npm error     Dependency types to omit from the installation tree on disk.
+Step #3 - "build": npm error
+Step #3 - "build": npm error   --include
+Step #3 - "build": npm error     Option that allows for defining which types of dependencies to install.
+Step #3 - "build": npm error
+Step #3 - "build": npm error   --strict-peer-deps
+Step #3 - "build": npm error     If set to `true`, and `--legacy-peer-deps` is not set, then _any_
+Step #3 - "build": npm error
+Step #3 - "build": npm error   --foreground-scripts
+Step #3 - "build": npm error     Run all build scripts (ie, `preinstall`, `install`, and
+Step #3 - "build": npm error
+Step #3 - "build": npm error   --ignore-scripts
+Step #3 - "build": npm error     If true, npm does not run scripts specified in package.json files.
+Step #3 - "build": npm error
+Step #3 - "build": npm error   --allow-directory
+Step #3 - "build": npm error     Limits the ability for npm to install dependencies from directories.
+Step #3 - "build": npm error
+Step #3 - "build": npm error   --allow-file
+Step #3 - "build": npm error     Limits the ability for npm to install dependencies from tarball files.
+Step #3 - "build": npm error
+Step #3 - "build": npm error   --allow-git
+Step #3 - "build": npm error     Limits the ability for npm to fetch dependencies from git references.
+Step #3 - "build": npm error
+Step #3 - "build": npm error   --allow-remote
+Step #3 - "build": npm error     Limits the ability for npm to fetch dependencies from urls.
+Step #3 - "build": npm error
+Step #3 - "build": npm error   --allow-scripts
+Step #3 - "build": npm error     Comma-separated list of packages whose install-time lifecycle scripts
+Step #3 - "build": npm error
+Step #3 - "build": npm error   --strict-allow-scripts
+Step #3 - "build": npm error     If `true`, turn the install-script policy from a warning into a hard
+Step #3 - "build": npm error
+Step #3 - "build": npm error   --dangerously-allow-all-scripts
+Step #3 - "build": npm error     If `true`, bypass the `allowScripts` policy entirely and run every
+Step #3 - "build": npm error
+Step #3 - "build": npm error   --audit
+Step #3 - "build": npm error     When "true" submit audit reports alongside the current npm command to the
+Step #3 - "build": npm error
+Step #3 - "build": npm error   --bin-links
+Step #3 - "build": npm error     Tells npm to create symlinks (or `.cmd` shims on Windows) for package
+Step #3 - "build": npm error
+Step #3 - "build": npm error   --fund
+Step #3 - "build": npm error     When "true" displays the message at the end of each `npm install`
+Step #3 - "build": npm error
+Step #3 - "build": npm error   --dry-run
+Step #3 - "build": npm error     Indicates that you don't want npm to make any changes and that it should
+Step #3 - "build": npm error
+Step #3 - "build": npm error   -w|--workspace
+Step #3 - "build": npm error     Enable running a command in the context of the configured workspaces of the
+Step #3 - "build": npm error
+Step #3 - "build": npm error   --workspaces
+Step #3 - "build": npm error     Set to true to run the command in the context of **all** configured
+Step #3 - "build": npm error
+Step #3 - "build": npm error   --include-workspace-root
+Step #3 - "build": npm error     Include the workspace root when workspaces are enabled for a command.
+Step #3 - "build": npm error
+Step #3 - "build": npm error   --install-links
+Step #3 - "build": npm error     When set file: protocol dependencies will be packed and installed as
+Step #3 - "build": npm error
+Step #3 - "build": npm error
+Step #3 - "build": npm error aliases: clean-install, ic, install-clean, isntall-clean
+Step #3 - "build": npm error
+Step #3 - "build": npm error Run "npm help ci" for more info
+Step #3 - "build": npm error A complete log of this run can be found in: /www-data-home/.npm/_logs/2026-11-09T21_07_42_742Z-debug-0.log
+Step #3 - "build": ERROR: failed to build: exit status 1
+Finished Step #3 - "build"
+ERROR
+ERROR: build step 3 "us-east4-docker.pkg.dev/serverless-runtimes/google-24-full/builder/nodejs:nodejs_20261028_RC00" failed: step exited with non-zero status: 51

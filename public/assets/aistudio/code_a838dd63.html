@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+
+<html lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="web_dashboard" name="shell-type"/>
+<title>Facturation &amp; Revenus - réserve.me</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+    @layer base {
+      html, body { margin:0; padding:0; font-family: 'Inter', sans-serif; }
+      body { overscroll-behavior: none; }
+    }
+    ::-webkit-scrollbar { display: none; }
+  </style>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "background": "#fafbfc",
+            "surface": "#ffffff",
+            "surface-subtle": "#f4f5f8",
+            "primary": "#0f172a",
+            "secondary": "#059669",
+            "secondary-light": "#ecfdf5",
+            "on-surface": "#0f172a",
+            "on-surface-muted": "#64748b",
+            "border-subtle": "#e2e8f0",
+            "border-light": "#f1f5f9"
+          }
+        }
+      }
+    };
+  </script>
+</head>
+<body class="bg-background text-on-surface antialiased text-sm">
+<!-- Left Sidebar (Clean, Minimalist & Spacious) -->
+<aside class="fixed left-0 top-0 h-full w-64 bg-surface border-r border-border-subtle z-50 flex flex-col justify-between p-5">
+<div class="flex flex-col gap-7">
+<!-- Brand & Pro Tag -->
+<div class="flex items-center justify-between px-1">
+<div class="flex items-center gap-2">
+<img alt="Brand logo" class="h-6 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1V7LppZrOo-J-oHoGm-m1e2di-Fw-vpLmWWWR6_JK4wQU1kPG1X3qJFhiDc-T1oKdbRY8FMRCnHgia_ht9zPfykvd0_qDtGtj_g_221MzuW63biwn935AcFC1vS3MHN45eUASClGj3geZKPCUMqyqt8zBn_KhdroDnd1BnONqE6RqyoaJoXIlc4P2QgentBiwtVH7i3TQWg_KbEu6hWRnL93Ikl0DvGd_74U76RQA"/>
+<span class="font-semibold text-base tracking-tight text-primary">réserve.me</span>
+</div>
+<span class="text-[10px] font-semibold tracking-wider px-1.5 py-0.5 rounded bg-surface-subtle text-on-surface-muted">PRO</span>
+</div>
+<!-- Practitioner Capsule -->
+<div class="p-3 bg-surface-subtle rounded-xl flex items-center justify-between border border-border-light">
+<div class="flex items-center gap-2.5">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<div class="flex flex-col">
+<span class="text-xs font-semibold text-primary">Studio Althéa</span>
+<span class="text-[11px] text-on-surface-muted">Dr. Sarah Martin</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-secondary text-[16px]">verified</span>
+</div>
+<!-- Nav -->
+<nav class="flex flex-col gap-0.5">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-muted hover:text-primary hover:bg-surface-subtle transition-colors text-[13px] font-medium" href="#">
+<span class="material-symbols-outlined text-[19px]">calendar_month</span>
+<span>Calendrier</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-muted hover:text-primary hover:bg-surface-subtle transition-colors text-[13px] font-medium" href="#">
+<span class="material-symbols-outlined text-[19px]">event_available</span>
+<span>Réservations</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-muted hover:text-primary hover:bg-surface-subtle transition-colors text-[13px] font-medium" href="#">
+<span class="material-symbols-outlined text-[19px]">medical_services</span>
+<span>Services &amp; Prestations</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-muted hover:text-primary hover:bg-surface-subtle transition-colors text-[13px] font-medium" href="#">
+<span class="material-symbols-outlined text-[19px]">schedule</span>
+<span>Disponibilités &amp; Horaires</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-muted hover:text-primary hover:bg-surface-subtle transition-colors text-[13px] font-medium" href="#">
+<span class="material-symbols-outlined text-[19px]">group</span>
+<span>Clients &amp; Contacts</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary text-white font-medium text-[13px] shadow-sm" href="#">
+<span class="material-symbols-outlined text-[19px]">payments</span>
+<span>Facturation &amp; Revenus</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-muted hover:text-primary hover:bg-surface-subtle transition-colors text-[13px] font-medium" href="#">
+<span class="material-symbols-outlined text-[19px]">tune</span>
+<span>Paramètres</span>
+</a>
+</nav>
+</div>
+<!-- Bottom utility links -->
+<div class="flex flex-col gap-2 pt-4 border-t border-border-light">
+<a class="flex items-center gap-2.5 px-3 py-1.5 text-xs text-on-surface-muted hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-[17px]">help_outline</span>
+<span>Aide &amp; Support</span>
+</a>
+<div class="flex items-center justify-between px-3 py-2 rounded-lg bg-surface-subtle border border-border-light">
+<span class="text-[11px] text-on-surface-muted truncate">reserve.me/althea</span>
+<button class="text-[10px] uppercase font-bold text-secondary tracking-wider hover:opacity-80" onclick="triggerToast('Lien public copié')">Copier</button>
+</div>
+</div>
+</aside>
+<!-- Main Workspace -->
+<div class="pl-64">
+<!-- Topbar Header -->
+<header class="sticky top-0 h-16 bg-surface/90 backdrop-blur border-b border-border-subtle z-40 flex items-center justify-between px-8">
+<div class="relative w-80">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-muted text-[18px]">search</span>
+<input class="w-full bg-surface-subtle text-primary placeholder:text-on-surface-muted text-xs rounded-lg pl-9 pr-3 py-2 border-0 focus:ring-1 focus:ring-primary/20 transition-all" placeholder="Rechercher un règlement, un patient..." type="text"/>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2 px-2.5 py-1 rounded-full bg-secondary-light text-secondary text-xs font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse"></span>
+<span>En ligne</span>
+</div>
+<button class="p-1.5 rounded-lg text-on-surface-muted hover:text-primary transition-colors relative" onclick="triggerToast('Aucune nouvelle notification')">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-secondary"></span>
+</button>
+<div class="h-4 w-px bg-border-subtle"></div>
+<div class="flex items-center gap-2.5">
+<div class="flex flex-col text-right">
+<span class="text-xs font-semibold text-primary leading-tight">Dr. Sarah Martin</span>
+<span class="text-[11px] text-on-surface-muted leading-tight">Studio Althéa</span>
+</div>
+<div class="w-8 h-8 rounded-full bg-surface-subtle border border-border-subtle flex items-center justify-center text-primary font-semibold text-xs">
+            SM
+          </div>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="p-8 max-w-6xl mx-auto flex flex-col gap-8">
+<!-- Title & Actions -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-2.5">
+<h1 class="text-2xl font-bold tracking-tight text-primary">Facturation &amp; Revenus</h1>
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-secondary-light text-secondary text-xs font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+              Stripe Connect Actif
+            </span>
+</div>
+<p class="text-xs text-on-surface-muted">Suivi financier unifié, acomptes anti-désistement et virements en FCFA (XOF).</p>
+</div>
+<div class="flex items-center gap-2">
+<button class="inline-flex items-center gap-1.5 bg-surface border border-border-subtle hover:bg-surface-subtle text-primary text-xs font-medium px-3.5 py-2 rounded-lg transition-colors" onclick="triggerToast('Génération du relevé comptable...')">
+<span class="material-symbols-outlined text-[17px]">file_download</span>
+<span>Rapport comptable</span>
+</button>
+<button class="inline-flex items-center gap-1.5 bg-primary text-white hover:bg-primary/90 text-xs font-medium px-3.5 py-2 rounded-lg transition-colors" onclick="triggerToast('Flux Stripe actualisé')">
+<span class="material-symbols-outlined text-[17px]">sync</span>
+<span>Actualiser flux</span>
+</button>
+</div>
+</div>
+<!-- Financial Metrics in FCFA (Clean, Uncluttered, Modern Cards) -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+<!-- Metric 1 -->
+<div class="bg-surface rounded-xl p-5 border border-border-subtle flex flex-col justify-between">
+<div class="flex items-center justify-between text-on-surface-muted text-xs font-medium">
+<span>CA MENSUEL</span>
+<span class="material-symbols-outlined text-[18px]">trending_up</span>
+</div>
+<div class="mt-4">
+<div class="text-xl font-bold tracking-tight text-primary">3 150 000 FCFA</div>
+<div class="mt-1 flex items-center gap-1 text-xs text-secondary font-medium">
+<span class="material-symbols-outlined text-[14px]">north_east</span>
+<span>+18%</span>
+<span class="text-on-surface-muted font-normal ml-0.5">vs mois précédent</span>
+</div>
+</div>
+</div>
+<!-- Metric 2 -->
+<div class="bg-surface rounded-xl p-5 border border-border-subtle flex flex-col justify-between">
+<div class="flex items-center justify-between text-on-surface-muted text-xs font-medium">
+<span>ACOMPTES SÉCURISÉS</span>
+<span class="material-symbols-outlined text-[18px] text-secondary">verified_user</span>
+</div>
+<div class="mt-4">
+<div class="text-xl font-bold tracking-tight text-primary">1 080 000 FCFA</div>
+<div class="mt-1 flex items-center gap-1 text-xs text-on-surface-muted">
+<span class="font-medium text-secondary">100% garantis</span>
+<span>• anti-no-show</span>
+</div>
+</div>
+</div>
+<!-- Metric 3 -->
+<div class="bg-surface rounded-xl p-5 border border-border-subtle flex flex-col justify-between">
+<div class="flex items-center justify-between text-on-surface-muted text-xs font-medium">
+<span>PAIEMENTS SOUS 48H</span>
+<span class="material-symbols-outlined text-[18px]">schedule</span>
+</div>
+<div class="mt-4">
+<div class="text-xl font-bold tracking-tight text-primary">220 000 FCFA</div>
+<div class="mt-1 flex items-center gap-1 text-xs text-on-surface-muted">
+<span class="font-medium text-primary">4 séances</span>
+<span>en capture auto</span>
+</div>
+</div>
+</div>
+<!-- Metric 4 -->
+<div class="bg-surface rounded-xl p-5 border border-border-subtle flex flex-col justify-between">
+<div class="flex items-center justify-between text-on-surface-muted text-xs font-medium">
+<span>PROCHAIN VIREMENT</span>
+<span class="material-symbols-outlined text-[18px]">account_balance</span>
+</div>
+<div class="mt-4">
+<div class="text-xl font-bold tracking-tight text-primary">2 050 000 FCFA</div>
+<div class="mt-1 flex items-center gap-1 text-xs text-on-surface-muted">
+<span class="text-secondary font-medium">Prévu le 28 Oct.</span>
+<span>(Automatique)</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Minimalist Chart & Balance Banner -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<!-- Chart Section (2 cols) -->
+<div class="lg:col-span-2 bg-surface rounded-xl p-6 border border-border-subtle flex flex-col justify-between">
+<div class="flex items-center justify-between mb-4">
+<div>
+<h2 class="text-sm font-semibold text-primary">Dynamique des encaissements</h2>
+<p class="text-xs text-on-surface-muted mt-0.5">Cabinet vs Téléconsultations</p>
+</div>
+<div class="flex items-center gap-4 text-xs">
+<span class="flex items-center gap-1.5 text-on-surface-muted">
+<span class="w-2.5 h-2.5 rounded-sm bg-primary"></span> Cabinet
+              </span>
+<span class="flex items-center gap-1.5 text-on-surface-muted">
+<span class="w-2.5 h-2.5 rounded-sm bg-secondary"></span> Téléconsultation
+              </span>
+</div>
+</div>
+<!-- Minimal SVG Graphic Bar Chart -->
+<div class="w-full pt-2">
+<svg class="w-full h-40 overflow-visible" fill="none" preserveaspectratio="none" viewbox="0 0 540 160">
+<line stroke="#f1f5f9" stroke-dasharray="3 3" stroke-width="1" x1="0" x2="540" y1="30" y2="30"></line>
+<line stroke="#f1f5f9" stroke-dasharray="3 3" stroke-width="1" x1="0" x2="540" y1="75" y2="75"></line>
+<line stroke="#f1f5f9" stroke-dasharray="3 3" stroke-width="1" x1="0" x2="540" y1="120" y2="120"></line>
+<!-- Week 1: ~ 580 000 FCFA -->
+<g class="cursor-pointer">
+<rect fill="#0f172a" height="52" rx="3" width="28" x="45" y="90"></rect>
+<rect fill="#059669" height="18" rx="3" width="28" x="45" y="70"></rect>
+</g>
+<!-- Week 2: ~ 750 000 FCFA -->
+<g class="cursor-pointer">
+<rect fill="#0f172a" height="70" rx="3" width="28" x="165" y="72"></rect>
+<rect fill="#059669" height="22" rx="3" width="28" x="165" y="48"></rect>
+</g>
+<!-- Week 3: ~ 880 000 FCFA -->
+<g class="cursor-pointer">
+<rect fill="#0f172a" height="85" rx="3" width="28" x="285" y="57"></rect>
+<rect fill="#059669" height="24" rx="3" width="28" x="285" y="31"></rect>
+</g>
+<!-- Week 4: ~ 940 000 FCFA -->
+<g class="cursor-pointer">
+<rect fill="#0f172a" height="92" rx="3" width="28" x="405" y="50"></rect>
+<rect fill="#059669" height="24" rx="3" width="28" x="405" y="24"></rect>
+</g>
+</svg>
+<div class="flex justify-between px-6 pt-3 text-[11px] text-on-surface-muted font-mono uppercase">
+<span>01 - 07 Oct</span>
+<span>08 - 14 Oct</span>
+<span>15 - 21 Oct</span>
+<span>22 - 28 Oct</span>
+</div>
+</div>
+<div class="mt-4 pt-3 border-t border-border-light flex items-center justify-between text-xs text-on-surface-muted">
+<span class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+              Taux de présence honoré : <strong class="text-primary font-medium">99.6%</strong>
+</span>
+<span class="font-medium text-secondary">Zéro désistement non indemnisé</span>
+</div>
+</div>
+<!-- Stripe Balance & Payout Panel (1 col) -->
+<div class="flex flex-col gap-4">
+<!-- Available Balance Card -->
+<div class="bg-primary text-white rounded-xl p-5 flex flex-col justify-between">
+<div class="flex items-center justify-between text-xs opacity-75">
+<span>SOLDE DISPONIBLE IMMÉDIAT</span>
+<span class="material-symbols-outlined text-[18px]">payments</span>
+</div>
+<div class="my-4">
+<div class="text-2xl font-bold tracking-tight">935 000 FCFA</div>
+<span class="text-xs text-emerald-300 font-medium">Prêt pour virement express</span>
+</div>
+<button class="w-full py-2 px-3 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-semibold transition-colors flex items-center justify-center gap-1.5" onclick="triggerToast('Demande de virement express de 935 000 FCFA enregistrée')">
+<span>Transférer sur compte bancaire</span>
+<span class="material-symbols-outlined text-[15px]">arrow_forward</span>
+</button>
+</div>
+<!-- Payout Info Card -->
+<div class="bg-surface rounded-xl p-5 border border-border-subtle flex flex-col gap-3">
+<div class="flex items-center justify-between text-xs">
+<span class="font-semibold text-primary">Compte de virement</span>
+<span class="text-[11px] text-secondary font-medium">Vérifié</span>
+</div>
+<div class="text-xs text-on-surface-muted space-y-1">
+<div class="flex justify-between">
+<span>Banque :</span>
+<span class="text-primary font-medium">Société Générale / CBAO</span>
+</div>
+<div class="flex justify-between">
+<span>IBAN masqué :</span>
+<span class="font-mono text-primary">SN •••• •••• 4812</span>
+</div>
+<div class="flex justify-between">
+<span>Délai standard :</span>
+<span class="text-primary font-medium">Instantané (J+2)</span>
+</div>
+</div>
+<button class="mt-1 text-left text-xs font-medium text-on-surface-muted hover:text-primary transition-colors flex items-center gap-1" onclick="triggerToast('Redirection vers Stripe Express...')">
+<span>Gérer les coordonnées bancaires</span>
+<span class="material-symbols-outlined text-[14px]">open_in_new</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Transactions Table (Clean & Reduced Density) -->
+<div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
+<!-- Header & Filter bar -->
+<div class="p-5 border-b border-border-subtle flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+<div>
+<h2 class="text-sm font-semibold text-primary">Transactions &amp; Acomptes récents</h2>
+<p class="text-xs text-on-surface-muted mt-0.5">Historique des encaissements en FCFA (XOF)</p>
+</div>
+<div class="flex items-center gap-2">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-on-surface-muted text-[16px]">search</span>
+<input class="bg-surface-subtle text-primary placeholder:text-on-surface-muted text-xs rounded-lg pl-8 pr-3 py-1.5 border-0 focus:ring-1 focus:ring-primary/20 w-44" id="tableFilter" placeholder="Filtrer client..." type="text"/>
+</div>
+<select class="bg-surface-subtle text-primary text-xs rounded-lg px-2.5 py-1.5 border-0 focus:ring-1 focus:ring-primary/20 cursor-pointer">
+<option>Tous les statuts</option>
+<option>Payé intégral</option>
+<option>Acompte retenu</option>
+<option>En attente (48h)</option>
+</select>
+</div>
+</div>
+<!-- Table -->
+<div class="overflow-x-auto">
+<table class="w-full text-left text-xs border-collapse">
+<thead>
+<tr class="border-b border-border-light text-on-surface-muted font-medium bg-surface-subtle/50">
+<th class="py-3 px-5">Réf.</th>
+<th class="py-3 px-5">Date</th>
+<th class="py-3 px-5">Patient</th>
+<th class="py-3 px-5">Prestation</th>
+<th class="py-3 px-5">Mode de règlement</th>
+<th class="py-3 px-5 text-right font-medium">Montant</th>
+<th class="py-3 px-5 text-center">Statut</th>
+<th class="py-3 px-5 text-right">Action</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-border-light text-primary" id="txTableBody">
+<!-- Row 1: 50 000 FCFA -->
+<tr class="hover:bg-surface-subtle/40 transition-colors">
+<td class="py-3.5 px-5 font-mono text-[11px] text-on-surface-muted">FAC-2024-1082</td>
+<td class="py-3.5 px-5 whitespace-nowrap text-on-surface-muted">26 Oct • 09:30</td>
+<td class="py-3.5 px-5 font-medium">Marc Lefèvre</td>
+<td class="py-3.5 px-5 text-on-surface-muted">Consultation Ostéopathie (Cabinet)</td>
+<td class="py-3.5 px-5 text-on-surface-muted">Stripe CB (•••• 4242)</td>
+<td class="py-3.5 px-5 text-right font-semibold whitespace-nowrap">50 000 FCFA</td>
+<td class="py-3.5 px-5 text-center whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-secondary-light text-secondary text-[11px] font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+                    Payé
+                  </span>
+</td>
+<td class="py-3.5 px-5 text-right whitespace-nowrap">
+<button class="p-1 rounded hover:bg-surface-subtle text-on-surface-muted hover:text-primary transition-colors" onclick="triggerToast('Téléchargement reçu FAC-2024-1082...')" title="Télécharger">
+<span class="material-symbols-outlined text-[17px]">download</span>
+</button>
+</td>
+</tr>
+<!-- Row 2: 40 000 FCFA -->
+<tr class="hover:bg-surface-subtle/40 transition-colors">
+<td class="py-3.5 px-5 font-mono text-[11px] text-on-surface-muted">FAC-2024-1081</td>
+<td class="py-3.5 px-5 whitespace-nowrap text-on-surface-muted">25 Oct • 17:15</td>
+<td class="py-3.5 px-5 font-medium">Élodie Bernard</td>
+<td class="py-3.5 px-5 text-on-surface-muted">Téléconsultation Posturologie</td>
+<td class="py-3.5 px-5 text-on-surface-muted">Apple Pay</td>
+<td class="py-3.5 px-5 text-right font-semibold whitespace-nowrap">40 000 FCFA</td>
+<td class="py-3.5 px-5 text-center whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-secondary-light text-secondary text-[11px] font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+                    Payé
+                  </span>
+</td>
+<td class="py-3.5 px-5 text-right whitespace-nowrap">
+<button class="p-1 rounded hover:bg-surface-subtle text-on-surface-muted hover:text-primary transition-colors" onclick="triggerToast('Téléchargement reçu FAC-2024-1081...')" title="Télécharger">
+<span class="material-symbols-outlined text-[17px]">download</span>
+</button>
+</td>
+</tr>
+<!-- Row 3: 20 000 FCFA (Acompte retenu) -->
+<tr class="hover:bg-surface-subtle/40 transition-colors">
+<td class="py-3.5 px-5 font-mono text-[11px] text-on-surface-muted">IND-2024-0014</td>
+<td class="py-3.5 px-5 whitespace-nowrap text-on-surface-muted">25 Oct • 11:00</td>
+<td class="py-3.5 px-5 font-medium">Thibault Laurent</td>
+<td class="py-3.5 px-5 text-on-surface-muted">Annulation &lt; 24h (Désistement)</td>
+<td class="py-3.5 px-5 text-on-surface-muted">Acompte Stripe CB</td>
+<td class="py-3.5 px-5 text-right font-semibold whitespace-nowrap">20 000 FCFA</td>
+<td class="py-3.5 px-5 text-center whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-surface-subtle text-on-surface-muted text-[11px] font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-on-surface-muted"></span>
+                    Acompte retenu
+                  </span>
+</td>
+<td class="py-3.5 px-5 text-right whitespace-nowrap">
+<button class="p-1 rounded hover:bg-surface-subtle text-on-surface-muted hover:text-primary transition-colors" onclick="triggerToast('Justificatif indemnité téléchargé')" title="Télécharger">
+<span class="material-symbols-outlined text-[17px]">download</span>
+</button>
+</td>
+</tr>
+<!-- Row 4: 45 000 FCFA (Pending 48h) -->
+<tr class="hover:bg-surface-subtle/40 transition-colors">
+<td class="py-3.5 px-5 font-mono text-[11px] text-on-surface-muted">PROV-2024-041</td>
+<td class="py-3.5 px-5 whitespace-nowrap text-on-surface-muted">27 Oct • 14:00</td>
+<td class="py-3.5 px-5 font-medium">Camille Perrin</td>
+<td class="py-3.5 px-5 text-on-surface-muted">Ostéopathie Pédiatrique</td>
+<td class="py-3.5 px-5 text-on-surface-muted">Empreinte CB bloquée</td>
+<td class="py-3.5 px-5 text-right font-semibold whitespace-nowrap">45 000 FCFA</td>
+<td class="py-3.5 px-5 text-center whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 text-[11px] font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                    En attente (48h)
+                  </span>
+</td>
+<td class="py-3.5 px-5 text-right whitespace-nowrap">
+<span class="text-[10px] text-on-surface-muted">Capture auto</span>
+</td>
+</tr>
+<!-- Row 5: 55 000 FCFA -->
+<tr class="hover:bg-surface-subtle/40 transition-colors">
+<td class="py-3.5 px-5 font-mono text-[11px] text-on-surface-muted">FAC-2024-1080</td>
+<td class="py-3.5 px-5 whitespace-nowrap text-on-surface-muted">24 Oct • 16:00</td>
+<td class="py-3.5 px-5 font-medium">Antoine Garnier</td>
+<td class="py-3.5 px-5 text-on-surface-muted">Ostéopathie d'urgence</td>
+<td class="py-3.5 px-5 text-on-surface-muted">Sur place (TPE / Espèces)</td>
+<td class="py-3.5 px-5 text-right font-semibold whitespace-nowrap">55 000 FCFA</td>
+<td class="py-3.5 px-5 text-center whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-secondary-light text-secondary text-[11px] font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+                    Payé
+                  </span>
+</td>
+<td class="py-3.5 px-5 text-right whitespace-nowrap">
+<button class="p-1 rounded hover:bg-surface-subtle text-on-surface-muted hover:text-primary transition-colors" onclick="triggerToast('Facture FAC-2024-1080 téléchargée')" title="Télécharger">
+<span class="material-symbols-outlined text-[17px]">download</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination -->
+<div class="p-4 border-t border-border-light flex items-center justify-between text-xs text-on-surface-muted">
+<span>Affichage de 5 transactions sur 68 ce mois-ci</span>
+<div class="flex items-center gap-1">
+<button class="p-1 rounded hover:bg-surface-subtle text-on-surface-muted hover:text-primary disabled:opacity-40" disabled="">
+<span class="material-symbols-outlined text-[16px]">chevron_left</span>
+</button>
+<span class="px-2 py-0.5 rounded bg-primary text-white text-[11px] font-semibold">1</span>
+<button class="px-2 py-0.5 rounded hover:bg-surface-subtle text-on-surface-muted text-[11px]">2</button>
+<button class="px-2 py-0.5 rounded hover:bg-surface-subtle text-on-surface-muted text-[11px]">3</button>
+<button class="p-1 rounded hover:bg-surface-subtle text-on-surface-muted hover:text-primary">
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Legal & Settings Section (Minimal Clean Card) -->
+<div class="bg-surface rounded-xl p-6 border border-border-subtle">
+<div class="flex items-center justify-between pb-4 border-b border-border-light">
+<div>
+<h2 class="text-sm font-semibold text-primary">Paramétrage légal &amp; Facturation</h2>
+<p class="text-xs text-on-surface-muted mt-0.5">Mentions obligatoires sur vos quittances et factures émises en FCFA</p>
+</div>
+<span class="material-symbols-outlined text-on-surface-muted text-[20px]">gavel</span>
+</div>
+<form class="grid grid-cols-1 md:grid-cols-2 gap-5 pt-5" onsubmit="event.preventDefault(); triggerToast('Paramètres de facturation enregistrés');">
+<div class="flex flex-col gap-1.5">
+<label class="text-xs font-medium text-primary">Régime fiscal &amp; TVA</label>
+<select class="w-full bg-surface-subtle text-primary text-xs rounded-lg px-3 py-2 border-0 focus:ring-1 focus:ring-primary/20">
+<option selected="">Exonéré de TVA (Pratique médicale / paramédicale)</option>
+<option>TVA standard (Prestations d'expertise / formation)</option>
+</select>
+</div>
+<div class="flex flex-col gap-1.5">
+<label class="text-xs font-medium text-primary">Identifiant légal / Enregistrement</label>
+<input class="w-full bg-surface-subtle text-primary text-xs rounded-lg px-3 py-2 border-0 focus:ring-1 focus:ring-primary/20 font-mono" type="text" value="NINEA / SIRET : 842 192 884 00021"/>
+</div>
+<div class="md:col-span-2 flex flex-col gap-1.5">
+<label class="text-xs font-medium text-primary">Pied de page de facture</label>
+<textarea class="w-full bg-surface-subtle text-primary text-xs rounded-lg p-3 border-0 focus:ring-1 focus:ring-primary/20 resize-none font-normal" rows="2">Facture d'honoraires pour prise en charge mutuelle / assurance santé. Reçu délivré pour valoir ce que de droit.</textarea>
+</div>
+<div class="md:col-span-2 flex items-center justify-end pt-2">
+<button class="bg-primary text-white hover:bg-primary/90 text-xs font-medium px-4 py-2 rounded-lg transition-colors" type="submit">
+              Enregistrer les modifications
+            </button>
+</div>
+</form>
+</div>
+</main>
+</div>
+<!-- Minimal Toast Notification -->
+<div class="fixed bottom-6 right-6 z-50 transform translate-y-16 opacity-0 transition-all duration-200 pointer-events-none flex items-center gap-2 bg-primary text-white text-xs px-4 py-2.5 rounded-lg shadow-lg" id="toastNotification">
+<span class="material-symbols-outlined text-secondary text-[18px]">check_circle</span>
+<span id="toastMessage">Opération réussie</span>
+</div>
+<script>
+    function triggerToast(message) {
+      const toast = document.getElementById('toastNotification');
+      const msg = document.getElementById('toastMessage');
+      if (!toast || !msg) return;
+      msg.textContent = message;
+      toast.classList.remove('translate-y-16', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+      setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-16', 'opacity-0');
+      }, 2800);
+    }
+
+    // Filter table by client name
+    const filterInput = document.getElementById('tableFilter');
+    if (filterInput) {
+      filterInput.addEventListener('input', function(e) {
+        const query = e.target.value.toLowerCase();
+        const rows = document.querySelectorAll('#txTableBody tr');
+        rows.forEach(row => {
+          const text = row.innerText.toLowerCase();
+          row.style.display = text.includes(query) ? '' : 'none';
+        });
+      });
+    }
+  </script>
+</body></html>

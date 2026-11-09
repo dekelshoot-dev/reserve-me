@@ -1,0 +1,1189 @@
+<!DOCTYPE html><html lang="fr" style=""><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><meta content="web_standard" name="shell-type"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;display=swap" rel="stylesheet">
+<style>
+@layer base {
+  html, body { margin: 0; padding: 0; }
+  body { overscroll-behavior: none; }
+  main > :first-child { margin-top: 0 !important; }
+  main > :last-child { margin-bottom: 0 !important; }
+}
+::-webkit-scrollbar { display: none; }
+
+/* Micro-interaction radar ping */
+@keyframes radar-pulse {
+  0% { transform: scale(0.95); opacity: 0.8; }
+  50% { transform: scale(2.2); opacity: 0; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+.radar-ring {
+  animation: radar-pulse 2s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+}
+
+/* Scroll reveal animations */
+.reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+.reveal-on-scroll.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Hero vertical slides */
+.vertical-slide {
+  transition: transform 650ms cubic-bezier(0.16, 1, 0.3, 1), opacity 600ms cubic-bezier(0.16, 1, 0.3, 1), filter 600ms cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, opacity, filter;
+}
+.vertical-slide.is-active {
+  transform: translateY(0);
+  opacity: 1;
+  filter: blur(0px);
+  pointer-events: auto;
+  z-index: 20;
+}
+.vertical-slide.is-exiting-up {
+  transform: translateY(-40px);
+  opacity: 0;
+  filter: blur(5px);
+  pointer-events: none;
+  z-index: 10;
+}
+.vertical-slide.is-hidden-down {
+  transform: translateY(40px);
+  opacity: 0;
+  filter: blur(6px);
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* Smooth slot button transition */
+.slot-pill {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Reduced motion accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .vertical-slide, .reveal-on-scroll, .slot-pill, * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .radar-ring {
+    display: none !important;
+  }
+  .reveal-on-scroll {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+</style>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+tailwind.config={"darkMode":"class","theme":{"extend":{"colors":{"primary":"#101828","secondary":"#14B8A6","secondary-hover":"#0d9488","accent":"#0ea5e9","surface":"#FAFAFC","surface-container":"#F2F4F7","surface-card":"#FFFFFF","outline":"#E4E7EC","on-dark":"#101828","text-muted":"#475467","text-subtle":"#667085"},"borderRadius":{"DEFAULT":"0.25rem","md":"0.5rem","lg":"0.75rem","xl":"1rem","2xl":"1.25rem","full":"9999px"},"fontFamily":{"sans":["Inter", "sans-serif"]}}}};</script>
+</head>
+<body class="bg-[#FAFAFC] text-[#101828] font-sans antialiased selection:bg-[#14B8A6]/20 selection:text-[#101828]">
+<!-- 1. NAVIGATION BAR -->
+<header class="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-[#E4E7EC] transition-shadow duration-300">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+<div class="flex items-center gap-8">
+<a class="flex items-center gap-2.5 group transition-transform active:scale-95 duration-200" data-path="landing-page" href="#">
+<img alt="réserve.me" class="h-8 w-auto object-contain transition-transform duration-300 group-hover:scale-105" src="https://lh3.googleusercontent.com/aida/AEtjO1WPPLtUhvsB13o-lJicoUkySkEGX_Eo0wJWoWLhPk10ZCg2JbiEWHyjYBEYcRtACB7AsCpuz0kGWIkC_uUzTuG1omRXDI_YvbzrFxemGlXGNcV_kiSQKS-Xa0vjd5ZF3pqsFQ5eR920ycAXSFXX1Yhz-s9PBM8D-PmmIR1fPS3ukpbq5khCyTWcBu4hy7i5bG6IyDGEKuJNw8kAaeveMd0XjHHVeK7nqIlgf6DWRQ">
+<span class="text-xl font-bold tracking-tight text-[#101828]">réserve<span class="text-[#14B8A6]">.me</span></span>
+</a>
+<nav class="hidden md:flex items-center gap-6">
+<a class="relative py-1 text-sm font-medium text-[#475467] hover:text-[#0f766e] transition-colors duration-200 after:absolute after:bottom-0 after:left-0 after:w-0 hover:after:w-full after:h-0.5 after:bg-[#0f766e] after:transition-all after:duration-300" data-path="explorer" href="#">Explorer</a>
+<a class="relative py-1 text-sm font-medium text-[#475467] hover:text-[#0f766e] transition-colors duration-200 after:absolute after:bottom-0 after:left-0 after:w-0 hover:after:w-full after:h-0.5 after:bg-[#0f766e] after:transition-all after:duration-300" data-path="comment-ca-marche" href="#">Comment ça marche ?</a>
+<a class="relative py-1 text-sm font-medium text-[#475467] hover:text-[#0f766e] transition-colors duration-200 after:absolute after:bottom-0 after:left-0 after:w-0 hover:after:w-full after:h-0.5 after:bg-[#0f766e] after:transition-all after:duration-300" data-path="pour-les-professionnels" href="#">Pour les professionnels</a>
+</nav>
+</div>
+<div class="flex items-center gap-3">
+<a class="hidden sm:inline-flex items-center px-3.5 py-2 text-sm font-medium text-[#475467] hover:text-[#101828] hover:bg-slate-100/70 rounded-lg transition-all duration-200" data-path="connexion" href="#">Connexion</a>
+<a class="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-[#0f766e] text-white text-sm font-semibold hover:bg-[#115e59] hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[#0f766e]/25 active:translate-y-0 shadow-sm transition-all duration-300" data-path="inscription" href="#">Créer un compte</a>
+<div class="pl-1 border-l border-[#E4E7EC] flex items-center">
+<img alt="Profile" class="w-8 h-8 rounded-full ring-2 ring-[#E4E7EC] hover:ring-[#0f766e] transition-all duration-200 cursor-pointer object-cover ml-2 hover:scale-105" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAB7Zcd0PuB7VXKWAREqx0-ByqEri6k4wRf86xAyUrugJDDGM1ozlc2Itx1yWqN0oPq6Vm8BflRMMBYuiKFfNE9hWQy6MbDdxkPu_85wSNoQxbZQsQXlZm8_LMus1197MUuBTyNt0DgoTUtkl9qYPWYVWqmjRQzC4IFFj-y7yzA-Iq1CiaPTixG49XldEoRviyqjEIP9clOSI7wKkPT6bwrX6TyZUENoytTec5UXg">
+</div>
+</div>
+</div>
+</header>
+<main class="w-full pt-16">
+<!-- 2. HERO SECTION -->
+<section class="relative w-full overflow-hidden bg-gradient-to-b from-[#FAFAFC] via-[#F4F6F9] to-[#FAFAFC] py-14 lg:py-20 border-b border-[#E4E7EC]">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-10 items-center">
+<!-- Left Hero Content -->
+<div class="lg:col-span-7 flex flex-col items-start space-y-6">
+<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-800 text-xs font-semibold shadow-sm transition-all duration-300 hover:border-emerald-300 hover:bg-emerald-100/60 cursor-default">
+<span class="relative flex h-2 w-2">
+<span class="radar-ring absolute inline-flex h-full w-full rounded-full bg-emerald-500"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+</span>
+<span class="">Plateforme de réservation instantanée • 1 420 pros en direct</span>
+</div>
+<h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-[#101828] tracking-tight leading-[1.12]">
+            Trouvez votre prochain créneau. <br>
+<span class="text-[#0f766e]">Réservez en quelques clics .</span>
+</h1>
+<p class="text-base sm:text-lg text-[#475467] max-w-2xl leading-relaxed">
+            Découvrez des professionnels, des services et des lieux, consultez leurs disponibilités en temps réel et réservez au moment qui vous convient.
+          </p>
+<!-- CTA Actions -->
+<div class="flex flex-wrap items-center gap-4 pt-2">
+<a class="inline-flex items-center justify-center px-6 py-3.5 rounded-xl bg-[#0f766e] text-white text-sm font-semibold hover:bg-[#115e59] hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[#0f766e]/25 active:translate-y-0 shadow-md transition-all duration-300 gap-2 group" data-path="explorer" href="#">
+<span class="">Trouver un créneau</span>
+<span class="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform duration-200">arrow_forward</span>
+</a>
+<a class="inline-flex items-center justify-center px-6 py-3.5 rounded-xl bg-white border border-[#E4E7EC] text-[#101828] text-sm font-semibold hover:bg-[#FAFAFC] hover:border-[#0f766e] hover:-translate-y-0.5 hover:shadow-md transition-all duration-300 active:translate-y-0" data-path="comment-ca-marche" href="#">Comment ça marche ?</a>
+</div>
+<div class="flex flex-wrap items-center gap-6 pt-1 text-xs text-[#667085]">
+<span class="flex items-center gap-1.5 transition-transform duration-200 hover:translate-x-0.5">
+<span class="material-symbols-outlined text-[#14B8A6] text-[18px]">verified</span>
+              Pros vérifiés &amp; certifiés
+            </span>
+<span class="flex items-center gap-1.5 transition-transform duration-200 hover:translate-x-0.5">
+<span class="material-symbols-outlined text-[#14B8A6] text-[18px]">sync</span>
+              Sync Cal.com, Google &amp; Apple
+            </span>
+<span class="flex items-center gap-1.5 transition-transform duration-200 hover:translate-x-0.5">
+<span class="material-symbols-outlined text-[#14B8A6] text-[18px]">lock</span>
+              Paiement sécurisé Stripe
+            </span>
+</div>
+</div>
+<!-- Right Hero Preview Card Composition - Vertical Smooth Sequence -->
+<div class="lg:col-span-5 relative" id="carousel-wrapper">
+<div class="absolute -top-6 -right-6 w-72 h-72 bg-[#14B8A6]/10 rounded-full blur-3xl pointer-events-none"></div>
+<!-- Header controls for vertical sequence -->
+<div class="flex items-center justify-between mb-3 px-1">
+<div class="flex items-center gap-2">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/90 border border-[#E4E7EC] text-[11px] font-semibold text-[#0f766e] shadow-xs">
+<span class="relative flex h-1.5 w-1.5">
+<span class="radar-ring absolute inline-flex h-full w-full rounded-full bg-emerald-500"></span>
+<span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+</span>
+En direct • Disponibilités vérifiées
+</span>
+</div>
+<!-- Vertical Nav Buttons (Up / Down) -->
+<div class="flex items-center gap-1.5">
+<button aria-label="Profil précédent" class="w-7 h-7 rounded-full bg-white border border-[#E4E7EC] hover:border-[#0f766e] hover:text-[#0f766e] text-[#475467] flex items-center justify-center transition-all duration-200 shadow-sm active:scale-90 hover:scale-105" id="carousel-prev">
+<span class="material-symbols-outlined text-[16px]">keyboard_arrow_up</span>
+</button>
+<button aria-label="Profil suivant" class="w-7 h-7 rounded-full bg-white border border-[#E4E7EC] hover:border-[#0f766e] hover:text-[#0f766e] text-[#475467] flex items-center justify-center transition-all duration-200 shadow-sm active:scale-90 hover:scale-105" id="carousel-next">
+<span class="material-symbols-outlined text-[16px]">keyboard_arrow_down</span>
+</button>
+</div>
+</div>
+<!-- Frame container with overflow-hidden for seamless vertical emerge -->
+<div class="relative min-h-[465px] h-[465px] rounded-2xl border border-slate-200/80 bg-white/95 shadow-xl shadow-slate-900/5 backdrop-blur-sm overflow-hidden" id="cards-viewport">
+<!-- CARD 0: Dr. Sarah Martin (Nutrition & Médecine Préventive) -->
+<div class="vertical-slide absolute inset-0 p-6 flex flex-col justify-between is-exiting-up" data-index="0">
+<div>
+<div class="flex items-start justify-between pb-4 border-b border-[#F2F4F7]">
+<div class="flex items-center gap-3.5">
+<img alt="Dr. Sarah Martin" class="w-14 h-14 rounded-xl object-cover ring-2 ring-[#E4E7EC] transition-transform duration-300 hover:scale-105" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB9cwdFDmkaQeuFcKFyycIqQlvcsyJtLtQlAip5UQQbOw2MnykjAe2J5cxDTWnM1lg9-6Ty_89sTVzl53K5DtxRv-Y-oOx7Aj4gKpjQ3no13wnZ-U3LUi2BheV7X-0_zDikkeqkuBzf7D10ZwI1jrWcMzRSdDx2X1-opKbxQ4yLUwkAwfLhp-Tp780wVEsLFgQqMte52CUO9wMZcs-Tt1o2h6AHiGQcScubindYlA">
+<div>
+<div class="flex items-center gap-1.5">
+<h3 class="text-base font-bold text-[#101828]">Dr. Sarah Martin</h3>
+<span class="material-symbols-outlined text-[#14B8A6] text-[18px]" title="Vérifié">check_circle</span>
+</div>
+<p class="text-xs text-[#667085]">Médecine préventive &amp; Nutrition</p>
+<div class="flex items-center gap-2 mt-1">
+<span class="inline-flex items-center gap-1 text-xs font-semibold text-[#101828]">
+<span class="text-amber-500 font-bold">★</span> 5.0
+</span>
+<span class="text-[11px] text-[#667085]">(94 avis)</span>
+<span class="inline-block w-1 h-1 rounded-full bg-[#D0D5DD]"></span>
+<span class="text-[11px] text-[#0f766e] font-medium bg-[#14B8A6]/10 px-1.5 py-0.5 rounded">Lyon &amp; Distanciel</span>
+</div>
+</div>
+</div>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-sky-50 text-sky-700 border border-sky-200">
+Cabinet &amp; Téléconsult
+</span>
+</div>
+<div class="space-y-3 mt-4">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-[#14B8A6]">calendar_month</span>
+<span class="text-xs font-bold text-[#101828]">Aujourd'hui, 14h00 - 18h30</span>
+</div>
+<span class="text-[11px] font-semibold text-[#0f766e] bg-[#14B8A6]/10 px-2 py-0.5 rounded">4 créneaux ouverts</span>
+</div>
+<div class="grid grid-cols-2 gap-2 slot-grid">
+<button class="slot-pill p-2.5 rounded-xl border border-[#0f766e] bg-[#0f766e] text-white flex flex-col text-left shadow-sm active:scale-95" data-slot="active">
+<div class="flex items-center justify-between w-full"><span class="text-sm font-bold">14:00</span><span class="text-[10px] font-semibold bg-white/20 text-white px-2 py-0.5 rounded badge-status">Sélectionné</span></div>
+<span class="text-[11px] text-white/90 mt-0.5">Bilan Nutritionnel (50 min)</span>
+</button>
+<button class="slot-pill p-2.5 rounded-xl border border-[#E4E7EC] bg-white text-[#344054] hover:border-[#0f766e] hover:bg-[#FAFAFC] flex flex-col text-left active:scale-95">
+<div class="flex items-center justify-between w-full"><span class="text-sm font-bold text-[#101828]">15:30</span><span class="text-[10px] text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded font-medium badge-status">Libre</span></div>
+<span class="text-[11px] text-[#667085] mt-0.5">Téléconsultation (30 min)</span>
+</button>
+<button class="slot-pill p-2.5 rounded-xl border border-[#E4E7EC] bg-white text-[#344054] hover:border-[#0f766e] hover:bg-[#FAFAFC] flex flex-col text-left active:scale-95">
+<div class="flex items-center justify-between w-full"><span class="text-sm font-bold text-[#101828]">17:00</span><span class="text-[10px] text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded font-medium badge-status">Libre</span></div>
+<span class="text-[11px] text-[#667085] mt-0.5">Suivi Thérapeutique (45 min)</span>
+</button>
+<button class="slot-pill p-2.5 rounded-xl border border-[#E4E7EC] bg-white text-[#344054] hover:border-[#0f766e] hover:bg-[#FAFAFC] flex flex-col text-left active:scale-95">
+<div class="flex items-center justify-between w-full"><span class="text-sm font-bold text-[#101828]">18:00</span><span class="text-[10px] text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded font-medium badge-status">Libre</span></div>
+<span class="text-[11px] text-[#667085] mt-0.5">Téléconsultation (30 min)</span>
+</button>
+</div>
+</div>
+</div>
+<div class="pt-4 border-t border-[#F2F4F7] space-y-3">
+<div class="flex flex-wrap items-center gap-2 text-[11px]">
+<span class="inline-flex items-center gap-1 text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> 3 créneaux libres
+</span>
+<span class="inline-flex items-center gap-1 text-sky-700 bg-sky-50 px-2 py-0.5 rounded font-medium">
+<span class="material-symbols-outlined text-[13px]">videocam</span> Lien visio instantané
+</span>
+<span class="inline-flex items-center gap-1 text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded font-medium">
+<span class="material-symbols-outlined text-[13px]">receipt_long</span> Facture mutuelle
+</span>
+</div>
+<div class="flex items-center justify-between pt-1">
+<div>
+<span class="text-[11px] text-[#667085] block">Consultation dès</span>
+<span class="text-lg font-bold text-[#101828]">55 000 FCFA</span>
+</div>
+<button class="px-5 py-2.5 rounded-lg bg-[#0f766e] text-white text-xs font-semibold hover:bg-[#115e59] hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[#0f766e]/25 active:translate-y-0 shadow-sm transition-all duration-300 flex items-center gap-1.5 group">
+<span class="">Réserver avec Dr. Martin</span>
+<span class="material-symbols-outlined text-[14px] group-hover:translate-x-1 transition-transform duration-200">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+<!-- CARD 1: Studio Althéa (Coaching exécutif & Stratégie) -->
+<div class="vertical-slide absolute inset-0 p-6 flex flex-col justify-between is-exiting-up" data-index="1">
+<div>
+<div class="flex items-start justify-between pb-4 border-b border-[#F2F4F7]">
+<div class="flex items-center gap-3.5">
+<img alt="Studio Althéa" class="w-14 h-14 rounded-xl object-cover ring-2 ring-[#E4E7EC] transition-transform duration-300 hover:scale-105" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6NTnYbQy83rZB_7Kqg0E8iPF5H6Pc4WS6M51ydWxaupaEj9bonV2mGpjAwC5IFtUXUlRaEmmfR6UAZAdLMN2wOv4uHTQjMBpt7EGkGJdjNS4W9-SyWjBx2dbEqlQpM_2MCOxdiUusmyRjNVzVt2fn7AiCKbu4PJPBB-ktAJw2u7997u_RuOZYd758SFxTRNn5ep8ssRdOEzOYJ-tZhNRQu2ZzEjHmVgsmt5XQoQ">
+<div>
+<div class="flex items-center gap-1.5">
+<h3 class="text-base font-bold text-[#101828]">Studio Althéa</h3>
+<span class="material-symbols-outlined text-[#14B8A6] text-[18px]" title="Vérifié">check_circle</span>
+</div>
+<p class="text-xs text-[#667085]">Coaching exécutif &amp; Stratégie</p>
+<div class="flex items-center gap-2 mt-1">
+<span class="inline-flex items-center gap-1 text-xs font-semibold text-[#101828]">
+<span class="text-amber-500 font-bold">★</span> 4.95
+</span>
+<span class="text-[11px] text-[#667085]">(112 avis)</span>
+<span class="inline-block w-1 h-1 rounded-full bg-[#D0D5DD]"></span>
+<span class="text-[11px] text-[#0f766e] font-medium bg-[#14B8A6]/10 px-1.5 py-0.5 rounded">Paris &amp; Distanciel</span>
+</div>
+</div>
+</div>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+En ligne
+</span>
+</div>
+<div class="space-y-3 mt-4">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-[#14B8A6]">calendar_month</span>
+<span class="text-xs font-bold text-[#101828]">Mardi 14 octobre 2025</span>
+</div>
+<span class="text-[11px] font-medium text-[#667085] bg-[#F2F4F7] px-2 py-0.5 rounded">UTC+2</span>
+</div>
+<div class="grid grid-cols-2 gap-2 slot-grid">
+<button class="slot-pill p-2.5 rounded-xl border border-[#0f766e] bg-[#0f766e] text-white flex flex-col text-left shadow-sm active:scale-95" data-slot="active">
+<div class="flex items-center justify-between w-full"><span class="text-sm font-bold">09:00</span><span class="text-[10px] font-semibold bg-white/20 text-white px-2 py-0.5 rounded badge-status">Sélectionné</span></div>
+<span class="text-[11px] text-white/90 mt-0.5">Session Découverte (45 min)</span>
+</button>
+<button class="slot-pill p-2.5 rounded-xl border border-[#E4E7EC] bg-white text-[#344054] hover:border-[#0f766e] hover:bg-[#FAFAFC] flex flex-col text-left active:scale-95">
+<div class="flex items-center justify-between w-full"><span class="text-sm font-bold text-[#101828]">11:30</span><span class="text-[10px] text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded font-medium badge-status">Libre</span></div>
+<span class="text-[11px] text-[#667085] mt-0.5">Bilan Individuel (60 min)</span>
+</button>
+<button class="slot-pill p-2.5 rounded-xl border border-[#E4E7EC] bg-white text-[#344054] hover:border-[#0f766e] hover:bg-[#FAFAFC] flex flex-col text-left active:scale-95">
+<div class="flex items-center justify-between w-full"><span class="text-sm font-bold text-[#101828]">14:30</span><span class="text-[10px] text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded font-medium badge-status">Libre</span></div>
+<span class="text-[11px] text-[#667085] mt-0.5">Consultation Express (30 min)</span>
+</button>
+<button class="p-2.5 rounded-xl border border-[#E4E7EC] bg-[#F8F9FA] text-[#98A2B3] flex flex-col text-left cursor-not-allowed opacity-60">
+<div class="flex items-center justify-between w-full"><span class="text-sm font-bold">16:00</span><span class="text-[10px]">Complet</span></div>
+<span class="text-[11px] mt-0.5">Session Découverte</span>
+</button>
+</div>
+</div>
+</div>
+<div class="pt-4 border-t border-[#F2F4F7] space-y-3">
+<div class="flex flex-wrap items-center gap-2 text-[11px]">
+<span class="inline-flex items-center gap-1 text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Disponible
+</span>
+<span class="inline-flex items-center gap-1 text-sky-700 bg-sky-50 px-2 py-0.5 rounded font-medium">
+<span class="material-symbols-outlined text-[13px]">bolt</span> Confirmé instantanément
+</span>
+<span class="inline-flex items-center gap-1 text-violet-700 bg-violet-50 px-2 py-0.5 rounded font-medium">
+<span class="material-symbols-outlined text-[13px]">shield</span> Acompte sécurisé
+</span>
+</div>
+<div class="flex items-center justify-between pt-1">
+<div>
+<span class="text-[11px] text-[#667085] block">Tarif séance</span>
+<span class="text-lg font-bold text-[#101828]">60 000 FCFA</span>
+</div>
+<button class="px-5 py-2.5 rounded-lg bg-[#0f766e] text-white text-xs font-semibold hover:bg-[#115e59] hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[#0f766e]/25 active:translate-y-0 shadow-sm transition-all duration-300 flex items-center gap-1.5 group">
+<span class="">Réserver avec Althéa</span>
+<span class="material-symbols-outlined text-[14px] group-hover:translate-x-1 transition-transform duration-200">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+<!-- CARD 2: Atelier Kura (Gastronomie d'auteur & Dégustation) -->
+<div class="vertical-slide absolute inset-0 p-6 flex flex-col justify-between is-exiting-up" data-index="2">
+<div>
+<div class="flex items-start justify-between pb-4 border-b border-[#F2F4F7]">
+<div class="flex items-center gap-3.5">
+<img alt="Atelier Kura" class="w-14 h-14 rounded-xl object-cover ring-2 ring-[#E4E7EC] transition-transform duration-300 hover:scale-105" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAwrTfBzs_zguWdImfK0wm_Obqp_GL9e8SW-33FNFCTtyUVvkNqGpMtWx2CvOj6Cug148FFQH5PYbfL8XsCs84p9Ws8Cz65LDIYbt8knPX09fFGwcu0u0qfj6S5L1wWc_pBYwMNAZB_2kQVmSUTMLrV1UKZcJm7KZcygRqPESxYNW0fG0v0eZgcp_d4DuyZ1VO_8rFWGV0JLfGYhzciGhhD8hG7crqo6UryIu2bGQ">
+<div>
+<div class="flex items-center gap-1.5">
+<h3 class="text-base font-bold text-[#101828]">Atelier Kura</h3>
+<span class="material-symbols-outlined text-[#14B8A6] text-[18px]" title="Vérifié">check_circle</span>
+</div>
+<p class="text-xs text-[#667085]">Gastronomie d'auteur &amp; Dégustation</p>
+<div class="flex items-center gap-2 mt-1">
+<span class="inline-flex items-center gap-1 text-xs font-semibold text-[#101828]">
+<span class="text-amber-500 font-bold">★</span> 4.9
+</span>
+<span class="text-[11px] text-[#667085]">(78 avis)</span>
+<span class="inline-block w-1 h-1 rounded-full bg-[#D0D5DD]"></span>
+<span class="text-[11px] text-[#0f766e] font-medium bg-[#14B8A6]/10 px-1.5 py-0.5 rounded">Bordeaux Chartrons</span>
+</div>
+</div>
+</div>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-50 text-amber-800 border border-amber-200">
+Atelier d'exception
+</span>
+</div>
+<div class="space-y-3 mt-4">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-[#14B8A6]">wine_bar</span>
+<span class="text-xs font-bold text-[#101828]">Soirée dégustation &amp; Sommelier</span>
+</div>
+<span class="text-[11px] font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded">2 places restantes</span>
+</div>
+<div class="grid grid-cols-2 gap-2 slot-grid">
+<button class="slot-pill p-2.5 rounded-xl border border-[#0f766e] bg-[#0f766e] text-white flex flex-col text-left shadow-sm active:scale-95" data-slot="active">
+<div class="flex items-center justify-between w-full"><span class="text-sm font-bold">19:30</span><span class="text-[10px] font-semibold bg-white/20 text-white px-2 py-0.5 rounded badge-status">Sélectionné</span></div>
+<span class="text-[11px] text-white/90 mt-0.5">Menu Dégustation 5 accords</span>
+</button>
+<button class="slot-pill p-2.5 rounded-xl border border-[#E4E7EC] bg-white text-[#344054] hover:border-[#0f766e] hover:bg-[#FAFAFC] flex flex-col text-left active:scale-95">
+<div class="flex items-center justify-between w-full"><span class="text-sm font-bold text-[#101828]">20:30</span><span class="text-[10px] text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded font-medium badge-status">Libre</span></div>
+<span class="text-[11px] text-[#667085] mt-0.5">Masterclass Sommelier (2h)</span>
+</button>
+<button class="slot-pill p-2.5 rounded-xl border border-[#E4E7EC] bg-white text-[#344054] hover:border-[#0f766e] hover:bg-[#FAFAFC] flex flex-col text-left active:scale-95">
+<div class="flex items-center justify-between w-full"><span class="text-sm font-bold text-[#101828]">21:30</span><span class="text-[10px] text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded font-medium badge-status">Libre</span></div>
+<span class="text-[11px] text-[#667085] mt-0.5">Dégustation Grands Crus</span>
+</button>
+<button class="slot-pill p-2.5 rounded-xl border border-[#E4E7EC] bg-white text-[#344054] hover:border-[#0f766e] hover:bg-[#FAFAFC] flex flex-col text-left active:scale-95">
+<div class="flex items-center justify-between w-full"><span class="text-sm font-bold text-[#101828]">Dim 18:00</span><span class="text-[10px] text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded font-medium badge-status">Libre</span></div>
+<span class="text-[11px] text-[#667085] mt-0.5">Session Privative Chef (max 6p)</span>
+</button>
+</div>
+</div>
+</div>
+<div class="pt-4 border-t border-[#F2F4F7] space-y-3">
+<div class="flex flex-wrap items-center gap-2 text-[11px]">
+<span class="inline-flex items-center gap-1 text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Ce soir disponible
+</span>
+<span class="inline-flex items-center gap-1 text-amber-800 bg-amber-50 px-2 py-0.5 rounded font-medium">
+<span class="material-symbols-outlined text-[13px]">restaurant_menu</span> Produits bio &amp; locaux
+</span>
+<span class="inline-flex items-center gap-1 text-violet-700 bg-violet-50 px-2 py-0.5 rounded font-medium">
+<span class="material-symbols-outlined text-[13px]">shield</span> Confirmation directe
+</span>
+</div>
+<div class="flex items-center justify-between pt-1">
+<div>
+<span class="text-[11px] text-[#667085] block">Tarif par convive</span>
+<span class="text-lg font-bold text-[#101828]">45 000 FCFA</span>
+</div>
+<button class="px-5 py-2.5 rounded-lg bg-[#0f766e] text-white text-xs font-semibold hover:bg-[#115e59] hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[#0f766e]/25 active:translate-y-0 shadow-sm transition-all duration-300 flex items-center gap-1.5 group">
+<span class="">Réserver mon atelier</span>
+<span class="material-symbols-outlined text-[14px] group-hover:translate-x-1 transition-transform duration-200">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+<!-- CARD 3: L'Espace Loft / Studio de création -->
+<div class="vertical-slide absolute inset-0 p-6 flex flex-col justify-between is-active" data-index="3">
+<div>
+<div class="flex items-start justify-between pb-4 border-b border-[#F2F4F7]">
+<div class="flex items-center gap-3.5">
+<img alt="L'Espace Loft" class="w-14 h-14 rounded-xl object-cover ring-2 ring-[#E4E7EC] transition-transform duration-300 hover:scale-105" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA1SPx6U4OXAwsGz7g687_4GAYwtYtEwEo9xhoKNPQU8w5c3iXY7JIHWl0hrtFImU57JUjTSal6at8zmFwDUZU1bUUXg1t_mrFpCBj0xcE89yrxIJ68QTIBoQaPLTVWqfKus9B-CW7XKG4hKSCPIbi7N0jVFmhajXhcVBsBGj6C3oHggeII-9ZLYGq6f-KE49A-SUjqw0mel3UB87lETlqaIXSHlQ5JIxwBSKq8LQ">
+<div>
+<div class="flex items-center gap-1.5">
+<h3 class="text-base font-bold text-[#101828]">L'Espace Loft</h3>
+<span class="material-symbols-outlined text-[#14B8A6] text-[18px]" title="Vérifié">check_circle</span>
+</div>
+<p class="text-xs text-[#667085]">Privatisation créative &amp; Podcasting</p>
+<div class="flex items-center gap-2 mt-1">
+<span class="inline-flex items-center gap-1 text-xs font-semibold text-[#101828]">
+<span class="text-amber-500 font-bold">★</span> 4.8
+</span>
+<span class="text-[11px] text-[#667085]">(88 avis)</span>
+<span class="inline-block w-1 h-1 rounded-full bg-[#D0D5DD]"></span>
+<span class="text-[11px] text-[#0f766e] font-medium bg-[#14B8A6]/10 px-1.5 py-0.5 rounded">Lille Centre • Équipé</span>
+</div>
+</div>
+</div>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">
+Studio Équipé
+</span>
+</div>
+<div class="space-y-3 mt-4">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-[#14B8A6]">mic</span>
+<span class="text-xs font-bold text-[#101828]">Samedi 18 octobre</span>
+</div>
+<span class="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">Créneaux ouverts</span>
+</div>
+<div class="grid grid-cols-2 gap-2 slot-grid">
+<button class="slot-pill p-2.5 rounded-xl border border-[#0f766e] bg-[#0f766e] text-white flex flex-col text-left shadow-sm active:scale-95" data-slot="active">
+<div class="flex items-center justify-between w-full"><span class="text-sm font-bold">09:30</span><span class="text-[10px] font-semibold bg-white/20 text-white px-2 py-0.5 rounded badge-status">Sélectionné</span></div>
+<span class="text-[11px] text-white/90 mt-0.5">Session Matinée (3h)</span>
+</button>
+<button class="slot-pill p-2.5 rounded-xl border border-[#E4E7EC] bg-white text-[#344054] hover:border-[#0f766e] hover:bg-[#FAFAFC] flex flex-col text-left active:scale-95">
+<div class="flex items-center justify-between w-full"><span class="text-sm font-bold text-[#101828]">14:00</span><span class="text-[10px] text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded font-medium badge-status">Libre</span></div>
+<span class="text-[11px] text-[#667085] mt-0.5">Tournage Vidéo HD (2h)</span>
+</button>
+<button class="slot-pill p-2.5 rounded-xl border border-[#E4E7EC] bg-white text-[#344054] hover:border-[#0f766e] hover:bg-[#FAFAFC] flex flex-col text-left active:scale-95">
+<div class="flex items-center justify-between w-full"><span class="text-sm font-bold text-[#101828]">17:00</span><span class="text-[10px] text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded font-medium badge-status">Libre</span></div>
+<span class="text-[11px] text-[#667085] mt-0.5">Enregistrement Podcast (1h30)</span>
+</button>
+<button class="p-2.5 rounded-xl border border-[#E4E7EC] bg-[#F8F9FA] text-[#98A2B3] flex flex-col text-left cursor-not-allowed opacity-60">
+<div class="flex items-center justify-between w-full"><span class="text-sm font-bold">19:30</span><span class="text-[10px]">Complet</span></div>
+<span class="text-[11px] mt-0.5">Privatisation Cocktail</span>
+</button>
+</div>
+</div>
+</div>
+<div class="pt-4 border-t border-[#F2F4F7] space-y-3">
+<div class="flex flex-wrap items-center gap-2 text-[11px]">
+<span class="inline-flex items-center gap-1 text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Accès badge connecté
+</span>
+<span class="inline-flex items-center gap-1 text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded font-medium">
+<span class="material-symbols-outlined text-[13px]">videocam</span> Régie 4K incluse
+</span>
+<span class="inline-flex items-center gap-1 text-violet-700 bg-violet-50 px-2 py-0.5 rounded font-medium">
+<span class="material-symbols-outlined text-[13px]">shield</span> Caution Stripe
+</span>
+</div>
+<div class="flex items-center justify-between pt-1">
+<div>
+<span class="text-[11px] text-[#667085] block">Tarif horaire</span>
+<span class="text-lg font-bold text-[#101828]">40 000 FCFA/h</span>
+</div>
+<button class="px-5 py-2.5 rounded-lg bg-[#0f766e] text-white text-xs font-semibold hover:bg-[#115e59] hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[#0f766e]/25 active:translate-y-0 shadow-sm transition-all duration-300 flex items-center gap-1.5 group">
+<span class="">Réserver l'Espace Loft</span>
+<span class="material-symbols-outlined text-[14px] group-hover:translate-x-1 transition-transform duration-200">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Sleek progression pill & indicator dots -->
+<div class="flex items-center justify-between mt-4 px-2">
+<div class="flex items-center gap-2">
+<span class="text-[11px] font-medium text-[#667085] transition-opacity duration-300" id="slide-label">4 / 4 • L'Espace Loft</span>
+</div>
+<div class="flex items-center gap-1.5">
+<button aria-label="Afficher Dr. Sarah Martin" class="carousel-dot h-1.5 rounded-full transition-all duration-300 w-2 bg-[#D0D5DD]" data-target="0"></button>
+<button aria-label="Afficher Studio Althéa" class="carousel-dot h-1.5 rounded-full transition-all duration-300 hover:bg-[#0f766e]/50 w-2 bg-[#D0D5DD]" data-target="1"></button>
+<button aria-label="Afficher Atelier Kura" class="carousel-dot h-1.5 rounded-full transition-all duration-300 hover:bg-[#0f766e]/50 w-2 bg-[#D0D5DD]" data-target="2"></button>
+<button aria-label="Afficher L'Espace Loft" class="carousel-dot h-1.5 rounded-full transition-all duration-300 hover:bg-[#0f766e]/50 w-7 bg-[#0f766e]" data-target="3"></button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- 3. CATÉGORIES POPULAIRES (6 Cards Grid) -->
+<section class="reveal-on-scroll w-full bg-white py-16 lg:py-24 border-b border-[#E4E7EC] is-visible">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
+<div>
+<span class="text-xs font-bold uppercase tracking-wider text-[#14B8A6] block mb-1">Univers &amp; Spécialités</span>
+<h2 class="text-2xl sm:text-3xl font-bold text-[#101828] tracking-tight">Explorez par catégorie</h2>
+<p class="text-sm text-[#667085] mt-1">Accédez à des centaines de praticiens certifiés et d'établissements vérifiés.</p>
+</div>
+<a class="group text-sm font-semibold text-[#14B8A6] hover:text-[#0d9488] transition-colors inline-flex items-center gap-1 self-start md:self-auto" data-path="explorer" href="#">
+<span class="">Voir toutes les catégories</span>
+<span class="material-symbols-outlined text-[18px] group-hover:translate-x-1.5 transition-transform duration-200">arrow_forward</span>
+</a>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+<!-- Cat 1 -->
+<a class="group p-6 rounded-2xl bg-[#FAFAFC] border border-[#E4E7EC] hover:border-[#14B8A6]/60 hover:bg-white hover:shadow-lg hover:shadow-[#14B8A6]/10 hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between" data-path="explorer" href="#">
+<div>
+<div class="flex items-center justify-between mb-4">
+<div class="w-12 h-12 rounded-xl bg-[#14B8A6]/10 text-[#14B8A6] flex items-center justify-center group-hover:bg-[#14B8A6] group-hover:text-white group-hover:scale-110 transition-all duration-300">
+<span class="material-symbols-outlined text-[26px]">psychology</span>
+</div>
+<span class="text-xs font-semibold text-[#0f766e] bg-[#14B8A6]/10 px-2 py-0.5 rounded-full group-hover:bg-[#0f766e] group-hover:text-white transition-colors duration-200">+320 disponibles</span>
+</div>
+<h3 class="text-base font-bold text-[#101828] mb-1.5 group-hover:text-[#0f766e] transition-colors">Coaching &amp; Consultations en ligne</h3>
+<p class="text-xs text-[#667085] leading-relaxed">Coaching professionnel, thérapie, développement personnel et mentorat par visioconférence HD.</p>
+</div>
+<div class="pt-4 mt-4 border-t border-[#E4E7EC]/60 flex items-center justify-between text-xs font-semibold text-[#101828] group-hover:text-[#0f766e]">
+<span class="">Explorer la catégorie</span>
+<span class="material-symbols-outlined text-[16px] group-hover:translate-x-1.5 transition-transform duration-300">arrow_forward</span>
+</div>
+</a>
+<!-- Cat 2 -->
+<a class="group p-6 rounded-2xl bg-[#FAFAFC] border border-[#E4E7EC] hover:border-[#14B8A6]/60 hover:bg-white hover:shadow-lg hover:shadow-[#14B8A6]/10 hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between" data-path="explorer" href="#">
+<div>
+<div class="flex items-center justify-between mb-4">
+<div class="w-12 h-12 rounded-xl bg-[#14B8A6]/10 text-[#14B8A6] flex items-center justify-center group-hover:bg-[#14B8A6] group-hover:text-white group-hover:scale-110 transition-all duration-300">
+<span class="material-symbols-outlined text-[26px]">content_cut</span>
+</div>
+<span class="text-xs font-semibold text-[#0f766e] bg-[#14B8A6]/10 px-2 py-0.5 rounded-full group-hover:bg-[#0f766e] group-hover:text-white transition-colors duration-200">+480 disponibles</span>
+</div>
+<h3 class="text-base font-bold text-[#101828] mb-1.5 group-hover:text-[#0f766e] transition-colors">Beauté, Coiffure &amp; Soins personnels</h3>
+<p class="text-xs text-[#667085] leading-relaxed">Instituts indépendants, coiffeurs visagistes, barbiers haut de gamme et rituels esthétiques.</p>
+</div>
+<div class="pt-4 mt-4 border-t border-[#E4E7EC]/60 flex items-center justify-between text-xs font-semibold text-[#101828] group-hover:text-[#0f766e]">
+<span class="">Explorer la catégorie</span>
+<span class="material-symbols-outlined text-[16px] group-hover:translate-x-1.5 transition-transform duration-300">arrow_forward</span>
+</div>
+</a>
+<!-- Cat 3 -->
+<a class="group p-6 rounded-2xl bg-[#FAFAFC] border border-[#E4E7EC] hover:border-[#14B8A6]/60 hover:bg-white hover:shadow-lg hover:shadow-[#14B8A6]/10 hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between" data-path="explorer" href="#">
+<div>
+<div class="flex items-center justify-between mb-4">
+<div class="w-12 h-12 rounded-xl bg-[#14B8A6]/10 text-[#14B8A6] flex items-center justify-center group-hover:bg-[#14B8A6] group-hover:text-white group-hover:scale-110 transition-all duration-300">
+<span class="material-symbols-outlined text-[26px]">restaurant</span>
+</div>
+<span class="text-xs font-semibold text-[#0f766e] bg-[#14B8A6]/10 px-2 py-0.5 rounded-full group-hover:bg-[#0f766e] group-hover:text-white transition-colors duration-200">+190 tables</span>
+</div>
+<h3 class="text-base font-bold text-[#101828] mb-1.5 group-hover:text-[#0f766e] transition-colors">Restaurants &amp; Tables d'exception</h3>
+<p class="text-xs text-[#667085] leading-relaxed">Tables gastronomiques, bars à vins d'auteur et ateliers culinaires avec réservation instantanée.</p>
+</div>
+<div class="pt-4 mt-4 border-t border-[#E4E7EC]/60 flex items-center justify-between text-xs font-semibold text-[#101828] group-hover:text-[#0f766e]">
+<span class="">Explorer la catégorie</span>
+<span class="material-symbols-outlined text-[16px] group-hover:translate-x-1.5 transition-transform duration-300">arrow_forward</span>
+</div>
+</a>
+<!-- Cat 4 -->
+<a class="group p-6 rounded-2xl bg-[#FAFAFC] border border-[#E4E7EC] hover:border-[#14B8A6]/60 hover:bg-white hover:shadow-lg hover:shadow-[#14B8A6]/10 hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between" data-path="explorer" href="#">
+<div>
+<div class="flex items-center justify-between mb-4">
+<div class="w-12 h-12 rounded-xl bg-[#14B8A6]/10 text-[#14B8A6] flex items-center justify-center group-hover:bg-[#14B8A6] group-hover:text-white group-hover:scale-110 transition-all duration-300">
+<span class="material-symbols-outlined text-[26px]">spa</span>
+</div>
+<span class="text-xs font-semibold text-[#0f766e] bg-[#14B8A6]/10 px-2 py-0.5 rounded-full group-hover:bg-[#0f766e] group-hover:text-white transition-colors duration-200">+260 praticiens</span>
+</div>
+<h3 class="text-base font-bold text-[#101828] mb-1.5 group-hover:text-[#0f766e] transition-colors">Santé &amp; Médecine douce</h3>
+<p class="text-xs text-[#667085] leading-relaxed">Ostéopathie, acupuncture, naturopathie et kinésithérapie avec gestion de rappel par SMS.</p>
+</div>
+<div class="pt-4 mt-4 border-t border-[#E4E7EC]/60 flex items-center justify-between text-xs font-semibold text-[#101828] group-hover:text-[#0f766e]">
+<span class="">Explorer la catégorie</span>
+<span class="material-symbols-outlined text-[16px] group-hover:translate-x-1.5 transition-transform duration-300">arrow_forward</span>
+</div>
+</a>
+<!-- Cat 5 -->
+<a class="group p-6 rounded-2xl bg-[#FAFAFC] border border-[#E4E7EC] hover:border-[#14B8A6]/60 hover:bg-white hover:shadow-lg hover:shadow-[#14B8A6]/10 hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between" data-path="explorer" href="#">
+<div>
+<div class="flex items-center justify-between mb-4">
+<div class="w-12 h-12 rounded-xl bg-[#14B8A6]/10 text-[#14B8A6] flex items-center justify-center group-hover:bg-[#14B8A6] group-hover:text-white group-hover:scale-110 transition-all duration-300">
+<span class="material-symbols-outlined text-[26px]">fitness_center</span>
+</div>
+<span class="text-xs font-semibold text-[#0f766e] bg-[#14B8A6]/10 px-2 py-0.5 rounded-full group-hover:bg-[#0f766e] group-hover:text-white transition-colors duration-200">+145 cours</span>
+</div>
+<h3 class="text-base font-bold text-[#101828] mb-1.5 group-hover:text-[#0f766e] transition-colors">Activités, Événements &amp; Loisirs</h3>
+<p class="text-xs text-[#667085] leading-relaxed">Pilates, yoga, escalade, séances de musique et stages immersifs en petits groupes.</p>
+</div>
+<div class="pt-4 mt-4 border-t border-[#E4E7EC]/60 flex items-center justify-between text-xs font-semibold text-[#101828] group-hover:text-[#0f766e]">
+<span class="">Explorer la catégorie</span>
+<span class="material-symbols-outlined text-[16px] group-hover:translate-x-1.5 transition-transform duration-300">arrow_forward</span>
+</div>
+</a>
+<!-- Cat 6 -->
+<a class="group p-6 rounded-2xl bg-[#FAFAFC] border border-[#E4E7EC] hover:border-[#14B8A6]/60 hover:bg-white hover:shadow-lg hover:shadow-[#14B8A6]/10 hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between" data-path="explorer" href="#">
+<div>
+<div class="flex items-center justify-between mb-4">
+<div class="w-12 h-12 rounded-xl bg-[#14B8A6]/10 text-[#14B8A6] flex items-center justify-center group-hover:bg-[#14B8A6] group-hover:text-white group-hover:scale-110 transition-all duration-300">
+<span class="material-symbols-outlined text-[26px]">meeting_room</span>
+</div>
+<span class="text-xs font-semibold text-[#0f766e] bg-[#14B8A6]/10 px-2 py-0.5 rounded-full group-hover:bg-[#0f766e] group-hover:text-white transition-colors duration-200">+95 espaces</span>
+</div>
+<h3 class="text-base font-bold text-[#101828] mb-1.5 group-hover:text-[#0f766e] transition-colors">Espaces de coworking &amp; Salles privatisables</h3>
+<p class="text-xs text-[#667085] leading-relaxed">Bureaux à l'heure, studios de podcasts, salles de réunion équipées et lofts de tournage.</p>
+</div>
+<div class="pt-4 mt-4 border-t border-[#E4E7EC]/60 flex items-center justify-between text-xs font-semibold text-[#101828] group-hover:text-[#0f766e]">
+<span class="">Explorer la catégorie</span>
+<span class="material-symbols-outlined text-[16px] group-hover:translate-x-1.5 transition-transform duration-300">arrow_forward</span>
+</div>
+</a>
+</div>
+</div>
+</section>
+<!-- 4. COMMENT ÇA MARCHE SECTION (3 clear steps) -->
+<section class="reveal-on-scroll w-full bg-[#F2F4F7]/50 py-16 lg:py-24 border-b border-[#E4E7EC] is-visible">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="text-center max-w-2xl mx-auto mb-16">
+<span class="text-xs font-bold uppercase tracking-wider text-[#14B8A6] block mb-2">Simplicité &amp; Fluidité</span>
+<h2 class="text-3xl sm:text-4xl font-bold text-[#101828] tracking-tight">Comment ça marche ?</h2>
+<p class="text-sm sm:text-base text-[#475467] mt-2">Une prise de rendez-vous directe, limpide et sans échanges d'e-mails interminables.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+<!-- Step 1 -->
+<div class="bg-white rounded-2xl p-8 border border-[#E4E7EC] shadow-sm flex flex-col relative group hover:border-[#14B8A6] hover:-translate-y-1 hover:shadow-xl hover:shadow-[#14B8A6]/5 transition-all duration-300">
+<div class="flex items-center justify-between mb-6">
+<div class="w-12 h-12 rounded-xl bg-[#101828] text-white flex items-center justify-center text-lg font-bold group-hover:bg-[#0f766e] group-hover:scale-110 transition-all duration-300">
+              01
+            </div>
+<span class="material-symbols-outlined text-[#14B8A6] text-3xl group-hover:scale-110 transition-transform duration-300">travel_explore</span>
+</div>
+<h3 class="text-lg font-bold text-[#101828] mb-2 group-hover:text-[#0f766e] transition-colors">Trouvez un professionnel ou un service</h3>
+<p class="text-sm text-[#475467] leading-relaxed">
+            Recherche ciblée, filtres géolocalisés, vérification des spécialités et consultation d'avis certifiés de clients réels.
+          </p>
+<div class="mt-6 pt-4 border-t border-[#F2F4F7] flex items-center gap-2 text-xs font-medium text-[#14B8A6]">
+<span class="material-symbols-outlined text-[16px]">search_check</span>
+            Filtres par créneau &amp; distance
+          </div>
+</div>
+<!-- Step 2 -->
+<div class="bg-white rounded-2xl p-8 border border-[#E4E7EC] shadow-sm flex flex-col relative group hover:border-[#14B8A6] hover:-translate-y-1 hover:shadow-xl hover:shadow-[#14B8A6]/5 transition-all duration-300">
+<div class="flex items-center justify-between mb-6">
+<div class="w-12 h-12 rounded-xl bg-[#14B8A6] text-white flex items-center justify-center text-lg font-bold group-hover:bg-[#0f766e] group-hover:scale-110 transition-all duration-300">
+              02
+            </div>
+<span class="material-symbols-outlined text-[#14B8A6] text-3xl group-hover:scale-110 transition-transform duration-300">event_available</span>
+</div>
+<h3 class="text-lg font-bold text-[#101828] mb-2 group-hover:text-[#0f766e] transition-colors">Choisissez un créneau disponible</h3>
+<p class="text-sm text-[#475467] leading-relaxed">
+            Accédez directement à l'agenda synchronisé en temps réel (Google &amp; Apple Cal). Aucun risque de double réservation.
+          </p>
+<div class="mt-6 pt-4 border-t border-[#F2F4F7] flex items-center gap-2 text-xs font-medium text-[#14B8A6]">
+<span class="material-symbols-outlined text-[16px]">sync_alt</span>
+            Disponibilité instantanée garantie
+          </div>
+</div>
+<!-- Step 3 -->
+<div class="bg-white rounded-2xl p-8 border border-[#E4E7EC] shadow-sm flex flex-col relative group hover:border-[#14B8A6] hover:-translate-y-1 hover:shadow-xl hover:shadow-[#14B8A6]/5 transition-all duration-300">
+<div class="flex items-center justify-between mb-6">
+<div class="w-12 h-12 rounded-xl bg-[#101828] text-white flex items-center justify-center text-lg font-bold group-hover:bg-[#0f766e] group-hover:scale-110 transition-all duration-300">
+              03
+            </div>
+<span class="material-symbols-outlined text-[#14B8A6] text-3xl group-hover:scale-110 transition-transform duration-300">verified_user</span>
+</div>
+<h3 class="text-lg font-bold text-[#101828] mb-2 group-hover:text-[#0f766e] transition-colors">Confirmez et payez en toute sécurité</h3>
+<p class="text-sm text-[#475467] leading-relaxed">
+            Confirmation instantanée, règlement par acompte sécurisé Stripe ou sur place, avec rappels automatiques SMS et email.
+          </p>
+<div class="mt-6 pt-4 border-t border-[#F2F4F7] flex items-center gap-2 text-xs font-medium text-[#14B8A6]">
+<span class="material-symbols-outlined text-[16px]">lock_reset</span>
+            Annulation &amp; modification flexibles
+          </div>
+</div>
+</div>
+</div>
+</section>
+<!-- 5. BUSINESS À DÉCOUVRIR (Featured Businesses Showcase) -->
+<section class="reveal-on-scroll w-full bg-white py-16 lg:py-24 border-b border-[#E4E7EC] is-visible">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
+<div>
+<span class="text-xs font-bold uppercase tracking-wider text-[#14B8A6] block mb-1">Sélection recommandée</span>
+<h2 class="text-2xl sm:text-3xl font-bold text-[#101828] tracking-tight">Professionnels et lieux recommandés</h2>
+<p class="text-sm text-[#667085] mt-1">Les professionnels les mieux notés avec créneaux ouverts dès aujourd'hui.</p>
+</div>
+<a class="group text-sm font-semibold text-[#14B8A6] hover:text-[#0d9488] transition-colors inline-flex items-center gap-1.5 self-start md:self-auto" data-path="explorer" href="#">
+<span class="">Voir tous les professionnels</span>
+<span class="material-symbols-outlined text-[18px] group-hover:translate-x-1.5 transition-transform duration-200">arrow_forward</span>
+</a>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+<!-- Card 1 -->
+<div class="group rounded-2xl bg-white border border-[#E4E7EC] overflow-hidden flex flex-col hover:border-[#0f766e] hover:shadow-xl hover:shadow-[#0f766e]/10 hover:-translate-y-1 transition-all duration-300">
+<div class="h-44 w-full relative overflow-hidden bg-slate-100">
+<img alt="Studio Élan" class="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500 ease-out" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDtLlxa4vOSNATTZTNktw6mEr8uOj5OwkiiUO-fgHuPsBvd2WBaH47ERJjyUMDJVtMiDK7zbaFykBZy8x6crONXeGU-IJqoloRd8Be14XrJrbT1nXsPykks0GPS5_qNrt1NptWh86Bs-T0m8dXQOaeXhs7qoTuzRCfjPbFNoftM6sBN0DSDj3UZVYQqngJiJ1J_gewbcFkO-JV83OB_PuLSw3i2lcuvxwegaHfBnQ">
+<span class="absolute top-3 left-3 bg-[#101828]/80 backdrop-blur-md text-white text-[11px] font-semibold px-2 py-0.5 rounded-full">COIFFURE VÉGÉTALE</span>
+<span class="absolute top-3 right-3 bg-white/95 backdrop-blur-md text-[#101828] text-xs font-bold px-2 py-0.5 rounded-md flex items-center gap-1 shadow-sm"><span class="text-amber-500">★</span> 4.9</span>
+</div>
+<div class="p-5 flex flex-col flex-1 justify-between space-y-4">
+<div>
+<div class="flex items-center justify-between mb-1">
+<h3 class="text-base font-bold text-[#101828] group-hover:text-[#0f766e] transition-colors">Studio Élan</h3>
+<span class="text-xs font-bold text-[#0f766e]">Dès 35 000 FCFA</span>
+</div>
+<p class="text-xs text-[#667085] flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">location_on</span> Paris 10e • Sur place</p>
+<div class="mt-3 inline-flex items-center gap-1 px-2 py-1 rounded bg-emerald-50 text-emerald-700 text-[11px] font-medium border border-emerald-200/60 hover:bg-emerald-100/80 transition-colors cursor-pointer active:scale-95">
+<span class="material-symbols-outlined text-[13px]">schedule</span> Prochain créneau : Demain 14:00
+</div>
+</div>
+<div class="pt-3 border-t border-[#F2F4F7]">
+<button class="w-full py-2.5 rounded-lg bg-[#0f766e] hover:bg-[#115e59] hover:shadow-md hover:shadow-[#0f766e]/20 active:scale-98 text-white text-xs font-semibold transition-all duration-200 flex items-center justify-center gap-1.5 shadow-sm">
+<span class="">Voir profil &amp; réserver</span>
+<span class="material-symbols-outlined text-[14px] group-hover:translate-x-1 transition-transform duration-200">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="group rounded-2xl bg-white border border-[#E4E7EC] overflow-hidden flex flex-col hover:border-[#0f766e] hover:shadow-xl hover:shadow-[#0f766e]/10 hover:-translate-y-1 transition-all duration-300">
+<div class="h-44 w-full relative overflow-hidden bg-slate-100">
+<img alt="Dr. Sarah Martin" class="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500 ease-out" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB9cwdFDmkaQeuFcKFyycIqQlvcsyJtLtQlAip5UQQbOw2MnykjAe2J5cxDTWnM1lg9-6Ty_89sTVzl53K5DtxRv-Y-oOx7Aj4gKpjQ3no13wnZ-U3LUi2BheV7X-0_zDikkeqkuBzf7D10ZwI1jrWcMzRSdDx2X1-opKbxQ4yLUwkAwfLhp-Tp780wVEsLFgQqMte52CUO9wMZcs-Tt1o2h6AHiGQcScubindYlA">
+<span class="absolute top-3 left-3 bg-[#101828]/80 backdrop-blur-md text-white text-[11px] font-semibold px-2 py-0.5 rounded-full">NUTRITION &amp; SANTÉ</span>
+<span class="absolute top-3 right-3 bg-white/95 backdrop-blur-md text-[#101828] text-xs font-bold px-2 py-0.5 rounded-md flex items-center gap-1 shadow-sm"><span class="text-amber-500">★</span> 5.0</span>
+</div>
+<div class="p-5 flex flex-col flex-1 justify-between space-y-4">
+<div>
+<div class="flex items-center justify-between mb-1">
+<h3 class="text-base font-bold text-[#101828] group-hover:text-[#0f766e] transition-colors">Dr. Sarah Martin</h3>
+<span class="text-xs font-bold text-[#0f766e]">Dès 55 000 FCFA</span>
+</div>
+<p class="text-xs text-[#667085] flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">videocam</span> Lyon &amp; Téléconsultation</p>
+<div class="mt-3 inline-flex items-center gap-1 px-2 py-1 rounded bg-emerald-50 text-emerald-700 text-[11px] font-medium border border-emerald-200/60 hover:bg-emerald-100/80 transition-colors cursor-pointer active:scale-95">
+<span class="material-symbols-outlined text-[13px]">schedule</span> Prochain créneau : Aujourd'hui 16:30
+</div>
+</div>
+<div class="pt-3 border-t border-[#F2F4F7]">
+<button class="w-full py-2.5 rounded-lg bg-[#0f766e] hover:bg-[#115e59] hover:shadow-md hover:shadow-[#0f766e]/20 active:scale-98 text-white text-xs font-semibold transition-all duration-200 flex items-center justify-center gap-1.5 shadow-sm">
+<span class="">Voir profil &amp; réserver</span>
+<span class="material-symbols-outlined text-[14px] group-hover:translate-x-1 transition-transform duration-200">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="group rounded-2xl bg-white border border-[#E4E7EC] overflow-hidden flex flex-col hover:border-[#0f766e] hover:shadow-xl hover:shadow-[#0f766e]/10 hover:-translate-y-1 transition-all duration-300">
+<div class="h-44 w-full relative overflow-hidden bg-slate-100">
+<img alt="Atelier Kura" class="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500 ease-out" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAwrTfBzs_zguWdImfK0wm_Obqp_GL9e8SW-33FNFCTtyUVvkNqGpMtWx2CvOj6Cug148FFQH5PYbfL8XsCs84p9Ws8Cz65LDIYbt8knPX09fFGwcu0u0qfj6S5L1wWc_pBYwMNAZB_2kQVmSUTMLrV1UKZcJm7KZcygRqPESxYNW0fG0v0eZgcp_d4DuyZ1VO_8rFWGV0JLfGYhzciGhhD8hG7crqo6UryIu2bGQ">
+<span class="absolute top-3 left-3 bg-[#101828]/80 backdrop-blur-md text-white text-[11px] font-semibold px-2 py-0.5 rounded-full">GASTRONOMIE</span>
+<span class="absolute top-3 right-3 bg-white/95 backdrop-blur-md text-[#101828] text-xs font-bold px-2 py-0.5 rounded-md flex items-center gap-1 shadow-sm"><span class="text-amber-500">★</span> 4.9</span>
+</div>
+<div class="p-5 flex flex-col flex-1 justify-between space-y-4">
+<div>
+<div class="flex items-center justify-between mb-1">
+<h3 class="text-base font-bold text-[#101828] group-hover:text-[#0f766e] transition-colors">Atelier Kura</h3>
+<span class="text-xs font-bold text-[#0f766e]">Dès 45 000 FCFA</span>
+</div>
+<p class="text-xs text-[#667085] flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">location_on</span> Bordeaux Chartrons</p>
+<div class="mt-3 inline-flex items-center gap-1 px-2 py-1 rounded bg-emerald-50 text-emerald-700 text-[11px] font-medium border border-emerald-200/60 hover:bg-emerald-100/80 transition-colors cursor-pointer active:scale-95">
+<span class="material-symbols-outlined text-[13px]">schedule</span> Prochain créneau : Ce soir 20:00
+</div>
+</div>
+<div class="pt-3 border-t border-[#F2F4F7]">
+<button class="w-full py-2.5 rounded-lg bg-[#0f766e] hover:bg-[#115e59] hover:shadow-md hover:shadow-[#0f766e]/20 active:scale-98 text-white text-xs font-semibold transition-all duration-200 flex items-center justify-center gap-1.5 shadow-sm">
+<span class="">Voir profil &amp; réserver</span>
+<span class="material-symbols-outlined text-[14px] group-hover:translate-x-1 transition-transform duration-200">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="group rounded-2xl bg-white border border-[#E4E7EC] overflow-hidden flex flex-col hover:border-[#0f766e] hover:shadow-xl hover:shadow-[#0f766e]/10 hover:-translate-y-1 transition-all duration-300">
+<div class="h-44 w-full relative overflow-hidden bg-slate-100">
+<img alt="L'Espace Loft" class="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500 ease-out" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA1SPx6U4OXAwsGz7g687_4GAYwtYtEwEo9xhoKNPQU8w5c3iXY7JIHWl0hrtFImU57JUjTSal6at8zmFwDUZU1bUUXg1t_mrFpCBj0xcE89yrxIJ68QTIBoQaPLTVWqfKus9B-CW7XKG4hKSCPIbi7N0jVFmhajXhcVBsBGj6C3oHggeII-9ZLYGq6f-KE49A-SUjqw0mel3UB87lETlqaIXSHlQ5JIxwBSKq8LQ">
+<span class="absolute top-3 left-3 bg-[#101828]/80 backdrop-blur-md text-white text-[11px] font-semibold px-2 py-0.5 rounded-full">STUDIO DE CRÉATION</span>
+<span class="absolute top-3 right-3 bg-white/95 backdrop-blur-md text-[#101828] text-xs font-bold px-2 py-0.5 rounded-md flex items-center gap-1 shadow-sm"><span class="text-amber-500">★</span> 4.8</span>
+</div>
+<div class="p-5 flex flex-col flex-1 justify-between space-y-4">
+<div>
+<div class="flex items-center justify-between mb-1">
+<h3 class="text-base font-bold text-[#101828] group-hover:text-[#0f766e] transition-colors">L'Espace Loft</h3>
+<span class="text-xs font-bold text-[#0f766e]">Dès 40 000 FCFA/h</span>
+</div>
+<p class="text-xs text-[#667085] flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">location_on</span> Lille Centre • Équipé</p>
+<div class="mt-3 inline-flex items-center gap-1 px-2 py-1 rounded bg-emerald-50 text-emerald-700 text-[11px] font-medium border border-emerald-200/60 hover:bg-emerald-100/80 transition-colors cursor-pointer active:scale-95">
+<span class="material-symbols-outlined text-[13px]">schedule</span> Prochain créneau : Samedi 09:30
+</div>
+</div>
+<div class="pt-3 border-t border-[#F2F4F7]">
+<button class="w-full py-2.5 rounded-lg bg-[#0f766e] hover:bg-[#115e59] hover:shadow-md hover:shadow-[#0f766e]/20 active:scale-98 text-white text-xs font-semibold transition-all duration-200 flex items-center justify-center gap-1.5 shadow-sm">
+<span class="">Voir profil &amp; réserver</span>
+<span class="material-symbols-outlined text-[14px] group-hover:translate-x-1 transition-transform duration-200">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- 6. SECTION DÉDIÉE AUX PROFESSIONNELS (SaaS Pro Conversion) -->
+<section class="reveal-on-scroll w-full bg-[#101828] text-white py-16 lg:py-24 relative overflow-hidden is-visible">
+<div class="absolute -bottom-24 -left-24 w-96 h-96 bg-[#14B8A6]/20 rounded-full blur-3xl pointer-events-none"></div>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+<div class="lg:col-span-6 space-y-6">
+<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#0f766e]/20 text-[#14B8A6] text-xs font-bold tracking-wide border border-[#0f766e]/40 transition-colors hover:border-[#14B8A6]/60 cursor-default">
+<span class="relative flex h-2 w-2">
+<span class="radar-ring absolute inline-flex h-full w-full rounded-full bg-[#14B8A6]"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-[#14B8A6]"></span>
+</span>
+ESPACE PRATICIENS &amp; ÉTABLISSEMENTS
+</div>
+<h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white leading-tight">
+            Votre activité mérite un calendrier plus simple.
+          </h2>
+<p class="text-base text-white/70 max-w-lg leading-relaxed">
+            Centralisez vos rendez-vous, faites payer vos acomptes automatiquement et dites adieu aux créneaux non honorés grâce à notre moteur universel de réservation.
+          </p>
+<!-- Metrics/Stats pill -->
+<div class="grid grid-cols-3 gap-3 pt-2">
+<div class="p-3.5 rounded-xl bg-white/5 border border-white/10 hover:border-[#14B8A6]/40 hover:bg-white/[0.08] transition-all duration-300 text-center cursor-default group">
+<span class="text-xl sm:text-2xl font-black text-[#14B8A6] block group-hover:scale-105 transition-transform duration-200">98%</span>
+<span class="text-[11px] text-white/70">de no-shows évités</span>
+</div>
+<div class="p-3.5 rounded-xl bg-white/5 border border-white/10 hover:border-[#14B8A6]/40 hover:bg-white/[0.08] transition-all duration-300 text-center cursor-default group">
+<span class="text-xl sm:text-2xl font-black text-[#14B8A6] block group-hover:scale-105 transition-transform duration-200">15 min</span>
+<span class="text-[11px] text-white/70">de gestion par jour</span>
+</div>
+<div class="p-3.5 rounded-xl bg-white/5 border border-white/10 hover:border-[#14B8A6]/40 hover:bg-white/[0.08] transition-all duration-300 text-center cursor-default group">
+<span class="text-xl sm:text-2xl font-black text-[#14B8A6] block group-hover:scale-105 transition-transform duration-200">100%</span>
+<span class="text-[11px] text-white/70">sync bidirectionnelle</span>
+</div>
+</div>
+<!-- CTAs Pro -->
+<div class="flex flex-wrap items-center gap-4 pt-4">
+<a class="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-[#0f766e] text-white text-sm font-semibold hover:bg-[#115e59] hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[#0f766e]/30 active:translate-y-0 shadow-md transition-all duration-300 gap-2 group" data-path="inscription" href="#">
+<span class="">Gérer mon activité</span>
+<span class="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform duration-200">arrow_forward</span>
+</a>
+<a class="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-white/10 text-white text-sm font-semibold hover:bg-white/20 hover:-translate-y-0.5 transition-all duration-300 active:translate-y-0" data-path="pour-les-professionnels" href="#">
+              Découvrir l'offre Pro
+            </a>
+</div>
+</div>
+<!-- SaaS Advantages Cards -->
+<div class="lg:col-span-6 space-y-3.5">
+<div class="group p-4 rounded-xl bg-white/5 border border-white/10 flex items-start gap-4 hover:bg-white/10 hover:border-[#14B8A6]/40 hover:translate-x-1 transition-all duration-300 cursor-default">
+<div class="w-10 h-10 rounded-lg bg-[#14B8A6]/20 text-[#14B8A6] flex items-center justify-center shrink-0 group-hover:bg-[#14B8A6] group-hover:text-white transition-colors duration-200">
+<span class="material-symbols-outlined text-xl">calendar_month</span>
+</div>
+<div>
+<h4 class="text-sm font-bold text-white group-hover:text-[#14B8A6] transition-colors">Centralisation des réservations en ligne</h4>
+<p class="text-xs text-white/70 mt-0.5">Votre page vitrine dédiée, accessible sur smartphone ou ordinateur, sans obliger vos clients à télécharger une application.</p>
+</div>
+</div>
+<div class="group p-4 rounded-xl bg-white/5 border border-white/10 flex items-start gap-4 hover:bg-white/10 hover:border-[#14B8A6]/40 hover:translate-x-1 transition-all duration-300 cursor-default">
+<div class="w-10 h-10 rounded-lg bg-[#14B8A6]/20 text-[#14B8A6] flex items-center justify-center shrink-0 group-hover:bg-[#14B8A6] group-hover:text-white transition-colors duration-200">
+<span class="material-symbols-outlined text-xl">sync</span>
+</div>
+<div>
+<h4 class="text-sm font-bold text-white group-hover:text-[#14B8A6] transition-colors">Gestion automatisée des disponibilités &amp; synchronisation d'agendas</h4>
+<p class="text-xs text-white/70 mt-0.5">Connexion immédiate avec Google Calendar, Outlook, iCloud et Cal.com pour éviter tout conflit d'horaires.</p>
+</div>
+</div>
+<div class="group p-4 rounded-xl bg-white/5 border border-white/10 flex items-start gap-4 hover:bg-white/10 hover:border-[#14B8A6]/40 hover:translate-x-1 transition-all duration-300 cursor-default">
+<div class="w-10 h-10 rounded-lg bg-[#14B8A6]/20 text-[#14B8A6] flex items-center justify-center shrink-0 group-hover:bg-[#14B8A6] group-hover:text-white transition-colors duration-200">
+<span class="material-symbols-outlined text-xl">credit_card</span>
+</div>
+<div>
+<h4 class="text-sm font-bold text-white group-hover:text-[#14B8A6] transition-colors">Validation automatique ou manuelle avec préautorisation Stripe</h4>
+<p class="text-xs text-white/70 mt-0.5">Encaissez un acompte ou conservez une empreinte bancaire garantissant la présence de chaque client.</p>
+</div>
+</div>
+<div class="group p-4 rounded-xl bg-white/5 border border-white/10 flex items-start gap-4 hover:bg-white/10 hover:border-[#14B8A6]/40 hover:translate-x-1 transition-all duration-300 cursor-default">
+<div class="w-10 h-10 rounded-lg bg-[#14B8A6]/20 text-[#14B8A6] flex items-center justify-center shrink-0 group-hover:bg-[#14B8A6] group-hover:text-white transition-colors duration-200">
+<span class="material-symbols-outlined text-xl">notifications_active</span>
+</div>
+<div>
+<h4 class="text-sm font-bold text-white group-hover:text-[#14B8A6] transition-colors">Réduction des no-shows par rappels SMS &amp; email</h4>
+<p class="text-xs text-white/70 mt-0.5">Alertes automatiques personnalisées 24h et 2h avant le rendez-vous avec lien de reprogrammation simple.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- 7. REASSURANCE & SECURITY SECTION -->
+<section class="reveal-on-scroll w-full bg-[#FAFAFC] py-12 border-b border-[#E4E7EC] is-visible">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+<div class="flex items-center gap-3 p-2 rounded-xl hover:bg-white hover:shadow-sm transition-all duration-200 cursor-default">
+<div class="w-10 h-10 rounded-xl bg-[#14B8A6]/10 text-[#14B8A6] flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[22px]">payments</span>
+</div>
+<div>
+<h5 class="text-xs font-bold text-[#101828]">Paiements Stripe</h5>
+<p class="text-[11px] text-[#667085]">Chiffrement bancaire 256 bits</p>
+</div>
+</div>
+<div class="flex items-center gap-3 p-2 rounded-xl hover:bg-white hover:shadow-sm transition-all duration-200 cursor-default">
+<div class="w-10 h-10 rounded-xl bg-[#14B8A6]/10 text-[#14B8A6] flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[22px]">event_repeat</span>
+</div>
+<div>
+<h5 class="text-xs font-bold text-[#101828]">Annulation flexible</h5>
+<p class="text-[11px] text-[#667085]">Selon les conditions du pro</p>
+</div>
+</div>
+<div class="flex items-center gap-3 p-2 rounded-xl hover:bg-white hover:shadow-sm transition-all duration-200 cursor-default">
+<div class="w-10 h-10 rounded-xl bg-[#14B8A6]/10 text-[#14B8A6] flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[22px]">security</span>
+</div>
+<div>
+<h5 class="text-xs font-bold text-[#101828]">RGPD &amp; France</h5>
+<p class="text-[11px] text-[#667085]">Données hébergées en UE</p>
+</div>
+</div>
+<div class="flex items-center gap-3 p-2 rounded-xl hover:bg-white hover:shadow-sm transition-all duration-200 cursor-default">
+<div class="w-10 h-10 rounded-xl bg-[#14B8A6]/10 text-[#14B8A6] flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[22px]">support_agent</span>
+</div>
+<div>
+<h5 class="text-xs font-bold text-[#101828]">Support réactif</h5>
+<p class="text-[11px] text-[#667085]">Assistance dédiée 7j/7</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- 8. FOOTER -->
+<footer class="w-full bg-white border-t border-[#E4E7EC]">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
+<div class="grid grid-cols-1 md:grid-cols-5 gap-8 mb-12">
+<!-- Col Brand -->
+<div class="md:col-span-2 space-y-4 pr-6">
+<a class="flex items-center gap-2.5 group transition-transform duration-200 inline-flex" data-path="landing-page" href="#">
+<img alt="réserve.me" class="h-7 w-auto object-contain transition-transform duration-300 group-hover:scale-105" src="https://lh3.googleusercontent.com/aida/AEtjO1WPPLtUhvsB13o-lJicoUkySkEGX_Eo0wJWoWLhPk10ZCg2JbiEWHyjYBEYcRtACB7AsCpuz0kGWIkC_uUzTuG1omRXDI_YvbzrFxemGlXGNcV_kiSQKS-Xa0vjd5ZF3pqsFQ5eR920ycAXSFXX1Yhz-s9PBM8D-PmmIR1fPS3ukpbq5khCyTWcBu4hy7i5bG6IyDGEKuJNw8kAaeveMd0XjHHVeK7nqIlgf6DWRQ">
+<span class="text-lg font-bold text-[#101828]">réserve<span class="text-[#14B8A6]">.me</span></span>
+</a>
+<p class="text-xs text-[#667085] leading-relaxed max-w-sm">
+          Plateforme SaaS de réservation universelle et gestion opérationnelle pour professionnels indépendants, praticiens, cabinets et établissements d'exception.
+        </p>
+<div class="flex items-center gap-3 pt-2 text-[#667085]">
+<span class="text-xs font-medium">Suivez-nous sur les réseaux</span>
+</div>
+</div>
+<!-- Col Plateforme -->
+<div>
+<h4 class="text-xs font-bold text-[#101828] uppercase tracking-wider mb-4">Plateforme</h4>
+<ul class="space-y-2.5 text-xs text-[#475467]">
+<li class=""><a class="hover:text-[#0f766e] transition-colors inline-block hover:translate-x-0.5 duration-200" data-path="explorer" href="#">Explorer les services</a></li>
+<li class=""><a class="hover:text-[#0f766e] transition-colors inline-block hover:translate-x-0.5 duration-200" data-path="comment-ca-marche" href="#">Fonctionnalités clés</a></li>
+<li class=""><a class="hover:text-[#0f766e] transition-colors inline-block hover:translate-x-0.5 duration-200" data-path="pour-les-professionnels" href="#">Offre Professionnels</a></li>
+<li class=""><a class="hover:text-[#0f766e] transition-colors inline-block hover:translate-x-0.5 duration-200" href="#">Tarifs &amp; Commissions</a></li>
+</ul>
+</div>
+<!-- Col Ressources -->
+<div>
+<h4 class="text-xs font-bold text-[#101828] uppercase tracking-wider mb-4">Ressources</h4>
+<ul class="space-y-2.5 text-xs text-[#475467]">
+<li class=""><a class="hover:text-[#0f766e] transition-colors inline-block hover:translate-x-0.5 duration-200" href="#">Centre d'aide</a></li>
+<li class=""><a class="hover:text-[#0f766e] transition-colors inline-block hover:translate-x-0.5 duration-200" href="#">Documentation API</a></li>
+<li class=""><a class="hover:text-[#0f766e] transition-colors inline-block hover:translate-x-0.5 duration-200" href="#">Sécurité &amp; Conformité</a></li>
+<li class=""><a class="hover:text-[#0f766e] transition-colors inline-block hover:translate-x-0.5 duration-200" href="#">Statut des services</a></li>
+</ul>
+</div>
+<!-- Col Légal -->
+<div>
+<h4 class="text-xs font-bold text-[#101828] uppercase tracking-wider mb-4">Légal</h4>
+<ul class="space-y-2.5 text-xs text-[#475467]">
+<li class=""><a class="hover:text-[#0f766e] transition-colors inline-block hover:translate-x-0.5 duration-200" href="#">Conditions Générales</a></li>
+<li class=""><a class="hover:text-[#0f766e] transition-colors inline-block hover:translate-x-0.5 duration-200" href="#">Politique de Confidentialité</a></li>
+<li class=""><a class="hover:text-[#0f766e] transition-colors inline-block hover:translate-x-0.5 duration-200" href="#">Gestion des cookies</a></li>
+<li class=""><a class="hover:text-[#0f766e] transition-colors inline-block hover:translate-x-0.5 duration-200" href="#">Mentions légales</a></li>
+</ul>
+</div>
+</div>
+<!-- Bottom subfooter -->
+<div class="pt-8 border-t border-[#E4E7EC] flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#667085]">
+<div class="">
+        © 2025 réserve.me. Tous droits réservés.
+      </div>
+<div class="flex items-center gap-3">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px] text-[#14B8A6]">shield</span> Paiements sécurisés Stripe</span>
+<span class="">•</span>
+<span class="">RGPD conforme</span>
+<span class="">•</span>
+<span class="">Fait avec soin</span>
+</div>
+</div>
+</div>
+</footer>
+<!-- SCRIPTS: Interactive Hero Carousel, Slot Pills & Intersection Reveal -->
+<script>
+  (function() {
+    // 1. Hero Vertical Carousel
+    const slides = document.querySelectorAll('.vertical-slide');
+    const dots = document.querySelectorAll('.carousel-dot');
+    const prevBtn = document.getElementById('carousel-prev');
+    const nextBtn = document.getElementById('carousel-next');
+    const wrapper = document.getElementById('carousel-wrapper');
+    const labelEl = document.getElementById('slide-label');
+    const labels = [
+      "1 / 4 • Dr. Sarah Martin",
+      "2 / 4 • Studio Althéa",
+      "3 / 4 • Atelier Kura",
+      "4 / 4 • L'Espace Loft"
+    ];
+
+    let currentIndex = 0;
+    let timer = null;
+    let isTransitioning = false;
+
+    function transitionTo(nextIndex, direction = 'up') {
+      if (isTransitioning || nextIndex === currentIndex) return;
+      isTransitioning = true;
+
+      const currentSlide = slides[currentIndex];
+      const targetSlide = slides[nextIndex];
+
+      if (direction === 'up') {
+        targetSlide.classList.remove('is-active', 'is-exiting-up');
+        targetSlide.classList.add('is-hidden-down');
+      } else {
+        targetSlide.classList.remove('is-active', 'is-hidden-down');
+        targetSlide.classList.add('is-exiting-up');
+      }
+
+      void targetSlide.offsetWidth;
+
+      if (direction === 'up') {
+        currentSlide.classList.remove('is-active');
+        currentSlide.classList.add('is-exiting-up');
+        targetSlide.classList.remove('is-hidden-down');
+        targetSlide.classList.add('is-active');
+      } else {
+        currentSlide.classList.remove('is-active');
+        currentSlide.classList.add('is-hidden-down');
+        targetSlide.classList.remove('is-exiting-up');
+        targetSlide.classList.add('is-active');
+      }
+
+      currentIndex = nextIndex;
+
+      dots.forEach((dot, idx) => {
+        if (idx === currentIndex) {
+          dot.classList.remove('w-2', 'bg-[#D0D5DD]');
+          dot.classList.add('w-7', 'bg-[#0f766e]');
+        } else {
+          dot.classList.remove('w-7', 'bg-[#0f766e]');
+          dot.classList.add('w-2', 'bg-[#D0D5DD]');
+        }
+      });
+      if (labelEl && labels[currentIndex]) {
+        labelEl.textContent = labels[currentIndex];
+      }
+
+      setTimeout(() => {
+        isTransitioning = false;
+      }, 650);
+    }
+
+    function nextSlide() {
+      const nextIdx = (currentIndex + 1) % slides.length;
+      transitionTo(nextIdx, 'up');
+    }
+
+    function prevSlide() {
+      const prevIdx = (currentIndex - 1 + slides.length) % slides.length;
+      transitionTo(prevIdx, 'down');
+    }
+
+    function startTimer() {
+      stopTimer();
+      timer = setInterval(nextSlide, 4800);
+    }
+
+    function stopTimer() {
+      if (timer) clearInterval(timer);
+    }
+
+    if (nextBtn) nextBtn.addEventListener('click', () => { nextSlide(); startTimer(); });
+    if (prevBtn) prevBtn.addEventListener('click', () => { prevSlide(); startTimer(); });
+
+    dots.forEach((dot, idx) => {
+      dot.addEventListener('click', () => {
+        if (idx > currentIndex) {
+          transitionTo(idx, 'up');
+        } else if (idx < currentIndex) {
+          transitionTo(idx, 'down');
+        }
+        startTimer();
+      });
+    });
+
+    if (wrapper) {
+      wrapper.addEventListener('mouseenter', stopTimer);
+      wrapper.addEventListener('mouseleave', startTimer);
+    }
+
+    startTimer();
+
+    // 2. Interactive Time Slots Switcher within each card
+    document.querySelectorAll('.slot-grid').forEach(grid => {
+      const slots = grid.querySelectorAll('.slot-pill');
+      slots.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          slots.forEach(s => {
+            s.removeAttribute('data-slot');
+            s.className = 'slot-pill p-2.5 rounded-xl border border-[#E4E7EC] bg-white text-[#344054] hover:border-[#0f766e] hover:bg-[#FAFAFC] flex flex-col text-left active:scale-95';
+            const badge = s.querySelector('.badge-status');
+            const timeSpan = s.querySelector('.text-sm');
+            if (badge) {
+              badge.className = 'text-[10px] text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded font-medium badge-status';
+              badge.textContent = 'Libre';
+            }
+            if (timeSpan) {
+              timeSpan.className = 'text-sm font-bold text-[#101828]';
+            }
+            const sub = s.querySelector('.text-\\[11px\\]');
+            if (sub) {
+              sub.className = 'text-[11px] text-[#667085] mt-0.5';
+            }
+          });
+
+          this.setAttribute('data-slot', 'active');
+          this.className = 'slot-pill p-2.5 rounded-xl border border-[#0f766e] bg-[#0f766e] text-white flex flex-col text-left shadow-sm active:scale-95';
+          const activeBadge = this.querySelector('.badge-status');
+          const activeTime = this.querySelector('.text-sm');
+          if (activeBadge) {
+            activeBadge.className = 'text-[10px] font-semibold bg-white/20 text-white px-2 py-0.5 rounded badge-status';
+            activeBadge.textContent = 'Sélectionné';
+          }
+          if (activeTime) {
+            activeTime.className = 'text-sm font-bold text-white';
+          }
+          const activeSub = this.querySelector('.text-\\[11px\\]');
+          if (activeSub) {
+            activeSub.className = 'text-[11px] text-white/90 mt-0.5';
+          }
+        });
+      });
+    });
+
+    // 3. Scroll Reveal via IntersectionObserver
+    if ('IntersectionObserver' in window) {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, {
+        threshold: 0.1,
+        rootMargin: '0px 0px -40px 0px'
+      });
+
+      document.querySelectorAll('.reveal-on-scroll').forEach(section => {
+        observer.observe(section);
+      });
+    } else {
+      document.querySelectorAll('.reveal-on-scroll').forEach(section => {
+        section.classList.add('is-visible');
+      });
+    }
+  })();
+</script>
+
+
+</body></html>

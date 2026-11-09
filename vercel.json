@@ -1,0 +1,20 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/index"
+    },
+    {
+      "source": "/webhooks/(.*)",
+      "destination": "/api/index"
+    },
+    {
+      "source": "/subscription",
+      "destination": "/api/index"
+    },
+    {
+      "source": "/((?!api|webhooks|subscription).*)",
+      "destination": "/index.html"
+    }
+  ]
+}

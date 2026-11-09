@@ -1,0 +1,6 @@
+{
+  "name": "réserve.me",
+  "description": "Plateforme de réservation instantanée, gestion de calendrier et facturation pour professionnels et cabinets.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
