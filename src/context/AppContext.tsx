@@ -106,7 +106,7 @@ interface AppContextType {
   allUsersList: UserProfile[];
   webhookLogsList: WebhookLog[];
   canCreateService: () => boolean;
-  manuallySetUserPlan: (userId: string, plan: 'free' | 'pro') => Promise<void>;
+  manuallySetUserPlan: (userId: string, plan: 'free' | 'pro', targetUserEmail?: string) => Promise<void>;
   updateSubscriptionSettings: (settings: Partial<SubscriptionSettings>) => Promise<void>;
   simulateWebhookPayment: (email: string) => Promise<{ success: boolean; message: string }>;
   fetchWebhookLogs: () => Promise<void>;
@@ -1122,7 +1122,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return services.length < (subscriptionSettings.freeMaxServices || 1);
   };
 
-  const manuallySetUserPlan = async (targetUserId: string, plan: 'free' | 'pro') => {
+  const manuallySetUserPlan = async (targetUserId: string, plan: 'free' | 'pro', targetUserEmail?: string) => {
     try {
       const userDocRef = doc(db, 'users', targetUserId);
       const subscriptionStatus = plan === 'pro' ? 'active' : 'inactive';
@@ -1131,11 +1131,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         subscriptionStatus,
         updatedAt: new Date().toISOString()
       });
+
       if (firebaseUser && firebaseUser.uid === targetUserId) {
         setUserProfile(prev => prev ? { ...prev, plan, subscriptionStatus } : null);
         setUser(prev => prev ? { ...prev, plan, subscriptionStatus } : null);
       }
-      showToast(`Statut d'abonnement de l'utilisateur changé en ${plan.toUpperCase()}`);
+
+      // Also trigger backend server API to send automated notification email
+      const emailToNotify = targetUserEmail || (firebaseUser?.uid === targetUserId ? firebaseUser.email : undefined);
+      if (emailToNotify) {
+        fetch('/api/admin/users/update-plan', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: targetUserId, userEmail: emailToNotify, plan })
+        }).catch(err => console.warn('[AppContext Warning] Échec de notification serveur:', err));
+      }
+
+      showToast(`Statut d'abonnement changé en ${plan.toUpperCase()} (E-mail envoyé)`);
     } catch (error) {
       handleFirestoreError(error, OperationType.UPDATE, `users/${targetUserId}`);
     }

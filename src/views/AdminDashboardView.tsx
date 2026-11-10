@@ -1463,7 +1463,7 @@ export const AdminDashboardView: React.FC = () => {
                                       onClick={async () => {
                                         setUpdatingPlanUid(u.uid);
                                         try {
-                                          await manuallySetUserPlan(u.uid, 'free');
+                                          await manuallySetUserPlan(u.uid, 'free', u.email);
                                         } finally {
                                           setUpdatingPlanUid(null);
                                         }
@@ -1478,7 +1478,7 @@ export const AdminDashboardView: React.FC = () => {
                                       onClick={async () => {
                                         setUpdatingPlanUid(u.uid);
                                         try {
-                                          await manuallySetUserPlan(u.uid, 'pro');
+                                          await manuallySetUserPlan(u.uid, 'pro', u.email);
                                         } finally {
                                           setUpdatingPlanUid(null);
                                         }

@@ -353,6 +353,34 @@ export const initialEmailTemplates: EmailTemplate[] = [
     ),
     text: `Bonjour {{firstName}},\n\nFélicitations ! Votre abonnement au Plan Pro Reserve Me est désormais activé.\n\nVous bénéficiez de prestations illimitées, notifications e-mail et outils avancés.\n\nAccéder à votre compte : {{appUrl}}`
   },
+  {
+    id: 'C03',
+    code: 'PLAN_DOWNGRADED_FREE',
+    name: 'Expiration ou passage au Plan Gratuit (Free)',
+    category: 'Gestion des professionnels',
+    description: 'Envoyé automatiquement lorsque l\'abonnement Pro d\'un utilisateur expire ou est repassé au plan Free par un administrateur.',
+    availableVariables: ['firstName', 'fullName', 'email', 'appUrl'],
+    isActive: true,
+    createdAt: '2026-11-10T10:00:00Z',
+    updatedAt: new Date().toISOString(),
+    subject: 'Mise à jour de votre abonnement Reserve Me — Passage au Plan Gratuit',
+    html: wrapInBaseLayout(
+      'Information sur votre abonnement',
+      `<p>Bonjour {{firstName}},</p>
+      <p>Nous vous informons que votre abonnement au <strong>Plan Pro Reserve Me</strong> pour le compte (<strong>{{email}}</strong>) a pris fin ou a été réajusté vers le <strong>Plan Gratuit</strong>.</p>
+      <div style="background-color: #fef2f2; border: 1px solid #fecaca; border-radius: 12px; padding: 20px; margin: 20px 0; color: #991b1b;">
+        <h3 style="margin-top: 0; color: #7f1d1d; font-size: 16px;">ℹ️ Ce que cela signifie pour votre compte :</h3>
+        <ul style="margin: 0; padding-left: 20px; color: #991b1b; line-height: 1.8; font-size: 14px;">
+          <li>Vous conservez l'accès à votre espace professionnel et à vos données existantes.</li>
+          <li>Votre catalogue est réajusté à la limite du plan Gratuit.</li>
+          <li>Vous pouvez souscrire à nouveau à tout moment pour retrouver les prestations illimitées.</li>
+        </ul>
+      </div>
+      <p>Pour continuer de bénéficier des avantages Pro sans restriction, vous pouvez réactiver votre abonnement Pro depuis votre espace administrateur.</p>`,
+      `<a href="{{appUrl}}" style="display: inline-block; background-color: #006b5f; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 600; padding: 12px 28px; border-radius: 8px;">Réactiver mon Plan Pro</a>`
+    ),
+    text: `Bonjour {{firstName}},\n\nVotre abonnement Reserve Me pour le compte {{email}} est désormais sur le Plan Gratuit.\n\nVous pouvez réactiver votre Plan Pro à tout moment sur : {{appUrl}}`
+  },
 
   // --- CATÉGORIE D: SÉCURITÉ ET SYSTÈME ---
   {
@@ -406,6 +434,10 @@ export function getTemplateByCode(code: string): EmailTemplate | undefined {
     'PRO_WELCOME': 'PRO_WELCOME',
     'PRO_SUBSCRIPTION': 'PRO_SUBSCRIPTION',
     'SUBSCRIPTION_ACTIVATED': 'PRO_SUBSCRIPTION',
+    'PLAN_DOWNGRADED_FREE': 'PLAN_DOWNGRADED_FREE',
+    'PRO_EXPIRED': 'PLAN_DOWNGRADED_FREE',
+    'SUBSCRIPTION_EXPIRED': 'PLAN_DOWNGRADED_FREE',
+    'PLAN_FREE': 'PLAN_DOWNGRADED_FREE',
     'SECURITY_ALERT': 'SECURITY_ALERT'
   };
 

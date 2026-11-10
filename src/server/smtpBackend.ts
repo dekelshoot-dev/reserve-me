@@ -869,6 +869,56 @@ smtpRouter.post('/subscription/save', async (req: Request, res: Response) => {
   }
 });
 
+// 10b. POST /api/admin/users/update-plan - Manually set user plan and automatically dispatch notification email
+export async function handleUserPlanUpdate(req: Request, res: Response) {
+  try {
+    const { userId, userEmail, plan } = req.body;
+    if (!userEmail || !plan || !['pro', 'free'].includes(plan)) {
+      return res.status(400).json({ success: false, error: 'Champs userEmail et plan (pro ou free) requis.' });
+    }
+
+    const cleanEmail = String(userEmail).trim().toLowerCase();
+    const targetPlan = plan as 'pro' | 'free';
+
+    // 1. Update in Firestore collection /users
+    const updateResult = await updateUserPlanByEmailInFirestore(cleanEmail, targetPlan);
+
+    // 2. Fetch active settings
+    const dbSettings = await getSubscriptionSettingsFromFirestore();
+    const priceXOF = dbSettings.proPriceXOF || 1000;
+
+    // 3. Automatically trigger email notification
+    if (targetPlan === 'pro') {
+      triggerNotificationEmail('PRO_SUBSCRIPTION', cleanEmail, {
+        firstName: cleanEmail.split('@')[0],
+        fullName: cleanEmail.split('@')[0],
+        email: cleanEmail,
+        priceXOF: priceXOF.toLocaleString('fr-FR')
+      }).catch(e => console.error('[SMTP Notification Error] Échec d\'envoi de l\'email Pro:', e));
+    } else {
+      triggerNotificationEmail('PLAN_DOWNGRADED_FREE', cleanEmail, {
+        firstName: cleanEmail.split('@')[0],
+        fullName: cleanEmail.split('@')[0],
+        email: cleanEmail
+      }).catch(e => console.error('[SMTP Notification Error] Échec d\'envoi de l\'email Free:', e));
+    }
+
+    return res.json({
+      success: true,
+      message: `Plan de l'utilisateur ${cleanEmail} changé vers ${targetPlan.toUpperCase()} avec succès. E-mail de notification envoyé.`,
+      email: cleanEmail,
+      plan: targetPlan,
+      updatedCount: updateResult.count
+    });
+  } catch (err: any) {
+    console.error('Erreur lors de la mise à jour du plan utilisateur:', err);
+    return res.status(500).json({ success: false, error: err.message || 'Erreur interne' });
+  }
+}
+
+smtpRouter.post('/admin/users/update-plan', handleUserPlanUpdate);
+smtpRouter.post('/users/update-plan', handleUserPlanUpdate);
+
 // 11. GET /api/admin/webhooks/logs - Retrieve Webhook Logs
 smtpRouter.get('/webhooks/logs', (_req: Request, res: Response) => {
   return res.json({ success: true, logs: webhookLogs });
