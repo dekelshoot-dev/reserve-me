@@ -38,6 +38,68 @@ export const ProClientsView: React.FC = () => {
     openAiModalWithClient(selectedClient);
   };
 
+  const handleExportCSV = (targetClients = filteredClients) => {
+    if (!targetClients || targetClients.length === 0) {
+      showToast('Aucun client à exporter');
+      return;
+    }
+
+    const headers = [
+      'Code Client',
+      'Nom & Prénom',
+      'E-mail',
+      'Téléphone',
+      'Badge',
+      'Tags',
+      'Rendez-vous',
+      'Total Réglé (FCFA)',
+      'Date de Création',
+      'Prochain RDV',
+      'Notes Privées'
+    ];
+
+    const formatCell = (val: string | number) => {
+      const str = String(val ?? '');
+      if (/[";,\n\r]/.test(str)) {
+        return `"${str.replace(/"/g, '""')}"`;
+      }
+      return str;
+    };
+
+    const rows = targetClients.map(c => [
+      c.code || c.id || '',
+      c.name || '',
+      c.email || '',
+      c.phone || '',
+      c.badge || '',
+      (c.tags || []).join('; '),
+      c.totalAppointments ?? 0,
+      c.totalRevenueXOF ?? 0,
+      c.createdDate || '',
+      c.nextAppointmentDate || 'Aucun',
+      (c.notes || '').replace(/\r?\n/g, ' ')
+    ]);
+
+    const csvLines = [
+      headers.map(formatCell).join(';'),
+      ...rows.map(row => row.map(formatCell).join(';'))
+    ];
+
+    const csvContent = csvLines.join('\r\n');
+    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    const dateStr = new Date().toISOString().split('T')[0];
+    link.href = url;
+    link.setAttribute('download', `reserve-me-clients-${dateStr}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    showToast(`Export CSV téléchargé (${targetClients.length} client${targetClients.length > 1 ? 's' : ''})`);
+  };
+
   return (
     <div className="flex flex-col w-full gap-6 pb-12 animate-fadeIn">
       {/* Header Section */}
@@ -54,7 +116,15 @@ export const ProClientsView: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-3 self-start md:self-auto">
+        <div className="flex items-center gap-2.5 self-start md:self-auto flex-wrap">
+          <button
+            onClick={() => handleExportCSV(filteredClients)}
+            className="flex items-center gap-1.5 bg-[#14B8A6] hover:bg-[#0d9488] text-white px-4 py-2.5 rounded-xl font-semibold text-xs shadow-xs transition-all active:scale-95"
+            title="Exporter la liste actuelle des clients au format CSV"
+          >
+            <span className="material-symbols-outlined text-[18px]">file_download</span>
+            <span>Exporter CSV ({filteredClients.length})</span>
+          </button>
           <button
             onClick={() => showToast('Module d\'import CSV/vCard prêt')}
             className="flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-[#101828] px-4 py-2.5 rounded-xl font-semibold text-xs transition-colors"
