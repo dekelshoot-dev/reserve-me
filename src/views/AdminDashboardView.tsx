@@ -57,11 +57,81 @@ export const AdminDashboardView: React.FC = () => {
     subscriptionSettings.webhookProvider === 'maketou' || subscriptionSettings.webhookSecret === 'maketou' ? 'maketou' : 'custom'
   );
 
+  // Marketto Gateway & Payment Method State
+  const [editPaymentMethodType, setEditPaymentMethodType] = useState<'checkout_link' | 'integrated_gateway'>(
+    subscriptionSettings.paymentMethodType || 'checkout_link'
+  );
+  const [editActiveGateway, setEditActiveGateway] = useState<'marketto' | 'custom'>(
+    subscriptionSettings.activeGateway || 'marketto'
+  );
+  const [editMarkettoApiKey, setEditMarkettoApiKey] = useState<string>(
+    subscriptionSettings.markettoApiKey || ''
+  );
+  const [editMarkettoProductId, setEditMarkettoProductId] = useState<string>(
+    subscriptionSettings.markettoProductId || ''
+  );
+  const [editMarkettoEnabled, setEditMarkettoEnabled] = useState<boolean>(
+    subscriptionSettings.markettoEnabled ?? true
+  );
+
+  // Marketto Modal & Key Testing State
+  const [showMarkettoModal, setShowMarkettoModal] = useState<boolean>(false);
+  const [isTestingMarketoKey, setIsTestingMarketoKey] = useState<boolean>(false);
+  const [marketoTestResult, setMarketoTestResult] = useState<{ success: boolean; message: string } | null>(null);
+  const [showApiKeyText, setShowApiKeyText] = useState<boolean>(false);
+  const [isSavingMarkettoSettings, setIsSavingMarkettoSettings] = useState<boolean>(false);
+
   // Users & Webhooks State
   const [userSearchQuery, setUserSearchQuery] = useState<string>('');
   const [selectedWebhookLog, setSelectedWebhookLog] = useState<any | null>(null);
   const [simCustomerEmail, setSimCustomerEmail] = useState<string>(firebaseUser?.email || 'dekel@dekel-dev.com');
   const [isSimulating, setIsSimulating] = useState<boolean>(false);
+
+  // Synchronize Marketto states when subscriptionSettings updates from Firestore
+  useEffect(() => {
+    if (subscriptionSettings) {
+      if (subscriptionSettings.paymentMethodType) setEditPaymentMethodType(subscriptionSettings.paymentMethodType);
+      if (subscriptionSettings.activeGateway) setEditActiveGateway(subscriptionSettings.activeGateway);
+      if (subscriptionSettings.markettoApiKey !== undefined) setEditMarkettoApiKey(subscriptionSettings.markettoApiKey);
+      if (subscriptionSettings.markettoProductId !== undefined) setEditMarkettoProductId(subscriptionSettings.markettoProductId);
+      if (subscriptionSettings.markettoEnabled !== undefined) setEditMarkettoEnabled(subscriptionSettings.markettoEnabled);
+    }
+  }, [subscriptionSettings]);
+
+  const handleTestMarketoApiKeyAction = async () => {
+    if (!editMarkettoApiKey || !editMarkettoApiKey.trim()) {
+      showToast('Veuillez d\'abord saisir une clé API Marketto.');
+      setMarketoTestResult({ success: false, message: 'La clé API ne peut pas être vide.' });
+      return;
+    }
+    setIsTestingMarketoKey(true);
+    setMarketoTestResult(null);
+
+    try {
+      const res = await fetch('/api/admin/marketto/test-key', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          apiKey: editMarkettoApiKey,
+          productId: editMarkettoProductId
+        })
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setMarketoTestResult({ success: true, message: data.message });
+        showToast('Clé API Marketto testée et validée avec succès !');
+      } else {
+        setMarketoTestResult({ success: false, message: data.error || 'Clé API non reconnue ou invalide.' });
+        showToast(data.error || 'Échec du test de la clé API Marketto');
+      }
+    } catch (err) {
+      setMarketoTestResult({ success: false, message: 'Impossible de contacter la passerelle Marketto.' });
+      showToast('Erreur lors du test de la clé API Marketto');
+    } finally {
+      setIsTestingMarketoKey(false);
+    }
+  };
 
   // Form State
   const [senderName, setSenderName] = useState('Reserve Me');
@@ -1242,18 +1312,236 @@ export const AdminDashboardView: React.FC = () => {
             {activeTab === 'abonnements' && (
               <div className="flex flex-col gap-6">
                 <div>
-                  <h1 className="text-2xl font-bold text-[#111c2d] tracking-tight">Paramètres des Abonnements &amp; Tarifs</h1>
+                  <h1 className="text-2xl font-bold text-[#111c2d] tracking-tight">Paramètres des Abonnements &amp; Passerelles de Paiement</h1>
                   <p className="text-sm text-slate-500 mt-1">
-                    Gérez le prix du forfait Pro, l'URL du lien de checkout externe et la clé secrète Webhook.
+                    Définissez la méthode de paiement pour vos utilisateurs (lien externe ou intégration directe), configurez la passerelle Marketto et gérez les clés API.
                   </p>
                 </div>
 
+                {/* Mode de Paiement Principal des Utilisateurs */}
+                <div className="p-6 rounded-xl bg-white shadow-xs border border-slate-200/80 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h2 className="text-base font-bold text-[#111c2d] flex items-center gap-2">
+                        <span className="material-symbols-outlined text-[#006b5f]">account_balance_wallet</span>
+                        Méthode de Paiement pour les Abonnements Pro
+                      </h2>
+                      <p className="text-xs text-slate-500 mt-0.5">
+                        Choisissez comment les professionnels règlent leur abonnement Pro lors du checkout.
+                      </p>
+                    </div>
+                    <span className="px-2.5 py-1 rounded-full bg-teal-50 text-[#006b5f] text-xs font-mono font-bold border border-teal-200">
+                      {editPaymentMethodType === 'integrated_gateway' ? 'Passerelle Intégrée' : 'Lien Externe'}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Mode 1: Lien de checkout externe */}
+                    <div
+                      onClick={() => setEditPaymentMethodType('checkout_link')}
+                      className={`cursor-pointer p-4 rounded-xl border text-left flex items-start gap-3.5 transition-all ${
+                        editPaymentMethodType === 'checkout_link'
+                          ? 'border-[#006b5f] bg-emerald-50/70 ring-2 ring-[#006b5f]/20 shadow-xs'
+                          : 'border-slate-200 bg-slate-50 hover:bg-slate-100/80'
+                      }`}
+                    >
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                        editPaymentMethodType === 'checkout_link' ? 'bg-[#006b5f] text-white' : 'bg-slate-200 text-slate-600'
+                      }`}>
+                        <span className="material-symbols-outlined text-xl">open_in_new</span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-xs font-bold text-[#111c2d]">Lien de Checkout Externe</h3>
+                          {editPaymentMethodType === 'checkout_link' && (
+                            <span className="material-symbols-outlined text-emerald-700 text-lg">check_circle</span>
+                          )}
+                        </div>
+                        <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">
+                          Redirige l'utilisateur vers une page de paiement externe (URL Stripe, Chariow checkout, etc.).
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Mode 2: Passerelle d'Intégration Spécialisée (ex: Marketto) */}
+                    <div
+                      onClick={() => setEditPaymentMethodType('integrated_gateway')}
+                      className={`cursor-pointer p-4 rounded-xl border text-left flex items-start gap-3.5 transition-all ${
+                        editPaymentMethodType === 'integrated_gateway'
+                          ? 'border-[#006b5f] bg-emerald-50/70 ring-2 ring-[#006b5f]/20 shadow-xs'
+                          : 'border-slate-200 bg-slate-50 hover:bg-slate-100/80'
+                      }`}
+                    >
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                        editPaymentMethodType === 'integrated_gateway' ? 'bg-[#006b5f] text-white' : 'bg-slate-200 text-slate-600'
+                      }`}>
+                        <span className="material-symbols-outlined text-xl">hub</span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-xs font-bold text-[#111c2d]">Passerelle Spécialisée Intégrée</h3>
+                          {editPaymentMethodType === 'integrated_gateway' && (
+                            <span className="material-symbols-outlined text-emerald-700 text-lg">check_circle</span>
+                          )}
+                        </div>
+                        <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">
+                          Utilise une plateforme dédiée (ex. <strong>Marketto</strong>) via sa Clé API et son ID Produit.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* SECTION: PASSERELLES D'INTÉGRATION SPÉCIALISÉES */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h2 className="text-lg font-bold text-[#111c2d]">Passerelles d'Intégration Disponibles</h2>
+                      <p className="text-xs text-slate-500">Configurez les identifiants API des plateformes de paiement partenaires</p>
+                    </div>
+                    <span className="text-xs font-mono text-slate-400 font-semibold">1 INTÉGRATION DISPONIBLE</span>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                    {/* Carte 1: MARKETTO INTÉGRATION / PASSERELLE MARKETTO */}
+                    <div className="bg-white rounded-xl border border-slate-200/80 shadow-xs overflow-hidden flex flex-col justify-between hover:shadow-md transition-all">
+                      <div className="p-5 space-y-4">
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="w-11 h-11 rounded-xl bg-purple-600 text-white flex items-center justify-center shadow-md font-bold text-lg">
+                              M
+                            </div>
+                            <div>
+                              <h3 className="font-bold text-sm text-[#111c2d]">Passerelle Marketto</h3>
+                              <span className="text-[11px] text-slate-400 font-mono">Intégration v1.0 API</span>
+                            </div>
+                          </div>
+
+                          <div className="flex flex-col items-end gap-1">
+                            {editMarkettoApiKey ? (
+                              <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 border border-emerald-200">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+                                Configuré
+                              </span>
+                            ) : (
+                              <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 border border-amber-200">
+                                <span className="w-1.5 h-1.5 rounded-full bg-amber-600"></span>
+                                Non configuré
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        <p className="text-xs text-slate-600 leading-relaxed">
+                          Intégration directe des paiements avec Marketto. Permet d'associer la clé API et l'ID du produit d'abonnement.
+                        </p>
+
+                        <div className="bg-slate-50 p-3 rounded-lg border border-slate-100 space-y-1.5 text-xs font-mono">
+                          <div className="flex items-center justify-between">
+                            <span className="text-slate-400 text-[11px]">Clé API :</span>
+                            <span className="font-bold text-[#111c2d]">
+                              {editMarkettoApiKey 
+                                ? `${editMarkettoApiKey.substring(0, 4)}••••••••${editMarkettoApiKey.substring(editMarkettoApiKey.length - 3)}`
+                                : <em className="text-slate-400 font-normal">Non définie</em>}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-slate-400 text-[11px]">ID Produit :</span>
+                            <span className="font-bold text-[#111c2d] truncate max-w-[140px]">
+                              {editMarkettoProductId || <em className="text-slate-400 font-normal">Non défini</em>}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="p-4 bg-slate-50/70 border-t border-slate-100 flex items-center justify-between">
+                        <span className="text-[11px] text-slate-500 font-medium">
+                          {editPaymentMethodType === 'integrated_gateway' && editActiveGateway === 'marketto'
+                            ? '✓ Mode actif sélectionné'
+                            : 'Passerelle disponible'}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setMarketoTestResult(null);
+                            setShowMarkettoModal(true);
+                          }}
+                          className="px-3.5 py-1.5 rounded-lg bg-[#141b2c] hover:bg-slate-800 text-white text-xs font-semibold flex items-center gap-1.5 transition-all shadow-xs"
+                        >
+                          <span className="material-symbols-outlined text-base text-purple-300">tune</span>
+                          <span>Configurer</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Carte 2: FUTURE PASSERELLE CHARIOW / MOBILE MONEY (APERCU) */}
+                    <div className="bg-slate-50/60 rounded-xl border border-slate-200/60 p-5 space-y-4 opacity-75 relative overflow-hidden">
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="w-11 h-11 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-lg">
+                            C
+                          </div>
+                          <div>
+                            <h3 className="font-bold text-sm text-[#111c2d]">Passerelle Chariow</h3>
+                            <span className="text-[11px] text-slate-400 font-mono">Mobile Money &amp; Card</span>
+                          </div>
+                        </div>
+                        <span className="px-2 py-0.5 rounded-full bg-slate-200 text-slate-600 text-[10px] font-bold uppercase tracking-wider">
+                          Prochainement
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-500 leading-relaxed">
+                        Intégration directe pour encaisser les souscriptions via Mobile Money (Wave, Orange, MTN) et carte de crédit.
+                      </p>
+                      <div className="pt-2">
+                        <button
+                          type="button"
+                          disabled
+                          className="w-full py-2 bg-slate-200 text-slate-500 text-xs font-semibold rounded-lg cursor-not-allowed"
+                        >
+                          En cours de développement
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Carte 3: FUTURE PASSERELLE STRIPE DIRECT (APERCU) */}
+                    <div className="bg-slate-50/60 rounded-xl border border-slate-200/60 p-5 space-y-4 opacity-75 relative overflow-hidden">
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="w-11 h-11 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-lg">
+                            S
+                          </div>
+                          <div>
+                            <h3 className="font-bold text-sm text-[#111c2d]">Stripe Billing Direct</h3>
+                            <span className="text-[11px] text-slate-400 font-mono">Subscriptions API</span>
+                          </div>
+                        </div>
+                        <span className="px-2 py-0.5 rounded-full bg-slate-200 text-slate-600 text-[10px] font-bold uppercase tracking-wider">
+                          Prochainement
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-500 leading-relaxed">
+                        Gestion automatique des abonnements récurrents et factures automatiques directement dans Stripe.
+                      </p>
+                      <div className="pt-2">
+                        <button
+                          type="button"
+                          disabled
+                          className="w-full py-2 bg-slate-200 text-slate-500 text-xs font-semibold rounded-lg cursor-not-allowed"
+                        >
+                          En cours de développement
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Configuration Form Card */}
+                  {/* Configuration Form Card (Tarif & Webhook) */}
                   <div className="p-6 rounded-xl bg-white shadow-xs border border-slate-200/80 space-y-5">
                     <h3 className="font-bold text-base text-[#111c2d] flex items-center gap-2">
                       <span className="material-symbols-outlined text-[#006b5f]">tune</span>
-                      Paramètres du Forfait Pro
+                      Paramètres Généraux du Forfait Pro
                     </h3>
 
                     <div className="space-y-4">
@@ -1268,7 +1556,7 @@ export const AdminDashboardView: React.FC = () => {
                       </div>
 
                       <div className="flex flex-col gap-1.5">
-                        <label className="text-xs font-semibold text-[#111c2d]">Lien de Checkout Externe (Stripe / Plateforme Externe)</label>
+                        <label className="text-xs font-semibold text-[#111c2d]">Lien de Checkout Externe (URL pour mode Lien Externe)</label>
                         <input
                           type="url"
                           value={editCheckoutUrl}
@@ -1296,7 +1584,7 @@ export const AdminDashboardView: React.FC = () => {
                             <span className="material-symbols-outlined text-[#006b5f] text-xl mt-0.5">verified_user</span>
                             <div>
                               <p className="text-xs font-bold text-[#111c2d]">Plateforme Marketo / Maketou</p>
-                              <p className="text-[11px] text-slate-500 mt-0.5">Validation automatique Ed25519 via X-Cart-Signature (sans clé secrète manuelle)</p>
+                              <p className="text-[11px] text-slate-500 mt-0.5">Validation Ed25519 automatique via X-Cart-Signature</p>
                             </div>
                           </button>
 
@@ -1329,7 +1617,7 @@ export const AdminDashboardView: React.FC = () => {
                           <div>
                             <p className="font-bold">Mode Marketo / Maketou Sélectionné</p>
                             <p className="text-[11px] text-emerald-800 mt-0.5 leading-relaxed">
-                              La vérification de signature est effectuée automatiquement via la Clé Publique Ed25519 transmise dans l'en-tête <code className="font-mono bg-emerald-100/80 px-1 rounded">X-Cart-Signature</code>. Aucune clé secrète manuelle n'est requise.
+                              La vérification de signature est effectuée automatiquement via la Clé Publique Ed25519 transmise dans l'en-tête <code className="font-mono bg-emerald-100/80 px-1 rounded">X-Cart-Signature</code>.
                             </p>
                           </div>
                         </div>
@@ -1369,7 +1657,12 @@ export const AdminDashboardView: React.FC = () => {
                                 proPriceXOF: editProPrice,
                                 checkoutUrl: editCheckoutUrl,
                                 webhookSecret: editWebhookProvider === 'maketou' ? 'maketou' : editWebhookSecret,
-                                webhookProvider: editWebhookProvider
+                                webhookProvider: editWebhookProvider,
+                                paymentMethodType: editPaymentMethodType,
+                                activeGateway: editActiveGateway,
+                                markettoApiKey: editMarkettoApiKey,
+                                markettoProductId: editMarkettoProductId,
+                                markettoEnabled: editMarkettoEnabled
                               });
                             } catch (e) {
                               showToast('Erreur lors de la sauvegarde des paramètres');
@@ -1786,6 +2079,194 @@ export const AdminDashboardView: React.FC = () => {
                 className="px-4 py-2 rounded-lg bg-[#141b2c] text-white text-xs font-semibold hover:bg-slate-800 transition-colors"
               >
                 Fermer l'aperçu
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Configuration Passerelle Marketto */}
+      {showMarkettoModal && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-fadeIn">
+          <div className="bg-white rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden border border-slate-100 flex flex-col">
+            {/* Modal Header */}
+            <div className="px-6 py-4 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-purple-600 text-white flex items-center justify-center font-bold text-lg shadow-xs">
+                  M
+                </div>
+                <div>
+                  <h3 className="font-bold text-base text-[#111c2d]">Passerelle Marketto</h3>
+                  <p className="text-xs text-slate-500">Configuration de l'intégration et des paramètres API</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowMarkettoModal(false)}
+                className="p-1.5 text-slate-400 hover:text-[#111c2d] rounded-lg hover:bg-slate-200/60 transition-colors"
+              >
+                <span className="material-symbols-outlined text-[20px]">close</span>
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 space-y-5">
+              {/* Activation Switch */}
+              <div className="p-4 rounded-xl bg-purple-50/60 border border-purple-100 flex items-center justify-between">
+                <div>
+                  <h4 className="text-xs font-bold text-purple-950">Activer la passerelle Marketto</h4>
+                  <p className="text-[11px] text-purple-800 mt-0.5">Autoriser cette passerelle pour les paiements d'abonnement</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setEditMarkettoEnabled(!editMarkettoEnabled)}
+                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                    editMarkettoEnabled ? 'bg-purple-600' : 'bg-slate-300'
+                  }`}
+                >
+                  <span
+                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                      editMarkettoEnabled ? 'translate-x-5' : 'translate-x-0'
+                    }`}
+                  />
+                </button>
+              </div>
+
+              {/* Field 1: Clé API (API Key) */}
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-[#111c2d] flex items-center justify-between">
+                  <span>Clé API Marketto</span>
+                  <span className="text-[11px] font-mono text-purple-700 font-bold">Requis</span>
+                </label>
+                <p className="text-[11px] text-slate-500">
+                  Clé d'authentification API fournie par la plateforme Marketto.
+                </p>
+
+                <div className="flex items-center gap-2">
+                  <div className="relative flex-1">
+                    <input
+                      type={showApiKeyText ? 'text' : 'password'}
+                      value={editMarkettoApiKey}
+                      onChange={(e) => {
+                        setEditMarkettoApiKey(e.target.value);
+                        setMarketoTestResult(null);
+                      }}
+                      placeholder="mkt_live_9f83a0429bf..."
+                      className="w-full h-10 pl-3 pr-10 rounded-lg bg-slate-50 text-xs font-mono text-[#111c2d] border border-slate-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-600"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowApiKeyText(!showApiKeyText)}
+                      className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600"
+                      title={showApiKeyText ? 'Masquer' : 'Afficher'}
+                    >
+                      <span className="material-symbols-outlined text-[18px]">
+                        {showApiKeyText ? 'visibility_off' : 'visibility'}
+                      </span>
+                    </button>
+                  </div>
+
+                  {/* Button: Tester la clé API */}
+                  <button
+                    type="button"
+                    disabled={isTestingMarketoKey || !editMarkettoApiKey}
+                    onClick={handleTestMarketoApiKeyAction}
+                    className="h-10 px-4 rounded-lg bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white text-xs font-semibold flex items-center gap-1.5 shrink-0 transition-all shadow-xs"
+                  >
+                    {isTestingMarketoKey ? (
+                      <>
+                        <span className="material-symbols-outlined text-base animate-spin">progress_activity</span>
+                        <span>Vérification...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="material-symbols-outlined text-base">verified</span>
+                        <span>Tester la clé API</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                {/* API Test Feedback Banner */}
+                {marketoTestResult && (
+                  <div className={`p-3 rounded-lg text-xs flex items-start gap-2.5 transition-all ${
+                    marketoTestResult.success
+                      ? 'bg-emerald-50 border border-emerald-200 text-emerald-900'
+                      : 'bg-rose-50 border border-rose-200 text-rose-900'
+                  }`}>
+                    <span className="material-symbols-outlined text-lg shrink-0 mt-0.5">
+                      {marketoTestResult.success ? 'check_circle' : 'error'}
+                    </span>
+                    <p className="leading-relaxed">{marketoTestResult.message}</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Field 2: ID du produit (Product ID) */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-[#111c2d] flex items-center justify-between">
+                  <span>ID du produit Marketto</span>
+                  <span className="text-[11px] font-mono text-slate-400 font-normal">Identifiant Produit</span>
+                </label>
+                <p className="text-[11px] text-slate-500">
+                  Identifiant UUID du produit d'abonnement configuré sur Marketto (ex: <code className="font-mono bg-slate-100 px-1 rounded">550e8400-e29b-41d4-a716-446655440000</code>).
+                </p>
+                <input
+                  type="text"
+                  value={editMarkettoProductId}
+                  onChange={(e) => setEditMarkettoProductId(e.target.value)}
+                  placeholder="550e8400-e29b-41d4-a716-446655440000"
+                  className="w-full h-10 px-3 rounded-lg bg-slate-50 text-xs font-mono text-[#111c2d] border border-slate-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-600"
+                />
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="px-6 py-4 border-t border-slate-100 bg-slate-50 flex items-center justify-between">
+              <button
+                type="button"
+                onClick={() => setShowMarkettoModal(false)}
+                className="px-4 py-2 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-semibold transition-colors"
+              >
+                Annuler
+              </button>
+
+              <button
+                type="button"
+                disabled={isSavingMarkettoSettings}
+                onClick={async () => {
+                  setIsSavingMarkettoSettings(true);
+                  try {
+                    await updateSubscriptionSettings({
+                      markettoApiKey: editMarkettoApiKey,
+                      markettoProductId: editMarkettoProductId,
+                      markettoEnabled: editMarkettoEnabled,
+                      paymentMethodType: 'integrated_gateway',
+                      activeGateway: 'marketto'
+                    });
+                    setEditPaymentMethodType('integrated_gateway');
+                    setEditActiveGateway('marketto');
+                    showToast('Configuration de la passerelle Marketto enregistrée !');
+                    setShowMarkettoModal(false);
+                  } catch (err) {
+                    showToast('Erreur lors de l\'enregistrement de la passerelle');
+                  } finally {
+                    setIsSavingMarkettoSettings(false);
+                  }
+                }}
+                className="px-5 py-2 rounded-lg bg-[#141b2c] hover:bg-slate-800 disabled:opacity-50 text-white text-xs font-semibold flex items-center gap-2 shadow-sm transition-all"
+              >
+                {isSavingMarkettoSettings ? (
+                  <>
+                    <span className="material-symbols-outlined text-base animate-spin">progress_activity</span>
+                    <span>Enregistrement...</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="material-symbols-outlined text-base">save</span>
+                    <span>Enregistrer la configuration</span>
+                  </>
+                )}
               </button>
             </div>
           </div>

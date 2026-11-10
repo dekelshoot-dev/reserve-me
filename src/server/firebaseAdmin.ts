@@ -111,6 +111,11 @@ export async function getSubscriptionSettingsFromFirestore(): Promise<{
   checkoutUrl: string;
   webhookSecret: string;
   webhookProvider?: 'custom' | 'maketou' | 'chariow';
+  paymentMethodType?: 'checkout_link' | 'integrated_gateway';
+  activeGateway?: 'marketto' | 'custom';
+  markettoApiKey?: string;
+  markettoProductId?: string;
+  markettoEnabled?: boolean;
   freeMaxServices: number;
   proMaxServices: number;
 }> {
@@ -119,6 +124,11 @@ export async function getSubscriptionSettingsFromFirestore(): Promise<{
     checkoutUrl: 'https://pay.reserve-me.io/checkout/pro',
     webhookSecret: 'whsec_wWyannB9BkCXJhSxk1D5FbqxoM1IWpHvvLhIphNR',
     webhookProvider: 'custom' as 'custom' | 'maketou' | 'chariow',
+    paymentMethodType: 'checkout_link' as 'checkout_link' | 'integrated_gateway',
+    activeGateway: 'marketto' as 'marketto' | 'custom',
+    markettoApiKey: '',
+    markettoProductId: '',
+    markettoEnabled: false,
     freeMaxServices: 1,
     proMaxServices: 999
   };
@@ -134,6 +144,11 @@ export async function getSubscriptionSettingsFromFirestore(): Promise<{
           checkoutUrl: String(data.checkoutUrl || defaultSettings.checkoutUrl),
           webhookSecret: String(data.webhookSecret || defaultSettings.webhookSecret),
           webhookProvider: (data.webhookProvider as any) || defaultSettings.webhookProvider,
+          paymentMethodType: (data.paymentMethodType as any) || defaultSettings.paymentMethodType,
+          activeGateway: (data.activeGateway as any) || defaultSettings.activeGateway,
+          markettoApiKey: String(data.markettoApiKey || ''),
+          markettoProductId: String(data.markettoProductId || ''),
+          markettoEnabled: Boolean(data.markettoEnabled),
           freeMaxServices: Number(data.freeMaxServices) || defaultSettings.freeMaxServices,
           proMaxServices: Number(data.proMaxServices) || defaultSettings.proMaxServices
         };
@@ -152,6 +167,11 @@ export async function getSubscriptionSettingsFromFirestore(): Promise<{
           checkoutUrl: fields.checkoutUrl?.stringValue || defaultSettings.checkoutUrl,
           webhookSecret: fields.webhookSecret?.stringValue || defaultSettings.webhookSecret,
           webhookProvider: (fields.webhookProvider?.stringValue as any) || defaultSettings.webhookProvider,
+          paymentMethodType: (fields.paymentMethodType?.stringValue as any) || defaultSettings.paymentMethodType,
+          activeGateway: (fields.activeGateway?.stringValue as any) || defaultSettings.activeGateway,
+          markettoApiKey: fields.markettoApiKey?.stringValue || '',
+          markettoProductId: fields.markettoProductId?.stringValue || '',
+          markettoEnabled: fields.markettoEnabled?.booleanValue || false,
           freeMaxServices: fields.freeMaxServices?.integerValue ? parseInt(fields.freeMaxServices.integerValue, 10) : defaultSettings.freeMaxServices,
           proMaxServices: fields.proMaxServices?.integerValue ? parseInt(fields.proMaxServices.integerValue, 10) : defaultSettings.proMaxServices
         };
@@ -172,6 +192,11 @@ export async function saveSubscriptionSettingsToFirestore(settings: {
   checkoutUrl?: string;
   webhookSecret?: string;
   webhookProvider?: 'custom' | 'maketou' | 'chariow';
+  paymentMethodType?: 'checkout_link' | 'integrated_gateway';
+  activeGateway?: 'marketto' | 'custom';
+  markettoApiKey?: string;
+  markettoProductId?: string;
+  markettoEnabled?: boolean;
   freeMaxServices?: number;
   proMaxServices?: number;
 }): Promise<boolean> {

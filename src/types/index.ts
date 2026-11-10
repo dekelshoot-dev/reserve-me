@@ -54,6 +54,11 @@ export interface SubscriptionSettings {
   checkoutUrl: string;
   webhookSecret: string;
   webhookProvider?: 'custom' | 'maketou' | 'chariow';
+  paymentMethodType?: 'checkout_link' | 'integrated_gateway';
+  activeGateway?: 'marketto' | 'custom';
+  markettoApiKey?: string;
+  markettoProductId?: string;
+  markettoEnabled?: boolean;
   freeMaxServices: number;
   proMaxServices: number;
   updatedAt?: string;
