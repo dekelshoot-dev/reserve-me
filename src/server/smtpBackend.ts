@@ -65,6 +65,103 @@ function timingSafeEqual(a: string, b: string): boolean {
 }
 
 /**
+ * Maketou / Marketo Canonical JSON Serializer
+ * Orders object keys alphabetically, filters out undefined values, removes all whitespace
+ */
+export function canonicalJson(value: any): string {
+  if (value === null || typeof value !== 'object') {
+    return JSON.stringify(value);
+  }
+
+  if (Array.isArray(value)) {
+    return `[${value.map(canonicalJson).join(',')}]`;
+  }
+
+  const entries = Object.entries(value)
+    .filter(([, entryValue]) => entryValue !== undefined)
+    .sort(([left], [right]) => left.localeCompare(right));
+
+  return `{${entries
+    .map(([key, entryValue]) => `${JSON.stringify(key)}:${canonicalJson(entryValue)}`)
+    .join(',')}}`;
+}
+
+let cachedMaketouKey: string | null = null;
+let lastKeyFetchTime = 0;
+
+/**
+ * Retrieves Maketou Ed25519 Public Key from official endpoint or cache
+ */
+export async function getMaketouPublicKey(): Promise<string> {
+  const now = Date.now();
+  if (cachedMaketouKey && (now - lastKeyFetchTime < 3600000)) {
+    return cachedMaketouKey;
+  }
+  try {
+    const res = await fetch('https://api.maketou.net/api/v1/stores/cart/webhook-signing-key', {
+      headers: { 'Accept': 'application/json' },
+      signal: AbortSignal.timeout(5000)
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data && typeof data.publicKey === 'string') {
+        cachedMaketouKey = data.publicKey;
+        lastKeyFetchTime = now;
+        return data.publicKey;
+      }
+    }
+  } catch (err) {
+    console.warn('[Maketou Key Fetch Warning] Impossible de contacter api.maketou.net:', err);
+  }
+  return cachedMaketouKey || process.env.MAKETOU_PUBLIC_KEY || '';
+}
+
+/**
+ * Verifies Maketou X-Cart-Signature (Ed25519)
+ */
+export function verifyMaketouSignature(
+  body: any,
+  signatureHeader: string,
+  publicKeyPem: string
+): { isValid: boolean; reason?: string } {
+  if (!signatureHeader || !publicKeyPem) {
+    return { isValid: false, reason: 'Header X-Cart-Signature ou clé publique Ed25519 manquante' };
+  }
+
+  const timestampMatch = signatureHeader.match(/t=(\d+)/);
+  const signatureMatch = signatureHeader.match(/v1=([^,]+)/);
+
+  const timestamp = timestampMatch ? timestampMatch[1] : null;
+  const signature = signatureMatch ? signatureMatch[1] : null;
+
+  if (!timestamp || !signature) {
+    return { isValid: false, reason: 'Timestamp (t=) ou signature (v1=) absent de X-Cart-Signature' };
+  }
+
+  const ageInSeconds = Math.floor(Date.now() / 1000) - Number(timestamp);
+  if (Math.abs(ageInSeconds) > 300) {
+    return { isValid: false, reason: `Timestamp du webhook Maketou expiré (${ageInSeconds}s, max 300s)` };
+  }
+
+  try {
+    const canonicalPayload = canonicalJson(body);
+    const signedString = `${timestamp}.${canonicalPayload}`;
+    const publicKey = crypto.createPublicKey(publicKeyPem);
+
+    const isValid = crypto.verify(
+      null,
+      Buffer.from(signedString),
+      publicKey,
+      Buffer.from(signature, 'base64')
+    );
+
+    return { isValid, reason: isValid ? undefined : 'Échec de vérification de signature Ed25519 Maketou' };
+  } catch (err: any) {
+    return { isValid: false, reason: `Erreur Ed25519: ${err.message}` };
+  }
+}
+
+/**
  * Robust Chariot / Gateway Webhook Secret & HMAC Signature Verification Helper
  */
 export function checkWebhookSignature(
@@ -220,6 +317,38 @@ export function checkWebhookSignature(
   }
 
   return { isValid: false, method: 'verification_failed', candidates };
+}
+
+/**
+ * Async Webhook Verification Engine supporting Maketou (Ed25519), Chariow (HMAC-SHA256) and Custom Secrets
+ */
+export async function checkWebhookSignatureAsync(
+  req: Request,
+  configuredSecret: string,
+  webhookProvider?: string,
+  testPublicKeyPem?: string
+): Promise<{ isValid: boolean; method: string; candidates: string[]; reason?: string }> {
+  const cartSigHeader = (req.headers['x-cart-signature'] || req.headers['cart-signature'] || req.headers['x-maketou-signature']) as string | undefined;
+
+  // 1. Maketou / Marketo Ed25519 signature mode
+  if (cartSigHeader || webhookProvider === 'maketou' || configuredSecret === 'maketou') {
+    if (cartSigHeader) {
+      const pubKeyPem = testPublicKeyPem || await getMaketouPublicKey();
+      if (pubKeyPem) {
+        const maketouRes = verifyMaketouSignature(req.body, cartSigHeader, pubKeyPem);
+        if (maketouRes.isValid) {
+          return { isValid: true, method: 'maketou_ed25519', candidates: [cartSigHeader] };
+        } else {
+          console.warn('[Maketou Verification Notice]:', maketouRes.reason);
+        }
+      } else {
+        console.warn('[Maketou Verification Notice] Clé publique Ed25519 introuvable.');
+      }
+    }
+  }
+
+  // 2. Chariow HMAC / Custom Secret Key mode
+  return checkWebhookSignature(req, configuredSecret);
 }
 
 export interface SmtpConfig {

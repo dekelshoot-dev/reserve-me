@@ -52,7 +52,10 @@ export const AdminDashboardView: React.FC = () => {
   // Subscription Edit Form State
   const [editProPrice, setEditProPrice] = useState<number>(subscriptionSettings.proPriceXOF || 1000);
   const [editCheckoutUrl, setEditCheckoutUrl] = useState<string>(subscriptionSettings.checkoutUrl || 'https://pay.reserve-me.io/checkout/pro');
-  const [editWebhookSecret, setEditWebhookSecret] = useState<string>(subscriptionSettings.webhookSecret || 'reserve_me_whsec_secret_2026_pro');
+  const [editWebhookSecret, setEditWebhookSecret] = useState<string>(subscriptionSettings.webhookSecret || 'whsec_wWyannB9BkCXJhSxk1D5FbqxoM1IWpHvvLhIphNR');
+  const [editWebhookProvider, setEditWebhookProvider] = useState<'custom' | 'maketou'>(
+    subscriptionSettings.webhookProvider === 'maketou' || subscriptionSettings.webhookSecret === 'maketou' ? 'maketou' : 'custom'
+  );
 
   // Users & Webhooks State
   const [userSearchQuery, setUserSearchQuery] = useState<string>('');
@@ -1275,28 +1278,85 @@ export const AdminDashboardView: React.FC = () => {
                         />
                       </div>
 
-                      <div className="flex flex-col gap-1.5">
-                        <label className="text-xs font-semibold text-[#111c2d]">Clé Secrète du Webhook (Signature Verification)</label>
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="text"
-                            value={editWebhookSecret}
-                            onChange={(e) => setEditWebhookSecret(e.target.value)}
-                            className="flex-1 h-10 px-3 rounded-lg bg-slate-50 text-[#111c2d] text-xs font-mono border border-slate-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#006b5f]/20 focus:border-[#006b5f]"
-                          />
+                      <div className="flex flex-col gap-2 pt-2 border-t border-slate-100">
+                        <label className="text-xs font-semibold text-[#111c2d]">Mode de Sécurité &amp; Validation du Webhook</label>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           <button
                             type="button"
                             onClick={() => {
-                              navigator.clipboard.writeText(editWebhookSecret);
-                              showToast('Secret Webhook copié !');
+                              setEditWebhookProvider('maketou');
+                              setEditWebhookSecret('maketou');
                             }}
-                            className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-xs font-semibold text-slate-700 rounded-lg flex items-center gap-1 shrink-0"
+                            className={`p-3 rounded-xl border text-left flex items-start gap-3 transition-all ${
+                              editWebhookProvider === 'maketou'
+                                ? 'border-[#006b5f] bg-emerald-50/70 ring-2 ring-[#006b5f]/20'
+                                : 'border-slate-200 bg-slate-50 hover:bg-slate-100'
+                            }`}
                           >
-                            <span className="material-symbols-outlined text-base">content_copy</span>
-                            <span>Copier</span>
+                            <span className="material-symbols-outlined text-[#006b5f] text-xl mt-0.5">verified_user</span>
+                            <div>
+                              <p className="text-xs font-bold text-[#111c2d]">Plateforme Marketo / Maketou</p>
+                              <p className="text-[11px] text-slate-500 mt-0.5">Validation automatique Ed25519 via X-Cart-Signature (sans clé secrète manuelle)</p>
+                            </div>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditWebhookProvider('custom');
+                              if (editWebhookSecret === 'maketou') {
+                                setEditWebhookSecret('whsec_wWyannB9BkCXJhSxk1D5FbqxoM1IWpHvvLhIphNR');
+                              }
+                            }}
+                            className={`p-3 rounded-xl border text-left flex items-start gap-3 transition-all ${
+                              editWebhookProvider === 'custom'
+                                ? 'border-[#006b5f] bg-emerald-50/70 ring-2 ring-[#006b5f]/20'
+                                : 'border-slate-200 bg-slate-50 hover:bg-slate-100'
+                            }`}
+                          >
+                            <span className="material-symbols-outlined text-[#006b5f] text-xl mt-0.5">key</span>
+                            <div>
+                              <p className="text-xs font-bold text-[#111c2d]">Clé Secrète Personnalisée</p>
+                              <p className="text-[11px] text-slate-500 mt-0.5">Chariow, Webhooks HMAC ou Bearer token</p>
+                            </div>
                           </button>
                         </div>
                       </div>
+
+                      {editWebhookProvider === 'maketou' ? (
+                        <div className="p-3.5 bg-emerald-50 rounded-xl border border-emerald-200 text-xs text-emerald-900 flex items-start gap-2.5">
+                          <span className="material-symbols-outlined text-emerald-700 text-lg shrink-0 mt-0.5">check_circle</span>
+                          <div>
+                            <p className="font-bold">Mode Marketo / Maketou Sélectionné</p>
+                            <p className="text-[11px] text-emerald-800 mt-0.5 leading-relaxed">
+                              La vérification de signature est effectuée automatiquement via la Clé Publique Ed25519 transmise dans l'en-tête <code className="font-mono bg-emerald-100/80 px-1 rounded">X-Cart-Signature</code>. Aucune clé secrète manuelle n'est requise.
+                            </p>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col gap-1.5">
+                          <label className="text-xs font-semibold text-[#111c2d]">Clé Secrète du Webhook (Signature Verification)</label>
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="text"
+                              value={editWebhookSecret}
+                              onChange={(e) => setEditWebhookSecret(e.target.value)}
+                              className="flex-1 h-10 px-3 rounded-lg bg-slate-50 text-[#111c2d] text-xs font-mono border border-slate-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#006b5f]/20 focus:border-[#006b5f]"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                navigator.clipboard.writeText(editWebhookSecret);
+                                showToast('Secret Webhook copié !');
+                              }}
+                              className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-xs font-semibold text-slate-700 rounded-lg flex items-center gap-1 shrink-0"
+                            >
+                              <span className="material-symbols-outlined text-base">content_copy</span>
+                              <span>Copier</span>
+                            </button>
+                          </div>
+                        </div>
+                      )}
 
                       <div className="pt-3 border-t border-slate-100 flex justify-end">
                         <button
@@ -1308,7 +1368,8 @@ export const AdminDashboardView: React.FC = () => {
                               await updateSubscriptionSettings({
                                 proPriceXOF: editProPrice,
                                 checkoutUrl: editCheckoutUrl,
-                                webhookSecret: editWebhookSecret
+                                webhookSecret: editWebhookProvider === 'maketou' ? 'maketou' : editWebhookSecret,
+                                webhookProvider: editWebhookProvider
                               });
                             } catch (e) {
                               showToast('Erreur lors de la sauvegarde des paramètres');

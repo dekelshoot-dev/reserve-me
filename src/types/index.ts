@@ -53,6 +53,7 @@ export interface SubscriptionSettings {
   proPriceXOF: number;
   checkoutUrl: string;
   webhookSecret: string;
+  webhookProvider?: 'custom' | 'maketou' | 'chariow';
   freeMaxServices: number;
   proMaxServices: number;
   updatedAt?: string;

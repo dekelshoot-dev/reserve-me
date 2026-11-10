@@ -101,6 +101,17 @@ app.post('/api/ai/assistant', async (req, res) => {
   }
 });
 
+const BUILD_VERSION = process.env.BUILD_VERSION || `v-${Date.now()}`;
+
+// Version endpoint for frontend clients to detect new deployments
+app.get('/api/version', (_req, res) => {
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate, max-age=0');
+  res.json({
+    version: BUILD_VERSION,
+    timestamp: Date.now()
+  });
+});
+
 async function startServer() {
   if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
     const { createServer: createViteServer } = await import('vite');
@@ -111,8 +122,17 @@ async function startServer() {
     app.use(vite.middlewares);
   } else {
     const distPath = path.resolve(process.cwd(), 'dist');
-    app.use(express.static(distPath));
+    app.use(express.static(distPath, {
+      setHeaders: (res, filePath) => {
+        if (filePath.endsWith('.html')) {
+          res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate, max-age=0');
+        } else if (filePath.includes('/assets/')) {
+          res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+        }
+      }
+    }));
     app.get('*', (_req, res) => {
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate, max-age=0');
       res.sendFile(path.join(distPath, 'index.html'));
     });
   }

@@ -110,6 +110,7 @@ export async function getSubscriptionSettingsFromFirestore(): Promise<{
   proPriceXOF: number;
   checkoutUrl: string;
   webhookSecret: string;
+  webhookProvider?: 'custom' | 'maketou' | 'chariow';
   freeMaxServices: number;
   proMaxServices: number;
 }> {
@@ -117,6 +118,7 @@ export async function getSubscriptionSettingsFromFirestore(): Promise<{
     proPriceXOF: 1000,
     checkoutUrl: 'https://pay.reserve-me.io/checkout/pro',
     webhookSecret: 'whsec_wWyannB9BkCXJhSxk1D5FbqxoM1IWpHvvLhIphNR',
+    webhookProvider: 'custom' as 'custom' | 'maketou' | 'chariow',
     freeMaxServices: 1,
     proMaxServices: 999
   };
@@ -131,6 +133,7 @@ export async function getSubscriptionSettingsFromFirestore(): Promise<{
           proPriceXOF: Number(data.proPriceXOF) || defaultSettings.proPriceXOF,
           checkoutUrl: String(data.checkoutUrl || defaultSettings.checkoutUrl),
           webhookSecret: String(data.webhookSecret || defaultSettings.webhookSecret),
+          webhookProvider: (data.webhookProvider as any) || defaultSettings.webhookProvider,
           freeMaxServices: Number(data.freeMaxServices) || defaultSettings.freeMaxServices,
           proMaxServices: Number(data.proMaxServices) || defaultSettings.proMaxServices
         };
@@ -148,6 +151,7 @@ export async function getSubscriptionSettingsFromFirestore(): Promise<{
           proPriceXOF: fields.proPriceXOF?.integerValue ? parseInt(fields.proPriceXOF.integerValue, 10) : (fields.proPriceXOF?.doubleValue || defaultSettings.proPriceXOF),
           checkoutUrl: fields.checkoutUrl?.stringValue || defaultSettings.checkoutUrl,
           webhookSecret: fields.webhookSecret?.stringValue || defaultSettings.webhookSecret,
+          webhookProvider: (fields.webhookProvider?.stringValue as any) || defaultSettings.webhookProvider,
           freeMaxServices: fields.freeMaxServices?.integerValue ? parseInt(fields.freeMaxServices.integerValue, 10) : defaultSettings.freeMaxServices,
           proMaxServices: fields.proMaxServices?.integerValue ? parseInt(fields.proMaxServices.integerValue, 10) : defaultSettings.proMaxServices
         };
@@ -167,6 +171,7 @@ export async function saveSubscriptionSettingsToFirestore(settings: {
   proPriceXOF?: number;
   checkoutUrl?: string;
   webhookSecret?: string;
+  webhookProvider?: 'custom' | 'maketou' | 'chariow';
   freeMaxServices?: number;
   proMaxServices?: number;
 }): Promise<boolean> {
