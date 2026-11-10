@@ -1,0 +1,770 @@
+> ## Documentation Index
+> Fetch the complete documentation index at: https://chariow.dev/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Pulses
+
+> Recevez des notifications en temps réel sur les événements de votre boutique Chariow
+
+Les Pulses sont des notifications webhook qui vous permettent de recevoir des requêtes HTTP POST en temps réel lorsque des événements spécifiques se produisent dans votre boutique Chariow. Au lieu d'interroger constamment l'API, les Pulses envoient les données d'événements vers votre URL de point de terminaison configurée dès que quelque chose se produit, vous permettant de construire des intégrations et des automatisations réactives.
+
+## Comment fonctionnent les Pulses
+
+**1. Un événement se produit**
+
+Un événement se produit dans votre boutique (par exemple, une vente est finalisée).
+
+**2. Pulse déclenché**
+
+Chariow envoie une requête HTTP POST signée vers votre point de terminaison configuré.
+
+**3. Vérifier la signature**
+
+Votre serveur contrôle l'en-tête `x-chariow-signature` avant de faire confiance à la charge utile.
+
+**4. Traiter l'événement**
+
+Votre serveur déduplique sur `x-pulse-delivery-id` puis traite la charge utile.
+
+**5. Confirmer la réception**
+
+Votre serveur renvoie un code de statut 2xx pour confirmer la réception.
+
+> [!WARNING]
+>
+> L'URL de votre point de terminaison est publique : quiconque la découvre peut y poster. Vérifiez toujours la signature avant d'agir sur une charge utile — voir [Sécurité des Pulses](https://chariow.dev/fr/guides/pulse-security.md).
+
+## En-têtes de la requête
+
+Chaque livraison porte ces en-têtes :
+
+| En-tête | Contenu |
+| - | - |
+| `x-chariow-signature` | `sha256=<empreinte hexadécimale>` — HMAC-SHA256 du corps brut |
+| `x-pulse-id` | L'identifiant du Pulse, ex. `pulse_abc123` |
+| `x-pulse-delivery-id` | L'identifiant de la livraison — votre clé d'idempotence |
+| `x-pulse-event` | Le nom de l'événement, ex. `successful.sale` |
+| `Content-Type` | `application/json; charset=utf-8` |
+| `User-Agent` | `Pulse \| Chariow +https://chariow.com` |
+
+> [!NOTE]
+>
+> Contrat de signature complet, extraits de vérification et diagnostic : [Sécurité des Pulses](https://chariow.dev/fr/guides/pulse-security.md).
+
+## Configuration des Pulses
+
+Vous pouvez configurer les Pulses de plusieurs manières :
+
+### Via le tableau de bord de la boutique
+
+1. Allez dans **Automatisation** → **Pulses**
+2. Cliquez sur **Ajouter un Pulse**
+3. Entrez l'URL de votre point de terminaison webhook (doit être en HTTPS)
+4. Sélectionnez les événements que vous souhaitez recevoir
+5. Sélectionnez éventuellement des produits spécifiques (laissez vide pour tous les produits)
+6. Enregistrez votre Pulse
+
+> [!NOTE]
+>
+> Votre point de terminaison Pulse doit être accessible via HTTPS. Les points de terminaison HTTP ne sont pas pris en charge pour des raisons de sécurité.
+
+## Événements Pulse
+
+Les Pulses prennent en charge les événements suivants. Lorsqu'un événement se produit, la charge utile du webhook contient un champ `event` avec la valeur de l'événement.
+
+### Événements de vente
+
+| Valeur d'événement | Libellé | Description |
+| - | - | - |
+| `successful.sale` | Vente réussie | Se déclenche lorsqu'une vente est finalisée |
+| `abandoned.sale` | Vente abandonnée | Se déclenche lorsqu'une vente est abandonnée |
+| `failed.sale` | Vente échouée | Se déclenche lorsqu'une vente échoue |
+
+### Événements de licence
+
+| Valeur d'événement | Libellé | Description |
+| - | - | - |
+| `license.activated` | Licence activée | Se déclenche lorsqu'une licence est activée |
+| `license.expired` | Licence expirée | Se déclenche lorsqu'une licence expire |
+| `license.issued` | Licence émise | Se déclenche lorsqu'une licence est émise à un client |
+| `license.nearing_expiry` | Licence bientôt expirée | Se déclenche lorsqu'une licence approche de sa date d'expiration |
+| `license.revoked` | Licence révoquée | Se déclenche lorsqu'une licence est révoquée |
+
+### Événements d'affiliation
+
+| Valeur d'événement | Libellé | Description |
+| - | - | - |
+| `affiliate.joined` | Affilié rejoint | Se déclenche lorsqu'un nouvel affilié rejoint votre boutique |
+
+> [!NOTE]
+>
+> `affiliate.joined` est un événement à l'échelle de la boutique. Il atteint chaque Pulse actif qui y est abonné, y compris un Pulse limité à certains produits : le filtre par produit ne restreint que les événements de vente et de licence.
+
+> [!TIP]
+>
+> Vous pouvez configurer plusieurs événements pour une seule URL de Pulse. Lorsque l'un des événements sélectionnés se produit, Chariow enverra une notification webhook à votre point de terminaison avec la valeur d'événement correspondante.
+
+## Charge utile Pulse
+
+Lorsqu'un événement configuré se produit, Chariow envoie une requête HTTP POST vers votre URL webhook avec les données de l'événement dans le corps de la requête. La structure exacte de la charge utile dépend du type d'événement.
+
+> [!NOTE]
+>
+> Les charges utiles Pulse contiennent des données d'événement complètes, y compris des détails sur l'entité (vente, licence, etc.), les informations client, les détails du produit et le contexte de la boutique. La structure de la charge utile varie selon le type d'événement pour fournir des informations pertinentes pour chaque événement.
+
+### Exemple de vente réussie
+
+Lorsqu'une vente est finalisée, Chariow envoie un webhook avec l'événement `successful.sale` :
+
+```json theme={null}
+{
+  "event": "successful.sale",
+  "sale": {
+    "id": "sal_xyz789abc",
+    "amount": {
+      "value": 99,
+      "formatted": "99,00 €",
+      "short": "99",
+      "currency": "EUR"
+    },
+    "original_amount": {
+      "value": 99,
+      "formatted": "99,00 €",
+      "short": "99",
+      "currency": "EUR"
+    },
+    "discount_amount": {
+      "value": 0,
+      "formatted": "0,00 €",
+      "short": "0",
+      "currency": "EUR"
+    },
+    "settlement": {
+      "amount": {
+        "value": 89.10,
+        "formatted": "89,10 €",
+        "short": "89",
+        "currency": "EUR"
+      },
+      "due_at": "2025-01-22T10:30:00+00:00",
+      "done_at": null,
+      "service_fee": {
+        "value": 4.95,
+        "formatted": "4,95 €",
+        "short": "5",
+        "currency": "EUR"
+      },
+      "payment_fee": {
+        "value": 4.95,
+        "formatted": "4,95 €",
+        "short": "5",
+        "currency": "EUR"
+      },
+      "fee": {
+        "value": 9.90,
+        "formatted": "9,90 €",
+        "short": "10",
+        "currency": "EUR"
+      }
+    },
+    "status": "completed",
+    "created_at": "2025-01-15T10:30:00+00:00",
+    "custom_fields": null,
+    "custom_metadata": {"order_ref": "CMD-123"},
+    "completed_at": "2025-01-15T10:32:00+00:00",
+    "abandoned_at": null,
+    "failed_at": null
+  },
+  "product": {
+    "id": "prd_def456",
+    "name": "Cours Premium",
+    "url": "https://maboutique.mychariow.com/cours-premium",
+    "metadata": null,
+    "price": {
+      "value": 99,
+      "formatted": "99,00 €",
+      "short": "99",
+      "currency": "EUR"
+    }
+  },
+  "customer": {
+    "id": "cus_abc123",
+    "name": "Jean Dupont",
+    "first_name": "Jean",
+    "last_name": "Dupont",
+    "email": "client@example.com",
+    "phone": "+33612345678",
+    "country": "FR"
+  },
+  "affiliate": null,
+  "store": {
+    "id": "str_xyz789",
+    "name": "Ma Boutique Digitale",
+    "url": "https://maboutique.mychariow.com"
+  },
+  "checkout": {
+    "url": "https://maboutique.mychariow.com/prd_def456/checkout?first_name=Jean&last_name=Dupont&email=client%40example.com&country=FR&phone=06+12+34+56+78&help=buy"
+  }
+}
+```
+
+* `product.metadata` contient les métadonnées personnalisées définies sur le produit, ou `null`.
+* `affiliate` vaut `null` sauf si la vente provient d'un affilié : il contient alors l'`id` de l'affilié de la boutique et le `code` de l'affilié.
+* `checkout.url` est un lien vers le paiement du produit, prérempli avec les informations du client (et le code promo, s'il a été utilisé). Il est utile pour relancer les événements `abandoned.sale` et `failed.sale`.
+
+### Exemple de licence activée
+
+Lorsqu'une licence est activée, Chariow envoie un webhook avec l'événement `license.activated` :
+
+```json theme={null}
+{
+  "event": "license.activated",
+  "license": {
+    "id": "lic_ghi789def",
+    "key": "XXXX-XXXX-XXXX-XXXX",
+    "status": "active",
+    "source_type": "sale",
+    "activation_count": 1,
+    "max_activations": 5,
+    "activated_at": "2025-01-15T10:35:00+00:00",
+    "expires_at": "2026-01-15T10:30:00+00:00",
+    "expired_at": null,
+    "revoked_at": null,
+    "created_at": "2025-01-15T10:30:00+00:00"
+  },
+  "product": {
+    "id": "prd_def456",
+    "name": "Licence Logiciel Pro",
+    "url": "https://maboutique.mychariow.com/licence-logiciel-pro",
+    "metadata": null
+  },
+  "customer": {
+    "id": "cus_abc123",
+    "name": "Jean Dupont",
+    "first_name": "Jean",
+    "last_name": "Dupont",
+    "email": "client@example.com",
+    "phone": "+33612345678",
+    "country": "FR"
+  },
+  "store": {
+    "id": "str_xyz789",
+    "name": "Ma Boutique Digitale",
+    "url": "https://maboutique.mychariow.com"
+  }
+}
+```
+
+### Exemple de licence bientôt expirée
+
+Chariow analyse les licences chaque jour et envoie l'événement `license.nearing_expiry` une seule fois par licence, dès qu'elle entre dans la fenêtre de sept jours précédant sa date `expires_at`. Utilisez-le pour proposer un renouvellement avant que le client ne perde son accès.
+
+> [!NOTE]
+>
+> `days_until_expiry` n'est présent que sur cet événement. La valeur est arrondie à l'entier supérieur : une licence qui expire dans quelques heures renvoie `1`. Une licence n'est annoncée qu'une seule fois, même si l'analyse est relancée avant son expiration.
+
+```json theme={null}
+{
+  "event": "license.nearing_expiry",
+  "days_until_expiry": 7,
+  "license": {
+    "id": "lic_ghi789def",
+    "key": "ABCD-1234-EFGH-5678",
+    "status": "active",
+    "source_type": "sale",
+    "activation_count": 1,
+    "max_activations": 5,
+    "activated_at": "2025-01-15T10:35:00+00:00",
+    "expires_at": "2026-01-15T10:35:00+00:00",
+    "expired_at": null,
+    "revoked_at": null,
+    "created_at": "2025-01-15T10:30:00+00:00"
+  },
+  "product": {
+    "id": "prd_def456",
+    "name": "Pro Software License",
+    "url": "https://mystore.mychariow.com/pro-software",
+    "metadata": null
+  },
+  "customer": {
+    "id": "cus_abc123",
+    "name": "John Doe",
+    "first_name": "John",
+    "last_name": "Doe",
+    "email": "customer@example.com",
+    "phone": "+1234567890",
+    "country": "US"
+  },
+  "store": {
+    "id": "str_xyz789",
+    "name": "My Digital Store",
+    "url": "https://mystore.mychariow.com"
+  }
+}
+```
+
+### Exemple d'affilié rejoint
+
+Lorsqu'un nouvel affilié rejoint votre boutique, Chariow envoie un webhook avec l'événement `affiliate.joined` :
+
+> [!NOTE]
+>
+> Depuis octobre 2026, `affiliate.joined` est signé, porte `x-pulse-delivery-id` et `x-pulse-event`, suit la politique de réessai et apparaît dans l'onglet **Livraisons** comme tous les autres événements. Avant cette date, il était envoyé sans signature : supprimez toute exception que vous auriez ajoutée pour ignorer la vérification de signature sur cet événement.
+
+```json theme={null}
+{
+  "event": "affiliate.joined",
+  "affiliate": {
+    "id": "saff_xyz789abc",
+    "account": {
+      "id": "aff_abc123def",
+      "code": "CREATOR123",
+      "pseudo": "studio_creatif",
+      "email": "creator@example.com",
+      "first_name": "Jean",
+      "last_name": "Dupont",
+      "name": "Jean Dupont",
+      "country": {
+        "name": "France",
+        "code": "FR",
+        "alpha_3_code": "FRA",
+        "dial_code": "+33",
+        "currency": "EUR",
+        "flag": "https://cdn.axazara.com/flags/svg/FR.svg"
+      },
+      "phone": {
+        "number": 33612345678,
+        "country": {
+          "name": "France",
+          "code": "FR",
+          "alpha_3_code": "FRA",
+          "dial_code": "+33",
+          "currency": "EUR",
+          "flag": "https://cdn.axazara.com/flags/svg/FR.svg"
+        }
+      }
+    },
+    "source": {
+      "value": "invitation",
+      "label": "Invitation",
+      "description": "Added via store invitation"
+    },
+    "status": "active",
+    "joined_at": "2025-01-15T10:40:00+00:00"
+  },
+  "store": {
+    "id": "str_xyz789",
+    "name": "Ma Boutique Digitale",
+    "url": "https://maboutique.mychariow.com"
+  }
+}
+```
+
+* `affiliate.source` est un objet : `value` vaut `invitation` (ajouté via une invitation de la boutique) ou `network` (arrivé par le réseau d'affiliation).
+* `affiliate.account.phone` vaut `null` si l'affilié n'a pas de numéro de téléphone. Sinon, `number` est le numéro au format E.164 sous forme d'entier, sans le `+` initial.
+* `affiliate.account` vaut `null` si le compte affilié n'existe plus.
+
+> [!WARNING]
+>
+> La structure exacte de la charge utile peut inclure des champs supplémentaires selon le type d'événement et le contexte. Vérifiez toujours la charge utile réelle reçue à votre point de terminaison pour la structure complète des données.
+
+## Gestion des Pulses
+
+### Exemple basique (Node.js/Express)
+
+```javascript theme={null}
+const express = require('express');
+const app = express();
+
+app.post('/webhooks/chariow', express.json(), (req, res) => {
+  const payload = req.body;
+  const event = payload.event;
+
+  switch (event) {
+    case 'successful.sale':
+      handleSuccessfulSale(payload.sale, payload.product, payload.customer, payload.store);
+      break;
+    case 'abandoned.sale':
+      handleAbandonedSale(payload.sale, payload.store);
+      break;
+    case 'failed.sale':
+      handleFailedSale(payload.sale, payload.store);
+      break;
+    case 'license.activated':
+      handleLicenseActivated(payload.license, payload.product, payload.customer);
+      break;
+    case 'license.expired':
+      handleLicenseExpired(payload.license, payload.customer);
+      break;
+    case 'license.issued':
+      handleLicenseIssued(payload.license, payload.product, payload.customer);
+      break;
+    case 'license.nearing_expiry':
+      handleLicenseNearingExpiry(payload.license, payload.customer, payload.days_until_expiry);
+      break;
+    case 'license.revoked':
+      handleLicenseRevoked(payload.license, payload.customer);
+      break;
+    case 'affiliate.joined':
+      handleAffiliateJoined(payload.affiliate, payload.store);
+      break;
+    default:
+      console.log(`Type d'événement non géré : ${event}`);
+  }
+
+  // Toujours renvoyer 200 pour confirmer la réception
+  res.status(200).send('OK');
+});
+
+function handleSuccessfulSale(sale, product, customer, store) {
+  console.log(`Vente finalisée : ${sale.id} dans la boutique ${store.name}`);
+  // Ajouter le client au CRM, envoyer un email de confirmation, accorder l'accès, etc.
+}
+
+function handleLicenseActivated(license, product, customer) {
+  console.log(`Licence activée : ${license.key} pour ${customer.email}`);
+  // Enregistrer l'activation, mettre à jour les enregistrements internes, notifier le client, etc.
+}
+
+function handleLicenseNearingExpiry(license, customer, daysUntilExpiry) {
+  console.log(`La licence ${license.key} expire dans ${daysUntilExpiry} jour(s)`);
+  // Envoyer un rappel de renouvellement, créer une offre de renouvellement, signaler le compte, etc.
+}
+
+function handleAffiliateJoined(affiliate, store) {
+  console.log(`Nouvel affilié rejoint : ${affiliate.account.code} dans la boutique ${store.name}`);
+  // Envoyer un email de bienvenue, créer l'accès au tableau de bord affilié, notifier l'équipe, etc.
+}
+
+app.listen(3000, () => console.log('Serveur webhook en cours d\'exécution sur le port 3000'));
+```
+
+### Exemple PHP
+
+```php theme={null}
+<?php
+
+// Lire les données POST brutes
+$payload = file_get_contents('php://input');
+$data = json_decode($payload, true);
+
+$event = $data['event'] ?? null;
+
+switch ($event) {
+    case 'successful.sale':
+        handleSuccessfulSale($data['sale'], $data['product'], $data['customer'], $data['store']);
+        break;
+    case 'abandoned.sale':
+        handleAbandonedSale($data['sale'], $data['store']);
+        break;
+    case 'failed.sale':
+        handleFailedSale($data['sale'], $data['store']);
+        break;
+    case 'license.activated':
+        handleLicenseActivated($data['license'], $data['product'], $data['customer']);
+        break;
+    case 'license.expired':
+        handleLicenseExpired($data['license'], $data['customer']);
+        break;
+    case 'license.issued':
+        handleLicenseIssued($data['license'], $data['product'], $data['customer']);
+        break;
+    case 'license.nearing_expiry':
+        handleLicenseNearingExpiry($data['license'], $data['customer'], $data['days_until_expiry']);
+        break;
+    case 'license.revoked':
+        handleLicenseRevoked($data['license'], $data['customer']);
+        break;
+    case 'affiliate.joined':
+        handleAffiliateJoined($data['affiliate'], $data['store']);
+        break;
+    default:
+        error_log("Type d'événement non géré : " . $event);
+}
+
+// Toujours renvoyer 200 pour confirmer la réception
+http_response_code(200);
+echo 'OK';
+
+function handleSuccessfulSale($sale, $product, $customer, $store) {
+    error_log("Vente finalisée : {$sale['id']} dans la boutique {$store['name']}");
+    // Ajouter le client au CRM, envoyer un email de confirmation, accorder l'accès, etc.
+}
+
+function handleLicenseActivated($license, $product, $customer) {
+    error_log("Licence activée : {$license['key']} pour {$customer['email']}");
+    // Enregistrer l'activation, mettre à jour les enregistrements internes, notifier le client, etc.
+}
+
+function handleLicenseNearingExpiry($license, $customer, $daysUntilExpiry) {
+    error_log("La licence {$license['key']} expire dans {$daysUntilExpiry} jour(s)");
+    // Envoyer un rappel de renouvellement, créer une offre de renouvellement, signaler le compte, etc.
+}
+
+function handleAffiliateJoined($affiliate, $store) {
+    error_log("Nouvel affilié rejoint : {$affiliate['account']['code']} dans la boutique {$store['name']}");
+    // Envoyer un email de bienvenue, créer l'accès au tableau de bord affilié, notifier l'équipe, etc.
+}
+```
+
+## Politique de réessai
+
+Si votre point de terminaison ne répond pas avec un code de statut 2xx, Chariow réessaie la livraison. Une livraison bénéficie de **5 tentatives au total**, espacées par une temporisation exponentielle :
+
+| Après la tentative | Tentative suivante dans |
+| - | - |
+| 1ère | 10 secondes |
+| 2ème | 100 secondes |
+| 3ème | \~17 minutes |
+| 4ème | \~2 heures 47 minutes |
+
+Chaque tentative expire au bout de 30 secondes. La signature est calculée une seule fois à l'émission et réutilisée à l'identique par chaque réessai : une tentative qui arrive plusieurs heures plus tard reste donc vérifiable.
+
+> [!WARNING]
+>
+> Après la 5e tentative infructueuse sur une même livraison, **le Pulse est désactivé automatiquement** et le propriétaire de la boutique, les administrateurs et les membres marketing reçoivent un courriel. Vous devez le réactiver depuis le tableau de bord avant qu'il ne se déclenche à nouveau — et avant de pouvoir rejouer ses livraisons.
+
+> [!WARNING]
+>
+> Assurez-vous que votre point de terminaison Pulse répond rapidement (dans les 30 secondes). Les processus de longue durée doivent être gérés de manière asynchrone.
+
+## Historique de livraison et rejeu
+
+Chaque tentative est enregistrée : vous pouvez donc savoir si Chariow a réellement appelé votre point de terminaison et ce qu'il a répondu.
+
+Ouvrez **Automatisations → Pulses → sélectionnez votre Pulse → onglet Livraisons**. Le tableau liste chaque livraison avec :
+
+| Champ | Signification |
+| - | - |
+| `status` | `pending`, `succeeded` ou `failed` |
+| `http_status_code` | Le code de statut renvoyé par votre point de terminaison |
+| `attempts` | Le nombre de tentatives effectuées à ce stade |
+| `payload` | Le corps exact qui a été envoyé |
+| `response_body` | La réponse de votre point de terminaison, tronquée |
+| `is_replay` | Indique si cette livraison résulte d'un rejeu manuel |
+
+> [!NOTE]
+>
+> `pending` signifie en file d'attente ou en cours de réessai, pas en échec. Une livraison ne devient `failed` qu'une fois les 5 tentatives épuisées.
+
+Un clic sur une ligne affiche la charge utile envoyée, la réponse et l'identifiant de livraison. **Rejouer** renvoie une charge utile stockée vers le même point de terminaison, sans retraiter l'événement de vente, de licence ou d'affiliation d'origine. C'est utile si votre point de terminaison était indisponible, ou pendant la mise au point de votre vérification de signature.
+
+> [!WARNING]
+>
+> Un rejeu est une nouvelle livraison, avec un nouveau `x-pulse-delivery-id` : il passe donc votre contrôle d'idempotence et sera traité à nouveau. C'est intentionnel.
+
+## Meilleures pratiques
+
+> [accordion] Répondre rapidement
+>
+> Renvoyez une réponse 200 immédiatement, puis traitez le Pulse de manière asynchrone pour éviter les délais d'expiration :
+>
+> ```javascript theme={null}
+> app.post('/webhooks/chariow', (req, res) => {
+>   // Confirmer la réception immédiatement
+>   res.status(200).send('OK');
+>
+>   // Traiter de manière asynchrone (par exemple, file d'attente de tâches, worker en arrière-plan)
+>   queuePulseProcessing(req.body);
+> });
+> ```
+
+> [accordion] Gérer les doublons
+>
+> En raison de la logique de réessai, une même livraison peut vous parvenir plusieurs fois. Dédupliquez sur l'en-tête `x-pulse-delivery-id`, stable sur toutes les tentatives d'une livraison :
+>
+> ```javascript theme={null}
+> const processedDeliveries = new Set();
+>
+> async function processPulse(deliveryId, payload) {
+>   if (processedDeliveries.has(deliveryId)) {
+>     console.log('Livraison en double, ignorée');
+>     return;
+>   }
+>
+>   processedDeliveries.add(deliveryId);
+>   // Traiter le pulse...
+> }
+> ```
+>
+> Ne dédupliquez pas sur l'identifiant de l'entité contenue dans la charge utile : une même vente produit légitimement une livraison par Pulse abonné.
+
+> [accordion] Vérifier la signature
+>
+> N'agissez jamais sur une charge utile avant d'avoir contrôlé `x-chariow-signature`. Voir [Sécurité des Pulses](https://chariow.dev/fr/guides/pulse-security.md) pour le contrat complet et des extraits prêts à l'emploi.
+
+> [accordion] Utiliser HTTPS
+>
+> Utilisez toujours HTTPS pour votre point de terminaison Pulse afin de garantir que les données sont chiffrées en transit. Chariow rejettera les points de terminaison HTTP pour des raisons de sécurité.
+
+> [accordion] Surveiller les échecs
+>
+> Consultez régulièrement l'onglet **Livraisons** de votre Pulse. Il affiche le code de statut et le corps de réponse de chaque tentative, ce qui permet de diagnostiquer un échec sans ajouter de journalisation de votre côté.
+
+> [accordion] Filtrer par produits
+>
+> Pour les boutiques à fort volume, envisagez de créer des Pulses séparés pour différents produits afin de rendre le traitement plus efficace et organisé.
+
+## Test des Pulses
+
+Utilisez la fonctionnalité de test de Pulse dans votre tableau de bord :
+
+1. Allez dans **Automatisations** → **Pulses**
+2. Cliquez sur votre Pulse
+3. Cliquez sur **Envoyer un pulse de test**
+4. Vérifiez que votre point de terminaison a reçu la charge utile de test
+
+Un test suit le même circuit qu'un événement réel : il est signé, porte les quatre en-têtes `x-pulse-*` (y compris `x-pulse-delivery-id`), est mis en file d'attente plutôt qu'envoyé instantanément, et est enregistré dans l'onglet **Livraisons** avec le code de statut et la réponse de votre point de terminaison.
+
+> [!NOTE]
+>
+> Un test est envoyé comme un événement `successful.sale` avec des données d'exemple, et non une vraie vente. Ses identifiants sont préfixés par `test_` (par exemple `test_sale_...`), l'objet `sale` ne contient que `id`, `amount`, `status`, `custom_fields`, `created_at`, `completed_at` et `abandoned_at`, `custom_fields` est une liste de paires `name`/`value`, et la charge utile contient un champ `note` supplémentaire. Pour valider votre intégration contre une charge utile réelle, rejouez plutôt une livraison depuis l'onglet **Livraisons**.
+
+> [!WARNING]
+>
+> Une livraison de test suit la politique de réessai habituelle décrite plus haut. Si votre point de terminaison échoue aux 5 tentatives, le Pulse est désactivé automatiquement, exactement comme pour un événement réel.
+
+> [!NOTE]
+>
+> Pour le développement local, utilisez un service comme [ngrok](https://ngrok.com) pour exposer votre serveur local à Internet.
+
+## Gestion des Pulses via l'API
+
+Vous pouvez consulter vos Pulses de manière programmatique avec l'API publique Chariow. Votre clé API doit disposer du scope `webhooks.read`.
+
+### Lister tous les Pulses
+
+```bash theme={null}
+curl -X GET "https://api.chariow.com/v1/pulses" \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+#### Exemple de réponse de liste
+
+```json theme={null}
+{
+  "data": [
+    {
+      "id": "pulse_abc123xyz789",
+      "url": "https://example.com/webhooks/chariow",
+      "is_enabled": true,
+      "masked_secret": "whsec_••••a1b2",
+      "source": {
+        "value": "manual",
+        "label": "Manual",
+        "description": "Created manually by user"
+      },
+      "triggers": [
+        {
+          "value": "successful_sale",
+          "label": "Successful Sale",
+          "description": "Triggers when a sale is successful."
+        }
+      ],
+      "products": [
+        {
+          "id": "prd_def456",
+          "name": "Cours Premium",
+          "type": "course",
+          "pictures": {
+            "thumbnail": "https://cdn.chariow.com/products/thumb.jpg",
+            "cover": "https://cdn.chariow.com/products/cover.jpg"
+          },
+          "category": {
+            "value": "education_and_learning",
+            "label": "Education and Learning"
+          },
+          "pricing": {
+            "type": "one_time",
+            "price": {
+              "value": 99,
+              "formatted": "99,00 €",
+              "short": "99",
+              "currency": "EUR"
+            },
+            "effective": {
+              "value": 99,
+              "formatted": "99,00 €",
+              "short": "99",
+              "currency": "EUR"
+            }
+          },
+          "bundle": null,
+          "metadata": null
+        }
+      ],
+      "store": {
+        "id": "str_xyz789",
+        "name": "Ma Boutique Digitale",
+        "logo_url": "https://cdn.chariow.com/stores/xyz789/logo.png",
+        "url": "https://maboutique.mychariow.com"
+      },
+      "is_editable": true,
+      "created_at": "2025-01-10T08:00:00+00:00",
+      "updated_at": "2025-01-10T08:00:00+00:00"
+    }
+  ],
+  "pagination": {
+    "count": 1,
+    "path": "https://api.chariow.com/v1/pulses",
+    "per_page": 10,
+    "next_cursor": null,
+    "next_page_url": null,
+    "prev_cursor": null,
+    "prev_page_url": null,
+    "has_more_pages": false,
+    "has_pages": false
+  }
+}
+```
+
+### Obtenir un Pulse spécifique
+
+```bash theme={null}
+curl -X GET "https://api.chariow.com/v1/pulses/pulse_abc123xyz789" \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+La réponse place un objet pulse unique, de même structure que chaque élément de la liste, sous une clé `data`.
+
+### Filtrer les Pulses
+
+Vous pouvez filtrer les pulses par URL, identifiant de pulse ou valeur de déclencheur en utilisant le paramètre de recherche :
+
+```bash theme={null}
+curl -X GET "https://api.chariow.com/v1/pulses?search=successful_sale" \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+> [!NOTE]
+>
+> Pour la documentation complète de l'API, consultez les points de terminaison [Lister les Pulses](https://chariow.dev/api-reference/pulses/list-pulses.md) et [Obtenir un Pulse](https://chariow.dev/api-reference/pulses/get-pulse.md).
+
+## Ressources associées
+
+> [card] [Sécurité des Pulses](https://chariow.dev/fr/guides/pulse-security.md)
+>
+> Vérifier les signatures et dédupliquer les réessais
+
+> [card] [Référence API - Lister les Pulses](https://chariow.dev/api-reference/pulses/list-pulses.md)
+>
+> Consultez la documentation détaillée de l'API
+
+> [card] [Référence API - Obtenir un Pulse](https://chariow.dev/api-reference/pulses/get-pulse.md)
+>
+> Obtenez un pulse spécifique via l'API
+
+> [card] [Guide des ventes](https://chariow.dev/fr/guides/sales.md)
+>
+> En savoir plus sur les événements de vente
+
+> [card] [Guide des licences](https://chariow.dev/fr/guides/licenses.md)
+>
+> En savoir plus sur les événements de licence
+
+> [card] [Guide des affiliés](https://chariow.dev/fr/guides/affiliates.md)
+>
+> En savoir plus sur les événements d'affiliation
+
+
+This documentation is built and hosted on [Mintlify](https://mintlify.com), a developer documentation platform.

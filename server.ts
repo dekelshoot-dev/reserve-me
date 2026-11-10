@@ -12,9 +12,19 @@ const __dirname = path.dirname(__filename);
 dotenv.config();
 
 const app = express();
-app.use(express.json({ limit: '10mb' }));
+app.use(express.json({
+  limit: '10mb',
+  verify: (req: any, _res, buf) => {
+    req.rawBody = buf.toString('utf8');
+  }
+}));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-app.use(express.text({ type: ['text/plain', 'text/html', 'application/x-www-form-urlencoded', 'application/json'] }));
+app.use(express.text({
+  type: ['text/plain', 'text/html', 'application/x-www-form-urlencoded', 'application/json'],
+  verify: (req: any, _res, buf) => {
+    req.rawBody = buf.toString('utf8');
+  }
+}));
 
 // Catch body parsing errors gracefully before routers
 app.use((err: any, _req: express.Request, res: express.Response, next: express.NextFunction) => {

@@ -78,8 +78,14 @@ export function checkWebhookSignature(
 
   const candidates: string[] = [];
   const secretHeaderKeys = [
+    'x-chariow-signature',
+    'chariow-signature',
+    'x-pulse-signature',
+    'pulse-signature',
     'x-chariot-signature',
     'chariot-signature',
+    'x-chariow-secret',
+    'chariow-secret',
     'x-chariot-secret',
     'chariot-secret',
     'chariot-webhook-secret',
@@ -110,7 +116,7 @@ export function checkWebhookSignature(
   }
 
   if (req.query) {
-    for (const qKey of ['secret', 'webhookSecret', 'webhook_secret', 'signature', 'token', 'key', 'chariot_secret', 'chariot_key']) {
+    for (const qKey of ['secret', 'webhookSecret', 'webhook_secret', 'signature', 'token', 'key', 'chariot_secret', 'chariot_key', 'chariow_secret']) {
       if (req.query[qKey]) {
         const cleaned = String(req.query[qKey]).trim();
         if (cleaned) candidates.push(cleaned);
@@ -120,7 +126,7 @@ export function checkWebhookSignature(
 
   const payload = req.body || {};
   if (payload && typeof payload === 'object') {
-    for (const bKey of ['secret', 'webhookSecret', 'webhook_secret', 'secret_key', 'signature', 'token', 'key', 'chariot_secret', 'chariot_key']) {
+    for (const bKey of ['secret', 'webhookSecret', 'webhook_secret', 'secret_key', 'signature', 'token', 'key', 'chariot_secret', 'chariot_key', 'chariow_secret']) {
       if (payload[bKey]) {
         const cleaned = String(payload[bKey]).trim();
         if (cleaned) candidates.push(cleaned);
@@ -128,24 +134,42 @@ export function checkWebhookSignature(
     }
   }
 
-  // 1. Direct key matching
+  // 1. Direct key matching (for secret header/token sent directly)
   for (const cand of candidates) {
     if (cand === secret) return { isValid: true, method: 'exact_match', candidates };
     if (cand.toLowerCase() === secret.toLowerCase()) return { isValid: true, method: 'case_insensitive_match', candidates };
     if (cand.includes(secret) || secret.includes(cand)) return { isValid: true, method: 'substring_match', candidates };
     if (secret.startsWith('whsec_')) {
       const rawKey = secret.replace(/^whsec_/, '');
-      if (cand.includes(rawKey) || rawKey.includes(cand)) {
+      if (cand === rawKey || cand.includes(rawKey) || rawKey.includes(cand)) {
         return { isValid: true, method: 'whsec_raw_match', candidates };
       }
     }
   }
 
-  // 2. HMAC SHA-256 signature matching (for Chariot / Stripe HMAC-signed webhooks)
-  const rawBodyString = typeof req.body === 'string' ? req.body : JSON.stringify(req.body || {});
-  const keysToTry = [secret];
+  // 2. Chariow Pulses & HMAC SHA-256 signature verification
+  const rawBodyFromReq = (req as any).rawBody;
+  const rawBodyString = typeof req.body === 'string'
+    ? req.body
+    : JSON.stringify(req.body || {});
+  
+  const rawBodiesToTry = [
+    rawBodyFromReq,
+    rawBodyString,
+    rawBodyFromReq ? rawBodyFromReq.trim() : '',
+    rawBodyString.trim(),
+  ].filter((b): b is string => Boolean(b && typeof b === 'string'));
+
+  const keysToTry: Array<string | Buffer> = [secret];
   if (secret.startsWith('whsec_')) {
-    keysToTry.push(secret.replace(/^whsec_/, ''));
+    const rawSecret = secret.replace(/^whsec_/, '');
+    keysToTry.push(rawSecret);
+    try {
+      const b64Buf = Buffer.from(rawSecret, 'base64');
+      if (b64Buf.length > 0) keysToTry.push(b64Buf);
+    } catch (e) {
+      // ignore
+    }
   }
 
   for (const cand of candidates) {
@@ -159,26 +183,38 @@ export function checkWebhookSignature(
     if (v1Match) {
       sigVal = v1Match[1];
     } else if (cand.startsWith('sha256=')) {
-      sigVal = cand.replace(/^sha256=/, '').trim();
+      sigVal = cand.replace(/^sha256=/i, '').trim();
+    } else if (cand.startsWith('sha256:')) {
+      sigVal = cand.replace(/^sha256:/i, '').trim();
     } else if (cand.startsWith('s=')) {
-      sigVal = cand.replace(/^s=/, '').trim();
+      sigVal = cand.replace(/^s=/i, '').trim();
     }
 
+    sigVal = sigVal.replace(/^['"]|['"]$/g, '');
+
     for (const k of keysToTry) {
-      try {
-        const hmacHex = crypto.createHmac('sha256', k).update(rawBodyString).digest('hex');
-        if (timingSafeEqual(hmacHex, sigVal)) return { isValid: true, method: 'hmac_sha256_hex', candidates };
+      for (const bodyStr of rawBodiesToTry) {
+        try {
+          const hmacHex = crypto.createHmac('sha256', k).update(bodyStr).digest('hex');
+          if (timingSafeEqual(hmacHex, sigVal)) {
+            return { isValid: true, method: 'chariow_hmac_sha256_hex', candidates };
+          }
 
-        const hmacBase64 = crypto.createHmac('sha256', k).update(rawBodyString).digest('base64');
-        if (timingSafeEqual(hmacBase64, sigVal)) return { isValid: true, method: 'hmac_sha256_base64', candidates };
+          const hmacBase64 = crypto.createHmac('sha256', k).update(bodyStr).digest('base64');
+          if (timingSafeEqual(hmacBase64, sigVal)) {
+            return { isValid: true, method: 'chariow_hmac_sha256_base64', candidates };
+          }
 
-        if (timestamp) {
-          const timestampedPayload = `${timestamp}.${rawBodyString}`;
-          const hmacTimeHex = crypto.createHmac('sha256', k).update(timestampedPayload).digest('hex');
-          if (timingSafeEqual(hmacTimeHex, sigVal)) return { isValid: true, method: 'hmac_sha256_timestamped', candidates };
+          if (timestamp) {
+            const timestampedPayload = `${timestamp}.${bodyStr}`;
+            const hmacTimeHex = crypto.createHmac('sha256', k).update(timestampedPayload).digest('hex');
+            if (timingSafeEqual(hmacTimeHex, sigVal)) {
+              return { isValid: true, method: 'chariow_hmac_sha256_timestamped', candidates };
+            }
+          }
+        } catch (e) {
+          // Continue testing
         }
-      } catch (e) {
-        // Continue testing other keys
       }
     }
   }
