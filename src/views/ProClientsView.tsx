@@ -187,9 +187,16 @@ export const ProClientsView: React.FC = () => {
   const recurringCount = clients.filter(c => c.totalAppointments >= 2).length;
   const recurrenceRate = totalClientsCount > 0 ? Math.round((recurringCount / totalClientsCount) * 100) : 0;
 
-  const handleSaveNotes = () => {
+  const [isSavingNotes, setIsSavingNotes] = useState(false);
+
+  const handleSaveNotes = async () => {
     if (!selectedClient) return;
-    updateClientNotes(selectedClient.id, notesText);
+    setIsSavingNotes(true);
+    try {
+      await updateClientNotes(selectedClient.id, notesText);
+    } finally {
+      setIsSavingNotes(false);
+    }
   };
 
   const handleQuickSms = () => {
@@ -679,9 +686,17 @@ export const ProClientsView: React.FC = () => {
                   <div className="flex justify-end pt-1">
                     <button
                       onClick={handleSaveNotes}
-                      className="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs transition-colors"
+                      disabled={isSavingNotes}
+                      className="px-3.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white font-semibold text-xs transition-colors flex items-center gap-1.5"
                     >
-                      Enregistrer
+                      {isSavingNotes ? (
+                        <>
+                          <span className="material-symbols-outlined text-[14px] animate-spin">progress_activity</span>
+                          <span>Enregistrement...</span>
+                        </>
+                      ) : (
+                        <span>Enregistrer</span>
+                      )}
                     </button>
                   </div>
                 </div>

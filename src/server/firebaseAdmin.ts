@@ -104,6 +104,106 @@ function toFirestoreFields(obj: Record<string, any>): Record<string, any> {
 }
 
 /**
+ * Retrieves subscription & webhook settings directly from Firestore /settings/subscription document
+ */
+export async function getSubscriptionSettingsFromFirestore(): Promise<{
+  proPriceXOF: number;
+  checkoutUrl: string;
+  webhookSecret: string;
+  freeMaxServices: number;
+  proMaxServices: number;
+}> {
+  const defaultSettings = {
+    proPriceXOF: 1000,
+    checkoutUrl: 'https://pay.reserve-me.io/checkout/pro',
+    webhookSecret: 'whsec_wWyannB9BkCXJhSxk1D5FbqxoM1IWpHvvLhIphNR',
+    freeMaxServices: 1,
+    proMaxServices: 999
+  };
+
+  try {
+    const { adminDb: db } = await getAdminServices();
+    if (db) {
+      const docSnap = await db.collection('settings').doc('subscription').get();
+      if (docSnap.exists) {
+        const data = docSnap.data();
+        return {
+          proPriceXOF: Number(data.proPriceXOF) || defaultSettings.proPriceXOF,
+          checkoutUrl: String(data.checkoutUrl || defaultSettings.checkoutUrl),
+          webhookSecret: String(data.webhookSecret || defaultSettings.webhookSecret),
+          freeMaxServices: Number(data.freeMaxServices) || defaultSettings.freeMaxServices,
+          proMaxServices: Number(data.proMaxServices) || defaultSettings.proMaxServices
+        };
+      }
+    }
+
+    // REST API fallback
+    const url = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/${DATABASE_ID}/documents/settings/subscription?key=${API_KEY}`;
+    const res = await fetch(url);
+    if (res.ok) {
+      const docData = await res.json();
+      if (docData && docData.fields) {
+        const fields = docData.fields;
+        return {
+          proPriceXOF: fields.proPriceXOF?.integerValue ? parseInt(fields.proPriceXOF.integerValue, 10) : (fields.proPriceXOF?.doubleValue || defaultSettings.proPriceXOF),
+          checkoutUrl: fields.checkoutUrl?.stringValue || defaultSettings.checkoutUrl,
+          webhookSecret: fields.webhookSecret?.stringValue || defaultSettings.webhookSecret,
+          freeMaxServices: fields.freeMaxServices?.integerValue ? parseInt(fields.freeMaxServices.integerValue, 10) : defaultSettings.freeMaxServices,
+          proMaxServices: fields.proMaxServices?.integerValue ? parseInt(fields.proMaxServices.integerValue, 10) : defaultSettings.proMaxServices
+        };
+      }
+    }
+  } catch (e) {
+    console.warn('[Firestore] Error fetching subscription settings:', e);
+  }
+
+  return defaultSettings;
+}
+
+/**
+ * Persists subscription & webhook settings directly into Firestore /settings/subscription document
+ */
+export async function saveSubscriptionSettingsToFirestore(settings: {
+  proPriceXOF?: number;
+  checkoutUrl?: string;
+  webhookSecret?: string;
+  freeMaxServices?: number;
+  proMaxServices?: number;
+}): Promise<boolean> {
+  const current = await getSubscriptionSettingsFromFirestore();
+  const updated = {
+    ...current,
+    ...settings,
+    updatedAt: new Date().toISOString()
+  };
+
+  try {
+    const { adminDb: db } = await getAdminServices();
+    if (db) {
+      await db.collection('settings').doc('subscription').set(updated, { merge: true });
+      return true;
+    }
+  } catch (err) {
+    console.warn('[Firebase Admin SDK Warning] Failed to save settings, using REST API:', err);
+  }
+
+  try {
+    const url = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/${DATABASE_ID}/documents/settings/subscription?key=${API_KEY}`;
+    const fields = toFirestoreFields(updated);
+    const res = await fetch(url, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fields })
+    });
+    return res.ok;
+  } catch (e) {
+    console.error('[Firestore REST Error] Échec de sauvegarde des paramètres:', e);
+  }
+
+  return false;
+}
+
+/**
  * Persists webhook log directly into Firestore /webhookLogs collection via REST API
  */
 export async function saveWebhookLogToFirestoreREST(webhookLog: any): Promise<boolean> {

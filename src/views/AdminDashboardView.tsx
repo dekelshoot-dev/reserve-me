@@ -86,6 +86,8 @@ export const AdminDashboardView: React.FC = () => {
   // Loading States
   const [isTestingConn, setIsTestingConn] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isSavingSubSettings, setIsSavingSubSettings] = useState(false);
+  const [updatingPlanUid, setUpdatingPlanUid] = useState<string | null>(null);
 
   // Load existing SMTP config, templates & logs from Backend on mount
   useEffect(() => {
@@ -1299,17 +1301,34 @@ export const AdminDashboardView: React.FC = () => {
                       <div className="pt-3 border-t border-slate-100 flex justify-end">
                         <button
                           type="button"
-                          onClick={() => {
-                            updateSubscriptionSettings({
-                              proPriceXOF: editProPrice,
-                              checkoutUrl: editCheckoutUrl,
-                              webhookSecret: editWebhookSecret
-                            });
+                          disabled={isSavingSubSettings}
+                          onClick={async () => {
+                            setIsSavingSubSettings(true);
+                            try {
+                              await updateSubscriptionSettings({
+                                proPriceXOF: editProPrice,
+                                checkoutUrl: editCheckoutUrl,
+                                webhookSecret: editWebhookSecret
+                              });
+                            } catch (e) {
+                              showToast('Erreur lors de la sauvegarde des paramètres');
+                            } finally {
+                              setIsSavingSubSettings(false);
+                            }
                           }}
-                          className="px-5 py-2.5 rounded-lg bg-[#141b2c] hover:bg-slate-800 text-white text-xs font-semibold flex items-center gap-2 shadow-sm"
+                          className="px-5 py-2.5 rounded-lg bg-[#141b2c] hover:bg-slate-800 disabled:opacity-50 text-white text-xs font-semibold flex items-center gap-2 shadow-sm transition-all"
                         >
-                          <span className="material-symbols-outlined text-base">save</span>
-                          <span>Sauvegarder les Paramètres</span>
+                          {isSavingSubSettings ? (
+                            <>
+                              <span className="material-symbols-outlined text-base animate-spin">progress_activity</span>
+                              <span>Sauvegarde en cours...</span>
+                            </>
+                          ) : (
+                            <>
+                              <span className="material-symbols-outlined text-base">save</span>
+                              <span>Sauvegarder les Paramètres</span>
+                            </>
+                          )}
                         </button>
                       </div>
                     </div>
@@ -1433,10 +1452,22 @@ export const AdminDashboardView: React.FC = () => {
                                   </span>
                                 </td>
                                 <td className="py-3.5 px-4 text-right">
-                                  {uPlan === 'pro' ? (
+                                  {updatingPlanUid === u.uid ? (
+                                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs text-[#006b5f] font-semibold">
+                                      <span className="material-symbols-outlined text-base animate-spin">progress_activity</span>
+                                      <span>Mise à jour...</span>
+                                    </span>
+                                  ) : uPlan === 'pro' ? (
                                     <button
                                       type="button"
-                                      onClick={() => manuallySetUserPlan(u.uid, 'free')}
+                                      onClick={async () => {
+                                        setUpdatingPlanUid(u.uid);
+                                        try {
+                                          await manuallySetUserPlan(u.uid, 'free');
+                                        } finally {
+                                          setUpdatingPlanUid(null);
+                                        }
+                                      }}
                                       className="px-3 py-1.5 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-100 text-xs font-semibold transition-colors"
                                     >
                                       Passer en Free
@@ -1444,7 +1475,14 @@ export const AdminDashboardView: React.FC = () => {
                                   ) : (
                                     <button
                                       type="button"
-                                      onClick={() => manuallySetUserPlan(u.uid, 'pro')}
+                                      onClick={async () => {
+                                        setUpdatingPlanUid(u.uid);
+                                        try {
+                                          await manuallySetUserPlan(u.uid, 'pro');
+                                        } finally {
+                                          setUpdatingPlanUid(null);
+                                        }
+                                      }}
                                       className="px-3 py-1.5 rounded-lg bg-[#006b5f] hover:bg-[#005048] text-white text-xs font-bold transition-colors shadow-2xs"
                                     >
                                       Activer Plan Pro

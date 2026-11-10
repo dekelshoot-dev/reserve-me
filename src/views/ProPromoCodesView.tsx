@@ -16,6 +16,8 @@ export const ProPromoCodesView: React.FC = () => {
   const [discountType, setDiscountType] = useState<'fixed' | 'percentage'>('percentage');
   const [discountValue, setDiscountValue] = useState<number>(100);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [togglingCodeId, setTogglingCodeId] = useState<string | null>(null);
+  const [deletingCodeId, setDeletingCodeId] = useState<string | null>(null);
 
   // Selected promo code for dedicated usage history inspection
   const [selectedCodeForHistory, setSelectedCodeForHistory] = useState<string | null>(null);
@@ -261,15 +263,26 @@ export const ProPromoCodesView: React.FC = () => {
                         </td>
 
                         <td className="py-3.5 px-4">
-                          <label className="relative inline-flex items-center cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={pc.isActive}
-                              onChange={() => togglePromoCodeStatus(pc.id)}
-                              className="sr-only peer"
-                            />
-                            <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-4 peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#14B8A6]"></div>
-                          </label>
+                          {togglingCodeId === pc.id ? (
+                            <span className="material-symbols-outlined text-sm text-[#14B8A6] animate-spin">progress_activity</span>
+                          ) : (
+                            <label className="relative inline-flex items-center cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={pc.isActive}
+                                onChange={async () => {
+                                  setTogglingCodeId(pc.id);
+                                  try {
+                                    await togglePromoCodeStatus(pc.id);
+                                  } finally {
+                                    setTogglingCodeId(null);
+                                  }
+                                }}
+                                className="sr-only peer"
+                              />
+                              <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-4 peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#14B8A6]"></div>
+                            </label>
+                          )}
                         </td>
 
                         <td className="py-3.5 px-4 text-right space-x-2">
@@ -290,11 +303,23 @@ export const ProPromoCodesView: React.FC = () => {
                           </button>
 
                           <button
-                            onClick={() => deletePromoCode(pc.id)}
-                            className="p-1.5 text-slate-400 hover:text-rose-600 transition-colors"
+                            disabled={deletingCodeId === pc.id}
+                            onClick={async () => {
+                              setDeletingCodeId(pc.id);
+                              try {
+                                await deletePromoCode(pc.id);
+                              } finally {
+                                setDeletingCodeId(null);
+                              }
+                            }}
+                            className="p-1.5 text-slate-400 hover:text-rose-600 transition-colors disabled:opacity-50"
                             title="Supprimer le code"
                           >
-                            <span className="material-symbols-outlined text-[18px]">delete</span>
+                            {deletingCodeId === pc.id ? (
+                              <span className="material-symbols-outlined text-[18px] animate-spin">progress_activity</span>
+                            ) : (
+                              <span className="material-symbols-outlined text-[18px]">delete</span>
+                            )}
                           </button>
                         </td>
                       </tr>

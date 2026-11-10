@@ -10,7 +10,12 @@ import {
   renderEmailTemplate,
   EmailTemplate
 } from './emailTemplateEngine';
-import { generateEmailVerificationLink, updateUserPlanByEmailInFirestore } from './firebaseAdmin';
+import {
+  generateEmailVerificationLink,
+  updateUserPlanByEmailInFirestore,
+  getSubscriptionSettingsFromFirestore,
+  saveSubscriptionSettingsToFirestore
+} from './firebaseAdmin';
 
 export { generateEmailVerificationLink, updateUserPlanByEmailInFirestore };
 
@@ -47,6 +52,138 @@ export function decryptSecret(encryptedData: string): string {
     console.error('Erreur de déchiffrement du secret SMTP:', err);
     return '';
   }
+}
+
+function timingSafeEqual(a: string, b: string): boolean {
+  if (typeof a !== 'string' || typeof b !== 'string') return false;
+  if (a.length !== b.length) return false;
+  try {
+    return crypto.timingSafeEqual(Buffer.from(a), Buffer.from(b));
+  } catch (e) {
+    return false;
+  }
+}
+
+/**
+ * Robust Chariot / Gateway Webhook Secret & HMAC Signature Verification Helper
+ */
+export function checkWebhookSignature(
+  req: Request,
+  configuredSecret: string
+): { isValid: boolean; method: string; candidates: string[] } {
+  const secret = configuredSecret ? configuredSecret.trim() : '';
+  if (!secret || secret === 'none') {
+    return { isValid: true, method: 'no_secret_required', candidates: [] };
+  }
+
+  const candidates: string[] = [];
+  const secretHeaderKeys = [
+    'x-chariot-signature',
+    'chariot-signature',
+    'x-chariot-secret',
+    'chariot-secret',
+    'chariot-webhook-secret',
+    'x-webhook-secret',
+    'webhook-secret',
+    'x-signature',
+    'x-hub-signature',
+    'x-hub-signature-256',
+    'x-secret-key',
+    'x-paystack-signature',
+    'x-cinetpay-signature',
+    'x-kkiapay-secret',
+    'authorization',
+    'secret',
+    'token',
+    'x-api-key',
+    'signature',
+    'stripe-signature'
+  ];
+
+  for (const hKey of secretHeaderKeys) {
+    const hVal = req.headers[hKey];
+    if (hVal) {
+      const valStr = Array.isArray(hVal) ? hVal[0] : String(hVal);
+      const cleaned = valStr.replace(/^Bearer\s+/i, '').trim();
+      if (cleaned) candidates.push(cleaned);
+    }
+  }
+
+  if (req.query) {
+    for (const qKey of ['secret', 'webhookSecret', 'webhook_secret', 'signature', 'token', 'key', 'chariot_secret', 'chariot_key']) {
+      if (req.query[qKey]) {
+        const cleaned = String(req.query[qKey]).trim();
+        if (cleaned) candidates.push(cleaned);
+      }
+    }
+  }
+
+  const payload = req.body || {};
+  if (payload && typeof payload === 'object') {
+    for (const bKey of ['secret', 'webhookSecret', 'webhook_secret', 'secret_key', 'signature', 'token', 'key', 'chariot_secret', 'chariot_key']) {
+      if (payload[bKey]) {
+        const cleaned = String(payload[bKey]).trim();
+        if (cleaned) candidates.push(cleaned);
+      }
+    }
+  }
+
+  // 1. Direct key matching
+  for (const cand of candidates) {
+    if (cand === secret) return { isValid: true, method: 'exact_match', candidates };
+    if (cand.toLowerCase() === secret.toLowerCase()) return { isValid: true, method: 'case_insensitive_match', candidates };
+    if (cand.includes(secret) || secret.includes(cand)) return { isValid: true, method: 'substring_match', candidates };
+    if (secret.startsWith('whsec_')) {
+      const rawKey = secret.replace(/^whsec_/, '');
+      if (cand.includes(rawKey) || rawKey.includes(cand)) {
+        return { isValid: true, method: 'whsec_raw_match', candidates };
+      }
+    }
+  }
+
+  // 2. HMAC SHA-256 signature matching (for Chariot / Stripe HMAC-signed webhooks)
+  const rawBodyString = typeof req.body === 'string' ? req.body : JSON.stringify(req.body || {});
+  const keysToTry = [secret];
+  if (secret.startsWith('whsec_')) {
+    keysToTry.push(secret.replace(/^whsec_/, ''));
+  }
+
+  for (const cand of candidates) {
+    let sigVal = cand;
+    let timestamp = '';
+
+    const tMatch = cand.match(/t=(\d+)/);
+    if (tMatch) timestamp = tMatch[1];
+
+    const v1Match = cand.match(/v1=([a-f0-9]+)/i);
+    if (v1Match) {
+      sigVal = v1Match[1];
+    } else if (cand.startsWith('sha256=')) {
+      sigVal = cand.replace(/^sha256=/, '').trim();
+    } else if (cand.startsWith('s=')) {
+      sigVal = cand.replace(/^s=/, '').trim();
+    }
+
+    for (const k of keysToTry) {
+      try {
+        const hmacHex = crypto.createHmac('sha256', k).update(rawBodyString).digest('hex');
+        if (timingSafeEqual(hmacHex, sigVal)) return { isValid: true, method: 'hmac_sha256_hex', candidates };
+
+        const hmacBase64 = crypto.createHmac('sha256', k).update(rawBodyString).digest('base64');
+        if (timingSafeEqual(hmacBase64, sigVal)) return { isValid: true, method: 'hmac_sha256_base64', candidates };
+
+        if (timestamp) {
+          const timestampedPayload = `${timestamp}.${rawBodyString}`;
+          const hmacTimeHex = crypto.createHmac('sha256', k).update(timestampedPayload).digest('hex');
+          if (timingSafeEqual(hmacTimeHex, sigVal)) return { isValid: true, method: 'hmac_sha256_timestamped', candidates };
+        }
+      } catch (e) {
+        // Continue testing other keys
+      }
+    }
+  }
+
+  return { isValid: false, method: 'verification_failed', candidates };
 }
 
 export interface SmtpConfig {
@@ -626,54 +763,74 @@ export const webhookLogs: any[] = [
   }
 ];
 
-// 9. GET /api/admin/subscription/config - Retrieve Subscription Plan & Webhook Settings
-smtpRouter.get('/subscription/config', (req: Request, res: Response) => {
-  return res.json({
-    proPriceXOF: process.env.PRO_PLAN_PRICE_XOF ? parseInt(process.env.PRO_PLAN_PRICE_XOF, 10) : 1000,
-    checkoutUrl: process.env.CHECKOUT_URL || 'https://checkout.reserve-me.io/pay/pro-plan',
-    webhookSecret: process.env.WEBHOOK_SECRET || 'reserve_me_whsec_secret_2026_pro',
-    freeMaxServices: 1,
-    proMaxServices: 9999
-  });
+// 9. GET /api/admin/subscription/config - Retrieve Subscription Plan & Webhook Settings from Firestore DB
+smtpRouter.get('/subscription/config', async (_req: Request, res: Response) => {
+  try {
+    const settings = await getSubscriptionSettingsFromFirestore();
+    return res.json(settings);
+  } catch (e) {
+    return res.json({
+      proPriceXOF: process.env.PRO_PLAN_PRICE_XOF ? parseInt(process.env.PRO_PLAN_PRICE_XOF, 10) : 1000,
+      checkoutUrl: process.env.CHECKOUT_URL || 'https://checkout.reserve-me.io/pay/pro-plan',
+      webhookSecret: process.env.WEBHOOK_SECRET || 'whsec_wWyannB9BkCXJhSxk1D5FbqxoM1IWpHvvLhIphNR',
+      freeMaxServices: 1,
+      proMaxServices: 999
+    });
+  }
 });
 
-// 10. POST /api/admin/subscription/save - Save Subscription & Webhook Settings
-smtpRouter.post('/subscription/save', (req: Request, res: Response) => {
-  const { proPriceXOF, checkoutUrl, webhookSecret } = req.body;
-
-  if (proPriceXOF !== undefined) process.env.PRO_PLAN_PRICE_XOF = String(proPriceXOF);
-  if (checkoutUrl) process.env.CHECKOUT_URL = checkoutUrl;
-  if (webhookSecret) process.env.WEBHOOK_SECRET = webhookSecret;
-
-  // Persist to .env
+// 10. POST /api/admin/subscription/save - Save Subscription & Webhook Settings to Firestore DB
+smtpRouter.post('/subscription/save', async (req: Request, res: Response) => {
   try {
-    const envPath = path.resolve(process.cwd(), '.env');
-    const envContent = [
-      `NODE_ENV=${process.env.NODE_ENV || 'production'}`,
-      `PORT=${process.env.PORT || 3000}`,
-      `GEMINI_API_KEY=${process.env.GEMINI_API_KEY || ''}`,
-      `SMTP_PROVIDER=${process.env.SMTP_PROVIDER || 'gmail'}`,
-      `SMTP_HOST=${process.env.SMTP_HOST || 'smtp.gmail.com'}`,
-      `SMTP_PORT=${process.env.SMTP_PORT || '465'}`,
-      `SMTP_SECURE=${process.env.SMTP_SECURE || 'true'}`,
-      `SMTP_USER=${process.env.SMTP_USER || 'notifications@reserve-me.io'}`,
-      `SMTP_PASSWORD=${process.env.SMTP_PASSWORD || ''}`,
-      `SMTP_FROM_NAME="${process.env.SMTP_FROM_NAME || 'Reserve Me'}"`,
-      `SMTP_FROM_EMAIL=${process.env.SMTP_FROM_EMAIL || 'notifications@reserve-me.io'}`,
-      `WEBHOOK_SECRET=${process.env.WEBHOOK_SECRET || 'reserve_me_whsec_secret_2026_pro'}`,
-      `CHECKOUT_URL=${process.env.CHECKOUT_URL || 'https://checkout.reserve-me.io/pay/pro-plan'}`,
-      `PRO_PLAN_PRICE_XOF=${process.env.PRO_PLAN_PRICE_XOF || '1000'}`
-    ].join('\n');
+    const { proPriceXOF, checkoutUrl, webhookSecret, freeMaxServices, proMaxServices } = req.body;
 
-    fs.writeFileSync(envPath, envContent, 'utf8');
-  } catch (e) {
-    console.warn('Erreur lors de la mise à jour de .env:', e);
+    if (proPriceXOF !== undefined) process.env.PRO_PLAN_PRICE_XOF = String(proPriceXOF);
+    if (checkoutUrl) process.env.CHECKOUT_URL = checkoutUrl;
+    if (webhookSecret) process.env.WEBHOOK_SECRET = webhookSecret;
+
+    await saveSubscriptionSettingsToFirestore({
+      proPriceXOF: proPriceXOF !== undefined ? Number(proPriceXOF) : undefined,
+      checkoutUrl: checkoutUrl ? String(checkoutUrl) : undefined,
+      webhookSecret: webhookSecret ? String(webhookSecret) : undefined,
+      freeMaxServices: freeMaxServices !== undefined ? Number(freeMaxServices) : undefined,
+      proMaxServices: proMaxServices !== undefined ? Number(proMaxServices) : undefined
+    });
+
+    // Persist to .env as local fallback
+    try {
+      const envPath = path.resolve(process.cwd(), '.env');
+      const envContent = [
+        `NODE_ENV=${process.env.NODE_ENV || 'production'}`,
+        `PORT=${process.env.PORT || 3000}`,
+        `GEMINI_API_KEY=${process.env.GEMINI_API_KEY || ''}`,
+        `SMTP_PROVIDER=${process.env.SMTP_PROVIDER || 'gmail'}`,
+        `SMTP_HOST=${process.env.SMTP_HOST || 'smtp.gmail.com'}`,
+        `SMTP_PORT=${process.env.SMTP_PORT || '465'}`,
+        `SMTP_SECURE=${process.env.SMTP_SECURE || 'true'}`,
+        `SMTP_USER=${process.env.SMTP_USER || 'notifications@reserve-me.io'}`,
+        `SMTP_PASSWORD=${process.env.SMTP_PASSWORD || ''}`,
+        `SMTP_FROM_NAME="${process.env.SMTP_FROM_NAME || 'Reserve Me'}"`,
+        `SMTP_FROM_EMAIL=${process.env.SMTP_FROM_EMAIL || 'notifications@reserve-me.io'}`,
+        `WEBHOOK_SECRET=${webhookSecret || process.env.WEBHOOK_SECRET || 'whsec_wWyannB9BkCXJhSxk1D5FbqxoM1IWpHvvLhIphNR'}`,
+        `CHECKOUT_URL=${checkoutUrl || process.env.CHECKOUT_URL || 'https://checkout.reserve-me.io/pay/pro-plan'}`,
+        `PRO_PLAN_PRICE_XOF=${proPriceXOF || process.env.PRO_PLAN_PRICE_XOF || '1000'}`
+      ].join('\n');
+
+      fs.writeFileSync(envPath, envContent, 'utf8');
+    } catch (e) {
+      console.warn('Erreur lors de la mise à jour de .env:', e);
+    }
+
+    return res.json({
+      success: true,
+      message: 'Paramètres d\'abonnement et clé secrète Webhook enregistrés avec succès en base de données.'
+    });
+  } catch (err: any) {
+    return res.status(500).json({
+      success: false,
+      message: `Erreur de sauvegarde: ${err.message}`
+    });
   }
-
-  return res.json({
-    success: true,
-    message: 'Paramètres d\'abonnement et clé secrète Webhook enregistrés avec succès.'
-  });
 });
 
 // 11. GET /api/admin/webhooks/logs - Retrieve Webhook Logs
@@ -716,7 +873,7 @@ export function extractEmailFromPayload(obj: any): string | null {
   return null;
 }
 
-// 12. POST /api/webhooks/subscription - Public Webhook Receiver for External Payment Services
+// 12. POST /api/webhooks/subscription - Public Webhook Receiver for External Payment Services (Chariot, Stripe, etc.)
 export async function handleIncomingWebhook(req: Request, res: Response) {
   try {
     let payload = req.body || {};
@@ -730,87 +887,41 @@ export async function handleIncomingWebhook(req: Request, res: Response) {
       }
     }
 
-    const configuredSecret = (process.env.WEBHOOK_SECRET || 'reserve_me_whsec_secret_2026_pro').trim();
+    // Always fetch the active secret directly from Firestore DB first!
+    const dbSettings = await getSubscriptionSettingsFromFirestore();
+    const configuredSecret = (dbSettings.webhookSecret || process.env.WEBHOOK_SECRET || 'whsec_wWyannB9BkCXJhSxk1D5FbqxoM1IWpHvvLhIphNR').trim();
+    const priceXOF = dbSettings.proPriceXOF || 1000;
 
-    // Comprehensive extraction of secret candidates from headers, query parameters, and body
-    const secretCandidates: string[] = [];
-
-    const secretHeaderKeys = [
-      'x-webhook-secret',
-      'x-chariot-signature',
-      'x-signature',
-      'x-hub-signature',
-      'x-secret-key',
-      'x-paystack-signature',
-      'x-cinetpay-signature',
-      'x-kkiapay-secret',
-      'authorization',
-      'secret',
-      'token',
-      'x-api-key',
-      'signature'
-    ];
-
-    for (const hKey of secretHeaderKeys) {
-      const hVal = req.headers[hKey];
-      if (hVal) {
-        const cleaned = String(hVal).replace(/^Bearer\s+/i, '').trim();
-        if (cleaned) secretCandidates.push(cleaned);
-      }
-    }
-
-    if (req.query) {
-      for (const qKey of ['secret', 'webhookSecret', 'webhook_secret', 'signature', 'token', 'key']) {
-        if (req.query[qKey]) {
-          const cleaned = String(req.query[qKey]).trim();
-          if (cleaned) secretCandidates.push(cleaned);
-        }
-      }
-    }
-
-    if (payload && typeof payload === 'object') {
-      for (const bKey of ['secret', 'webhookSecret', 'webhook_secret', 'secret_key', 'signature', 'token', 'key']) {
-        if (payload[bKey]) {
-          const cleaned = String(payload[bKey]).trim();
-          if (cleaned) secretCandidates.push(cleaned);
-        }
-      }
-    }
+    // Verify secret / signature using robust Chariot verification engine
+    const verificationResult = checkWebhookSignature(req, configuredSecret);
+    const { isValid: isSecretValid, method: verificationMethod, candidates: secretCandidates } = verificationResult;
 
     // Extract Customer Email from Payload (recursive & robust)
     const extractedEmail = extractEmailFromPayload(payload);
     const cleanEmail = extractedEmail ? extractedEmail.trim().toLowerCase() : 'E-mail introuvable dans payload';
-    const priceXOF = process.env.PRO_PLAN_PRICE_XOF ? parseInt(process.env.PRO_PLAN_PRICE_XOF, 10) : 1000;
-
-    const isSecretProvided = secretCandidates.length > 0;
-    const isSecretValid = !configuredSecret || configuredSecret === 'none' || secretCandidates.some(cand => {
-      if (cand === configuredSecret) return true;
-      if (cand.toLowerCase() === configuredSecret.toLowerCase()) return true;
-      if (cand.includes(configuredSecret) || configuredSecret.includes(cand)) return true;
-      return false;
-    });
 
     // CASE 1: Secret Missing or Invalid -> ALWAYS LOG AS REJECTED
     if (!isSecretValid) {
       const rejectedLog = {
         id: `wh-${Date.now()}-${Math.floor(100 + Math.random() * 900)}`,
         eventId: payload.event || payload.id || `evt_${Date.now()}`,
-        provider: payload.provider || (isSecretProvided ? 'Gateway Externe (Chariot/Paystack)' : 'Gateway Externe'),
+        provider: payload.provider || (secretCandidates.length > 0 ? 'Gateway Chariot Externe' : 'Gateway Externe'),
         userEmail: cleanEmail,
         planAssigned: 'free',
         amountXOF: 0,
         status: 'Rejected',
         receivedAt: new Date().toISOString(),
         payloadJson: typeof payload === 'string' ? payload : JSON.stringify({
-          receivedSecrets: isSecretProvided ? secretCandidates : 'Aucun secret transmis',
+          verificationMethod,
+          receivedSecrets: secretCandidates.length > 0 ? secretCandidates : 'Aucun secret transmis',
           payload
         }, null, 2),
-        error: !isSecretProvided
+        error: secretCandidates.length === 0
           ? 'Secret Webhook non fourni dans la requête (headers, query ou body)'
-          : `Secret Webhook non validé. Secret(s) reçu(s): [${secretCandidates.join(', ')}]. Secret configuré: "${configuredSecret}"`
+          : `Secret/Signature Webhook non validé par Chariot Engine. Secret(s) reçu(s): [${secretCandidates.join(', ')}]. Secret configuré: "${configuredSecret}"`
       };
 
-      // Save in-memory AND persist asynchronously to Firestore
+      // Save in-memory AND persist asynchronously to Firestore DB
       webhookLogs.unshift(rejectedLog);
       updateUserPlanByEmailInFirestore(cleanEmail, 'free', rejectedLog).catch(e =>
         console.warn('Background Firestore log update notice:', e)
@@ -819,11 +930,12 @@ export async function handleIncomingWebhook(req: Request, res: Response) {
       return res.status(200).json({
         success: false,
         status: 'Rejected',
-        message: 'Webhook reçu et enregistré dans l\'historique, mais NON TRAITÉ : Secret Webhook invalide ou absent.',
+        message: 'Webhook reçu et enregistré dans l\'historique, mais REJETÉ : Secret/Signature Webhook invalide ou absent.',
         receivedEmail: cleanEmail,
         receivedSecrets: secretCandidates,
         configuredSecret,
-        hint: 'Passez le secret configuré dans le header x-webhook-secret, x-chariot-signature, ou le corps de la requête.'
+        verificationMethod,
+        hint: 'Transmettez le secret dans la clé header Chariot (x-chariot-signature, chariot-signature, x-webhook-secret) ou dans le corps de la requête.'
       });
     }
 
