@@ -1,22 +1,128 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 
 export const ProSubscriptionView: React.FC = () => {
-  const { userProfile, user, firebaseUser, services, subscriptionSettings, showToast, setCurrentView } = useApp();
-  const [isRedirecting, setIsRedirecting] = React.useState<boolean>(false);
+  const { userProfile, user, firebaseUser, services, subscriptionSettings, setCurrentView, triggerConfetti } = useApp();
+  const [isRedirecting] = React.useState<boolean>(false);
 
-  const currentPlan = userProfile?.plan || user?.plan || 'free';
+  // Extract query parameters from URL (supporting both standard ?and& or multiple ?)
+  const getUrlParams = () => {
+    if (typeof window === 'undefined') return {};
+    const href = window.location.href;
+    const rawSearch = window.location.search || (href.includes('?') ? href.split('?').slice(1).join('&') : '');
+    const params: Record<string, string> = {};
+    if (!rawSearch) return params;
+
+    const pairs = rawSearch.replace(/^\?/, '').split(/[?&]/);
+    for (const pair of pairs) {
+      if (!pair) continue;
+      const [key, val] = pair.split('=');
+      if (key) {
+        params[decodeURIComponent(key).toLowerCase().trim()] = val ? decodeURIComponent(val).trim() : '';
+      }
+    }
+    return params;
+  };
+
+  const params = getUrlParams();
+  const statusParam = params.status || '';
+  const isCheckoutCompleted = statusParam === 'checkout_completed' || statusParam === 'checkout_complete';
+
+  const userEmail = params.email || params.mail || firebaseUser?.email || userProfile?.email || 'N/A';
+  const userName = params.name || params.nam || params.firstname || params.prenom || (userProfile?.displayName ? userProfile.displayName.split(' ')[0] : 'Client');
+  const userSurname = params.surname || params.lastname || params.nom || (userProfile?.displayName ? userProfile.displayName.split(' ').slice(1).join(' ') : 'Pro');
+  const userTel = params.tel || params.phone || params.telephone || 'Non renseigné';
+
+  useEffect(() => {
+    if (isCheckoutCompleted) {
+      triggerConfetti();
+    }
+  }, [isCheckoutCompleted]);
+
+  const currentPlan = (isCheckoutCompleted || userProfile?.plan === 'pro' || user?.plan === 'pro') ? 'pro' : (userProfile?.plan || user?.plan || 'free');
   const isPro = currentPlan === 'pro';
   const serviceCount = services.length;
   const maxServices = isPro ? 'Illimité' : `${subscriptionSettings.freeMaxServices || 1}`;
 
   const handleUpgrade = () => {
-    // Always navigate to internal checkout page (/checkout) on our platform
     setCurrentView('public-checkout');
   };
 
   return (
-    <div className="max-[#101828] max-w-6xl mx-auto space-y-8">
+    <div className="max-w-6xl mx-auto space-y-8 font-sans text-[#101828]">
+      
+      {/* Thank You Card after Purchase (Shown when status=checkout_completed or checkout_complete) */}
+      {isCheckoutCompleted && (
+        <div className="bg-white rounded-3xl p-8 sm:p-10 border-2 border-emerald-500/80 shadow-xl space-y-6 animate-fadeIn">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 pb-6 border-b border-slate-100">
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-md">
+                <span className="material-symbols-outlined text-3xl">task_alt</span>
+              </div>
+              <div>
+                <span className="inline-block px-3 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold mb-1">
+                  Paiement Réussi • Passerelle Maketou
+                </span>
+                <h1 className="text-2xl sm:text-3xl font-extrabold text-[#101828] tracking-tight">
+                  Merci pour votre achat !
+                </h1>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Félicitations, votre abonnement <strong className="text-emerald-700">Forfait Pro Unlimited</strong> est désormais activé avec succès.
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setCurrentView(user ? 'pro-accueil' : 'public-landing')}
+              className="px-5 py-2.5 rounded-xl bg-[#0f766e] hover:bg-[#115e59] text-white text-xs font-bold shadow-sm transition-all shrink-0 flex items-center gap-2"
+            >
+              <span>Accéder à mon tableau de bord</span>
+              <span className="material-symbols-outlined text-base">arrow_forward</span>
+            </button>
+          </div>
+
+          {/* User & Order Details Summary */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-2">
+            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/60 space-y-1">
+              <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">
+                Prénom &amp; Nom
+              </span>
+              <span className="text-sm font-bold text-[#101828] block truncate">
+                {userName} {userSurname}
+              </span>
+            </div>
+
+            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/60 space-y-1">
+              <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">
+                Adresse e-mail
+              </span>
+              <span className="text-sm font-bold text-[#0f766e] block truncate">
+                {userEmail}
+              </span>
+            </div>
+
+            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/60 space-y-1">
+              <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">
+                Numéro de téléphone
+              </span>
+              <span className="text-sm font-bold text-[#101828] block font-mono truncate">
+                {userTel}
+              </span>
+            </div>
+
+            <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200/80 space-y-1">
+              <span className="text-[11px] font-semibold text-emerald-700 uppercase tracking-wider block">
+                Statut du compte
+              </span>
+              <span className="text-sm font-extrabold text-emerald-800 flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                PRO UNLIMITED ACTIF
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-[#E4E7EC] shadow-2xs">
         <div>
@@ -190,3 +296,4 @@ export const ProSubscriptionView: React.FC = () => {
     </div>
   );
 };
+

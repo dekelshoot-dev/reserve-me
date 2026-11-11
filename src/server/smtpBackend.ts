@@ -1336,22 +1336,31 @@ export async function handleCreateMaketouCheckout(req: any, res: any) {
       });
     }
 
-    const reqHost = host || req.headers?.host || 'rezeserve.me';
-    const protocol = reqHost.includes('localhost') ? 'http' : 'https';
-    const appOrigin = `${protocol}://${reqHost}`;
-    const redirectURL = `${appOrigin}/pro-subscription?status=checkout_completed`;
-    const webhookUrl = `${appOrigin}/api/webhooks/subscription`;
+    const reqProto = (req.headers?.['x-forwarded-proto'] as string) || (host?.includes('localhost') || req.headers?.host?.includes('localhost') ? 'http' : 'https');
+    const reqHost = host || req.headers?.['x-forwarded-host'] || req.headers?.host || 'reserve-me.io';
+    const appOrigin = `${reqProto}://${reqHost}`;
 
     const cleanEmail = email.trim().toLowerCase();
     const cleanFirstName = (firstName || cleanEmail.split('@')[0] || 'Client').trim();
     const cleanLastName = (lastName || 'Pro').trim();
+    const cleanPhone = (phone || '').trim();
+
+    const redirectParams = new URLSearchParams({
+      status: 'checkout_completed',
+      email: cleanEmail,
+      name: cleanFirstName,
+      surname: cleanLastName,
+      tel: cleanPhone
+    });
+    const redirectURL = `${appOrigin}/pro-subscription?${redirectParams.toString()}`;
+    const webhookUrl = `${appOrigin}/api/webhooks/subscription`;
 
     const payload = {
       productDocumentId: productId,
       email: cleanEmail,
       firstName: cleanFirstName,
       lastName: cleanLastName,
-      phone: phone || '+2250102030405',
+      phone: cleanPhone || '+2250102030405',
       redirectURL,
       webhookUrl,
       meta: {
@@ -1361,7 +1370,7 @@ export async function handleCreateMaketouCheckout(req: any, res: any) {
       }
     };
 
-    console.log('[Maketou Checkout Init] Création du panier Maketou pour:', cleanEmail);
+    console.log('[Maketou Checkout Init] Création du panier Maketou pour:', cleanEmail, 'avec redirectURL:', redirectURL);
 
     const maketouRes = await fetch('https://api.maketou.net/api/v1/stores/cart/checkout', {
       method: 'POST',
@@ -1397,7 +1406,8 @@ export async function handleCreateMaketouCheckout(req: any, res: any) {
     return res.status(200).json({
       success: true,
       redirectUrl,
-      cartId: data?.cart?.id
+      cartId: data?.cart?.id,
+      webhookUrl
     });
   } catch (err: any) {
     console.error('[Maketou Checkout Exception]', err);
@@ -1439,15 +1449,20 @@ smtpRouter.post('/subscription/create-checkout', handleCreateMaketouCheckout);
 
 // Universal Route Attachments for Webhooks to guarantee 0% 404 rate
 smtpRouter.all('/webhooks/subscription', handleIncomingWebhook);
+smtpRouter.all('/webhooks/subscribe', handleIncomingWebhook);
+smtpRouter.all('/webhook/subscribe', handleIncomingWebhook);
 smtpRouter.all('/webhooks/maketou', handleIncomingWebhook);
 smtpRouter.all('/webhooks/maketou-cart', handleIncomingWebhook);
 smtpRouter.all('/webhooks/cart', handleIncomingWebhook);
 smtpRouter.all('/subscription', handleIncomingWebhook);
 smtpRouter.all('/api/webhooks/subscription', handleIncomingWebhook);
+smtpRouter.all('/api/webhooks/subscribe', handleIncomingWebhook);
+smtpRouter.all('/api/webhook/subscribe', handleIncomingWebhook);
 smtpRouter.all('/api/webhooks/maketou', handleIncomingWebhook);
 smtpRouter.all('/api/webhooks/maketou-cart', handleIncomingWebhook);
 smtpRouter.all('/api/webhooks/cart', handleIncomingWebhook);
 smtpRouter.all('/api/subscription', handleIncomingWebhook);
 smtpRouter.all('/webhooks', handleIncomingWebhook);
+
 
 

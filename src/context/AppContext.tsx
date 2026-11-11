@@ -116,8 +116,20 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const getInitialView = (): ViewMode => {
-    if (typeof window !== 'undefined' && window.location.pathname === '/checkout') {
-      return 'public-checkout';
+    if (typeof window !== 'undefined') {
+      const pathname = window.location.pathname;
+      const search = window.location.search || window.location.href;
+      if (pathname === '/checkout') {
+        return 'public-checkout';
+      }
+      if (
+        pathname === '/prosubscribe' || 
+        pathname === '/pro-subscription' || 
+        search.includes('status=checkout_completed') || 
+        search.includes('status=checkout_complete')
+      ) {
+        return 'pro-subscription';
+      }
     }
     return 'public-landing';
   };
@@ -131,7 +143,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (window.location.pathname !== '/checkout') {
           window.history.pushState({ view }, '', '/checkout');
         }
-      } else if (window.location.pathname === '/checkout') {
+      } else if (view === 'pro-subscription') {
+        if (window.location.pathname !== '/pro-subscription' && window.location.pathname !== '/prosubscribe') {
+          window.history.pushState({ view }, '', '/pro-subscription');
+        }
+      } else if (window.location.pathname === '/checkout' || window.location.pathname === '/prosubscribe') {
         window.history.pushState({ view }, '', '/');
       }
     }
@@ -139,8 +155,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   useEffect(() => {
     const handlePopState = () => {
-      if (window.location.pathname === '/checkout') {
+      const pathname = window.location.pathname;
+      const search = window.location.search || window.location.href;
+      if (pathname === '/checkout') {
         setCurrentViewRaw('public-checkout');
+      } else if (
+        pathname === '/prosubscribe' || 
+        pathname === '/pro-subscription' || 
+        search.includes('status=checkout_completed') || 
+        search.includes('status=checkout_complete')
+      ) {
+        setCurrentViewRaw('pro-subscription');
       } else if (currentView === 'public-checkout') {
         setCurrentViewRaw('public-landing');
       }
