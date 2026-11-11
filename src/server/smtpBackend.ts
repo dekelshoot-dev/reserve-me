@@ -1102,16 +1102,16 @@ export async function handleIncomingWebhook(req: Request, res: Response) {
       }
     }
 
-    // Always fetch the active secret directly from Firestore DB first!
+    // Always fetch active settings directly from Firestore DB
     const dbSettings = await getSubscriptionSettingsFromFirestore();
     const configuredSecret = (dbSettings.webhookSecret || process.env.WEBHOOK_SECRET || 'whsec_wWyannB9BkCXJhSxk1D5FbqxoM1IWpHvvLhIphNR').trim();
     const priceXOF = dbSettings.proPriceXOF || 1000;
 
-    // Verify secret / signature using robust Chariot verification engine
-    const verificationResult = checkWebhookSignature(req, configuredSecret);
-    const { isValid: isSecretValid, method: verificationMethod, candidates: secretCandidates } = verificationResult;
+    // Verify signature using Maketou (Ed25519) / Chariow (HMAC) verification engine
+    const verificationResult = await checkWebhookSignatureAsync(req, configuredSecret, dbSettings.webhookProvider);
+    const { isValid: isSecretValid, method: verificationMethod, candidates: secretCandidates, reason: failureReason } = verificationResult;
 
-    // Extract Customer Email from Payload (recursive & robust)
+    // Extract Customer Email from Payload
     const extractedEmail = extractEmailFromPayload(payload);
     const cleanEmail = extractedEmail ? extractedEmail.trim().toLowerCase() : 'E-mail introuvable dans payload';
 
@@ -1120,7 +1120,7 @@ export async function handleIncomingWebhook(req: Request, res: Response) {
       const rejectedLog = {
         id: `wh-${Date.now()}-${Math.floor(100 + Math.random() * 900)}`,
         eventId: payload.event || payload.id || `evt_${Date.now()}`,
-        provider: payload.provider || (secretCandidates.length > 0 ? 'Gateway Chariot Externe' : 'Gateway Externe'),
+        provider: verificationMethod === 'maketou_ed25519' ? 'Maketou Ed25519' : (payload.provider || 'Gateway Externe'),
         userEmail: cleanEmail,
         planAssigned: 'free',
         amountXOF: 0,
@@ -1128,15 +1128,13 @@ export async function handleIncomingWebhook(req: Request, res: Response) {
         receivedAt: new Date().toISOString(),
         payloadJson: typeof payload === 'string' ? payload : JSON.stringify({
           verificationMethod,
+          failureReason,
           receivedSecrets: secretCandidates.length > 0 ? secretCandidates : 'Aucun secret transmis',
           payload
         }, null, 2),
-        error: secretCandidates.length === 0
-          ? 'Secret Webhook non fourni dans la requête (headers, query ou body)'
-          : `Secret/Signature Webhook non validé par Chariot Engine. Secret(s) reçu(s): [${secretCandidates.join(', ')}]. Secret configuré: "${configuredSecret}"`
+        error: failureReason || 'Signature/Secret Webhook invalide'
       };
 
-      // Save in-memory AND persist asynchronously to Firestore DB
       webhookLogs.unshift(rejectedLog);
       updateUserPlanByEmailInFirestore(cleanEmail, 'free', rejectedLog).catch(e =>
         console.warn('Background Firestore log update notice:', e)
@@ -1145,28 +1143,57 @@ export async function handleIncomingWebhook(req: Request, res: Response) {
       return res.status(200).json({
         success: false,
         status: 'Rejected',
-        message: 'Webhook reçu et enregistré dans l\'historique, mais REJETÉ : Secret/Signature Webhook invalide ou absent.',
+        message: `Webhook reçu mais REJETÉ : ${failureReason || 'Signature/Secret Webhook invalide ou absent.'}`,
         receivedEmail: cleanEmail,
-        receivedSecrets: secretCandidates,
-        configuredSecret,
-        verificationMethod,
-        hint: 'Transmettez le secret dans la clé header Chariot (x-chariot-signature, chariot-signature, x-webhook-secret) ou dans le corps de la requête.'
+        verificationMethod
       });
     }
 
-    // CASE 2: Secret Valid, but Email not found in Payload
+    // Check cart payment status according to Maketou docs ("Ne livrer que si le statut est completed")
+    const cartStatus = String(payload.status || payload.cart?.status || payload.event || '').toLowerCase();
+    const isCompleted = cartStatus === 'completed' || cartStatus === 'success' || cartStatus === 'payment.success';
+
+    // CASE 2: Payment not completed (e.g. payment_failed, waiting_payment, etc.)
+    if (!isCompleted) {
+      const pendingLog = {
+        id: `wh-${Date.now()}-${Math.floor(100 + Math.random() * 900)}`,
+        eventId: payload.id || payload.event || `evt_${Date.now()}`,
+        provider: 'Maketou',
+        userEmail: cleanEmail,
+        planAssigned: 'free',
+        amountXOF: 0,
+        status: 'Failed',
+        receivedAt: new Date().toISOString(),
+        payloadJson: typeof payload === 'string' ? payload : JSON.stringify(payload, null, 2),
+        error: `Statut du panier non validé: '${cartStatus}'. Activation annulée.`
+      };
+
+      webhookLogs.unshift(pendingLog);
+      updateUserPlanByEmailInFirestore(cleanEmail, 'free', pendingLog).catch(e =>
+        console.warn('Background Firestore log update notice:', e)
+      );
+
+      return res.status(200).json({
+        success: true,
+        status: 'Ignored',
+        message: `Notification reçue pour panier en statut '${cartStatus}'. Aucun changement de plan.`,
+        cartStatus
+      });
+    }
+
+    // CASE 3: Secret Valid AND Email found AND Status Completed -> Upgrade User to Pro
     if (!extractedEmail) {
       const failedLog = {
         id: `wh-${Date.now()}-${Math.floor(100 + Math.random() * 900)}`,
         eventId: payload.event || payload.id || `evt_${Date.now()}`,
-        provider: payload.provider || 'Gateway Externe',
+        provider: 'Maketou',
         userEmail: 'Inconnu',
         planAssigned: 'free',
         amountXOF: 0,
         status: 'Failed',
         receivedAt: new Date().toISOString(),
         payloadJson: typeof payload === 'string' ? payload : JSON.stringify(payload, null, 2),
-        error: 'Adresse e-mail introuvable dans le payload JSON'
+        error: 'Adresse e-mail introuvable dans le payload JSON du panier Maketou'
       };
 
       webhookLogs.unshift(failedLog);
@@ -1177,16 +1204,15 @@ export async function handleIncomingWebhook(req: Request, res: Response) {
       return res.status(200).json({
         success: false,
         status: 'Failed',
-        message: 'Secret Webhook validé, mais l\'adresse e-mail client n\'a pas pu être identifiée dans les données.',
+        message: 'Signature Webhook validée, mais l\'adresse e-mail client n\'a pas été identifiée.',
         error: 'Adresse e-mail introuvable'
       });
     }
 
-    // CASE 3: Secret Valid AND Email found -> Upgrade User to Pro
     const successLog = {
       id: `wh-${Date.now()}-${Math.floor(100 + Math.random() * 900)}`,
       eventId: payload.event || payload.id || `evt_${Date.now()}`,
-      provider: payload.provider || 'Gateway de Paiement Externe',
+      provider: 'Maketou (Ed25519 Verified)',
       userEmail: cleanEmail,
       planAssigned: 'pro',
       amountXOF: priceXOF,
@@ -1213,7 +1239,7 @@ export async function handleIncomingWebhook(req: Request, res: Response) {
     return res.status(200).json({
       success: true,
       status: 'Success',
-      message: `Plan Pro activé avec succès pour l'utilisateur ${cleanEmail}. E-mail de confirmation envoyé.`,
+      message: `Plan Pro activé avec succès pour l'utilisateur ${cleanEmail} (Maketou completed). E-mail de confirmation envoyé.`,
       userEmail: cleanEmail,
       plan: 'pro'
     });
@@ -1228,43 +1254,165 @@ export async function handleIncomingWebhook(req: Request, res: Response) {
   }
 }
 
-export async function handleTestMarketoApiKey(req: any, res: any) {
+/**
+ * Real Server-Side API Key Test Endpoint for Maketou
+ */
+export async function handleTestMaketouApiKey(req: any, res: any) {
   try {
     const { apiKey, productId } = req.body || {};
-    if (!apiKey || !apiKey.trim()) {
+    const testKey = (apiKey || '').trim();
+
+    if (!testKey) {
       return res.status(400).json({
         success: false,
-        error: 'Veuillez saisir une clé API Marketto valide.'
+        error: 'Veuillez saisir une clé API Maketou valide.'
       });
     }
 
-    const cleanKey = apiKey.trim();
-    if (cleanKey.length < 8) {
-      return res.status(400).json({
+    // Call Maketou API server-side to test authentication securely
+    const testDocId = (productId || '').trim() || '550e8400-e29b-41d4-a716-446655440000';
+    const maketouRes = await fetch(`https://api.maketou.net/api/v1/stores/cart/${testDocId}`, {
+      headers: {
+        'Authorization': `Bearer ${testKey}`,
+        'Accept': 'application/json'
+      },
+      signal: AbortSignal.timeout(6000)
+    });
+
+    if (maketouRes.status === 401) {
+      const errData = await maketouRes.json().catch(() => ({}));
+      return res.status(401).json({
         success: false,
-        error: 'La clé API saisie semble trop courte ou invalide.'
+        error: `Clé API Maketou refusée (Code 401: ${errData.code || 'INVALID_API_KEY'}). Vérifiez la clé générée dans votre boutique Maketou.`
       });
     }
 
-    // Simulate API handshake with Marketto Gateway service
-    await new Promise(resolve => setTimeout(resolve, 600));
-
+    // If HTTP status is not 401, authentication succeeded!
     return res.status(200).json({
       success: true,
-      message: `Clé API Marketto "${cleanKey.substring(0, 4)}...${cleanKey.substring(cleanKey.length - 4)}" validée avec succès ! Connexion étables à la passerelle Marketto v1.`,
+      message: `Clé API Maketou "${testKey.substring(0, 4)}...${testKey.substring(testKey.length - 4)}" authentifiée avec succès auprès des serveurs api.maketou.net !`,
       timestamp: new Date().toISOString(),
-      productId: productId || 'Non spécifié'
+      httpStatus: maketouRes.status
     });
   } catch (err: any) {
     return res.status(500).json({
       success: false,
-      error: `Erreur lors de la vérification de la clé API Marketto : ${err.message}`
+      error: `Impossible de contacter api.maketou.net : ${err.message}`
     });
   }
 }
 
-// Attach Marketto Test Key endpoint
-smtpRouter.post('/api/admin/marketto/test-key', handleTestMarketoApiKey);
+/**
+ * Initiates Maketou Cart Checkout (POST https://api.maketou.net/api/v1/stores/cart/checkout)
+ */
+export async function handleCreateMaketouCheckout(req: any, res: any) {
+  try {
+    const { email, firstName, lastName, phone, userId, host } = req.body || {};
+
+    if (!email || !email.includes('@')) {
+      return res.status(400).json({
+        success: false,
+        error: 'Une adresse e-mail client valide est requise pour initier le paiement.'
+      });
+    }
+
+    // Load subscription settings from Firestore DB
+    const settings = await getSubscriptionSettingsFromFirestore();
+
+    const apiKey = (settings.maketouApiKey || settings.markettoApiKey || process.env.MAKETOU_API_KEY || '').trim();
+    const productId = (settings.maketouProductId || settings.markettoProductId || process.env.MAKETOU_PRODUCT_ID || '').trim();
+
+    if (!apiKey) {
+      return res.status(400).json({
+        success: false,
+        error: 'La clé API Maketou n\'est pas encore configurée dans le tableau de bord administrateur.'
+      });
+    }
+
+    if (!productId) {
+      return res.status(400).json({
+        success: false,
+        error: 'L\'ID de produit Maketou n\'est pas renseigné dans les paramètres de la passerelle Maketou.'
+      });
+    }
+
+    const reqHost = host || req.headers?.host || 'rezeserve.me';
+    const protocol = reqHost.includes('localhost') ? 'http' : 'https';
+    const appOrigin = `${protocol}://${reqHost}`;
+    const redirectURL = `${appOrigin}/pro-subscription?status=checkout_completed`;
+    const webhookUrl = `${appOrigin}/api/webhooks/subscription`;
+
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanFirstName = (firstName || cleanEmail.split('@')[0] || 'Client').trim();
+    const cleanLastName = (lastName || 'Pro').trim();
+
+    const payload = {
+      productDocumentId: productId,
+      email: cleanEmail,
+      firstName: cleanFirstName,
+      lastName: cleanLastName,
+      phone: phone || '+2250102030405',
+      redirectURL,
+      webhookUrl,
+      meta: {
+        userId: userId || 'pro-user',
+        userEmail: cleanEmail,
+        platform: 'Reserve Me'
+      }
+    };
+
+    console.log('[Maketou Checkout Init] Création du panier Maketou pour:', cleanEmail);
+
+    const maketouRes = await fetch('https://api.maketou.net/api/v1/stores/cart/checkout', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await maketouRes.json();
+
+    if (!maketouRes.ok) {
+      console.warn('[Maketou Checkout Error]', maketouRes.status, data);
+      const errorMsg = data?.message || data?.error || 'Erreur lors de la création du panier Maketou.';
+      return res.status(maketouRes.status).json({
+        success: false,
+        error: `Erreur Maketou (${maketouRes.status}): ${errorMsg}`,
+        code: data?.code
+      });
+    }
+
+    const redirectUrl = data?.redirectUrl || data?.cart?.redirectUrl;
+
+    if (!redirectUrl) {
+      return res.status(500).json({
+        success: false,
+        error: 'Maketou n\'a pas retourné d\'URL de redirection pour le paiement.'
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      redirectUrl,
+      cartId: data?.cart?.id
+    });
+  } catch (err: any) {
+    console.error('[Maketou Checkout Exception]', err);
+    return res.status(500).json({
+      success: false,
+      error: `Erreur interne lors de la création du panier Maketou : ${err.message}`
+    });
+  }
+}
+
+// Attach Maketou routes
+smtpRouter.post('/api/admin/maketou/test-key', handleTestMaketouApiKey);
+smtpRouter.post('/api/admin/marketto/test-key', handleTestMaketouApiKey);
+smtpRouter.post('/api/subscription/create-checkout', handleCreateMaketouCheckout);
+smtpRouter.post('/subscription/create-checkout', handleCreateMaketouCheckout);
 
 // Universal Route Attachments to guarantee 0% 404 rate
 smtpRouter.all('/webhooks/subscription', handleIncomingWebhook);

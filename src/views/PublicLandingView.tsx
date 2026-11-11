@@ -2,8 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 
 export const PublicLandingView: React.FC = () => {
-  const { setCurrentView, showToast, subscriptionSettings } = useApp();
+  const { setCurrentView, showToast, subscriptionSettings, firebaseUser, userProfile, user } = useApp();
   const [activeSlide, setActiveSlide] = useState<number>(0);
+  const [isRedirecting, setIsRedirecting] = useState<boolean>(false);
+
+  const handleSubscribe = () => {
+    // Always navigate to internal checkout page (/checkout) on our platform
+    setCurrentView('public-checkout');
+  };
 
   const heroSlides = [
     {
@@ -586,18 +592,21 @@ export const PublicLandingView: React.FC = () => {
 
               <div className="mt-8 pt-4">
                 <button
-                  onClick={() => {
-                    if (subscriptionSettings?.checkoutUrl) {
-                      window.open(subscriptionSettings.checkoutUrl, '_blank');
-                      showToast('Redirection vers le lien de paiement paramétré...');
-                    } else {
-                      setCurrentView('auth-signup');
-                    }
-                  }}
-                  className="w-full py-3.5 px-4 rounded-xl bg-[#0f766e] text-white text-sm font-semibold hover:bg-[#115e59] transition-colors shadow-md flex items-center justify-center gap-2"
+                  disabled={isRedirecting}
+                  onClick={handleSubscribe}
+                  className="w-full py-3.5 px-4 rounded-xl bg-[#0f766e] hover:bg-[#115e59] disabled:opacity-60 text-white text-sm font-semibold transition-all shadow-md flex items-center justify-center gap-2 group"
                 >
-                  <span>Souscrire au plan Pro ({subscriptionSettings?.proPriceXOF ? `${subscriptionSettings.proPriceXOF.toLocaleString('fr-FR')} FCFA` : '1 000 FCFA'})</span>
-                  <span className="material-symbols-outlined text-lg">open_in_new</span>
+                  {isRedirecting ? (
+                    <>
+                      <span className="material-symbols-outlined text-lg animate-spin">progress_activity</span>
+                      <span>Création du panier Maketou...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Souscrire au plan Pro ({subscriptionSettings?.proPriceXOF ? `${subscriptionSettings.proPriceXOF.toLocaleString('fr-FR')} FCFA` : '1 000 FCFA'})</span>
+                      <span className="material-symbols-outlined text-lg group-hover:translate-x-1 transition-transform">open_in_new</span>
+                    </>
+                  )}
                 </button>
               </div>
             </div>

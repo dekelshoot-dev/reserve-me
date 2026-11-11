@@ -2,7 +2,8 @@ import React from 'react';
 import { useApp } from '../context/AppContext';
 
 export const ProSubscriptionView: React.FC = () => {
-  const { userProfile, user, services, subscriptionSettings, showToast } = useApp();
+  const { userProfile, user, firebaseUser, services, subscriptionSettings, showToast, setCurrentView } = useApp();
+  const [isRedirecting, setIsRedirecting] = React.useState<boolean>(false);
 
   const currentPlan = userProfile?.plan || user?.plan || 'free';
   const isPro = currentPlan === 'pro';
@@ -10,12 +11,8 @@ export const ProSubscriptionView: React.FC = () => {
   const maxServices = isPro ? 'Illimité' : `${subscriptionSettings.freeMaxServices || 1}`;
 
   const handleUpgrade = () => {
-    if (subscriptionSettings.checkoutUrl) {
-      window.open(subscriptionSettings.checkoutUrl, '_blank');
-      showToast('Redirection vers la page de paiement sécurisée...');
-    } else {
-      showToast('Lien de paiement indisponible actuellement.');
-    }
+    // Always navigate to internal checkout page (/checkout) on our platform
+    setCurrentView('public-checkout');
   };
 
   return (
@@ -170,11 +167,21 @@ export const ProSubscriptionView: React.FC = () => {
               </div>
             ) : (
               <button
+                disabled={isRedirecting}
                 onClick={handleUpgrade}
-                className="w-full py-3.5 px-4 rounded-xl bg-[#0f766e] hover:bg-[#115e59] text-white text-sm font-bold shadow-md transition-all flex items-center justify-center gap-2 group"
+                className="w-full py-3.5 px-4 rounded-xl bg-[#0f766e] hover:bg-[#115e59] disabled:opacity-60 text-white text-sm font-bold shadow-md transition-all flex items-center justify-center gap-2 group"
               >
-                <span>Passer au Forfait Pro ({subscriptionSettings.proPriceXOF.toLocaleString('fr-FR')} FCFA)</span>
-                <span className="material-symbols-outlined text-base group-hover:translate-x-1 transition-transform">open_in_new</span>
+                {isRedirecting ? (
+                  <>
+                    <span className="material-symbols-outlined text-base animate-spin">progress_activity</span>
+                    <span>Création du panier Maketou...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Passer au Forfait Pro ({subscriptionSettings.proPriceXOF.toLocaleString('fr-FR')} FCFA)</span>
+                    <span className="material-symbols-outlined text-base group-hover:translate-x-1 transition-transform">open_in_new</span>
+                  </>
+                )}
               </button>
             )}
           </div>

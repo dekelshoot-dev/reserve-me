@@ -10,6 +10,7 @@ import { AiAssistantModal } from './components/AiAssistantModal';
 import { PublicLandingView } from './views/PublicLandingView';
 import { PublicExplorerView } from './views/PublicExplorerView';
 import { PublicBookingView } from './views/PublicBookingView';
+import { PublicCheckoutView } from './views/PublicCheckoutView';
 import { AuthSignInView } from './views/AuthSignInView';
 import { AuthSignUpView } from './views/AuthSignUpView';
 import { AuthVerifyEmailView } from './views/AuthVerifyEmailView';
@@ -129,6 +130,7 @@ const MainRouter: React.FC = () => {
             {currentView === 'public-landing' && <PublicLandingView />}
             {currentView === 'public-explorer' && <PublicExplorerView />}
             {currentView === 'public-booking' && <PublicBookingView />}
+            {currentView === 'public-checkout' && <PublicCheckoutView />}
             {currentView === 'auth-signin' && <AuthSignInView />}
             {currentView === 'auth-signup' && <AuthSignUpView />}
             {currentView === 'auth-verify-email' && <AuthVerifyEmailView />}

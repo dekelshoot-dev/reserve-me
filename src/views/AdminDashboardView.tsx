@@ -57,29 +57,29 @@ export const AdminDashboardView: React.FC = () => {
     subscriptionSettings.webhookProvider === 'maketou' || subscriptionSettings.webhookSecret === 'maketou' ? 'maketou' : 'custom'
   );
 
-  // Marketto Gateway & Payment Method State
+  // Maketou Gateway & Payment Method State
   const [editPaymentMethodType, setEditPaymentMethodType] = useState<'checkout_link' | 'integrated_gateway'>(
     subscriptionSettings.paymentMethodType || 'checkout_link'
   );
-  const [editActiveGateway, setEditActiveGateway] = useState<'marketto' | 'custom'>(
-    subscriptionSettings.activeGateway || 'marketto'
+  const [editActiveGateway, setEditActiveGateway] = useState<'maketou' | 'marketto' | 'custom'>(
+    subscriptionSettings.activeGateway || 'maketou'
   );
-  const [editMarkettoApiKey, setEditMarkettoApiKey] = useState<string>(
-    subscriptionSettings.markettoApiKey || ''
+  const [editMaketouApiKey, setEditMaketouApiKey] = useState<string>(
+    subscriptionSettings.maketouApiKey || subscriptionSettings.markettoApiKey || ''
   );
-  const [editMarkettoProductId, setEditMarkettoProductId] = useState<string>(
-    subscriptionSettings.markettoProductId || ''
+  const [editMaketouProductId, setEditMaketouProductId] = useState<string>(
+    subscriptionSettings.maketouProductId || subscriptionSettings.markettoProductId || ''
   );
-  const [editMarkettoEnabled, setEditMarkettoEnabled] = useState<boolean>(
-    subscriptionSettings.markettoEnabled ?? true
+  const [editMaketouEnabled, setEditMaketouEnabled] = useState<boolean>(
+    subscriptionSettings.maketouEnabled ?? subscriptionSettings.markettoEnabled ?? true
   );
 
-  // Marketto Modal & Key Testing State
-  const [showMarkettoModal, setShowMarkettoModal] = useState<boolean>(false);
-  const [isTestingMarketoKey, setIsTestingMarketoKey] = useState<boolean>(false);
-  const [marketoTestResult, setMarketoTestResult] = useState<{ success: boolean; message: string } | null>(null);
+  // Maketou Modal & Key Testing State
+  const [showMaketouModal, setShowMaketouModal] = useState<boolean>(false);
+  const [isTestingMaketouKey, setIsTestingMaketouKey] = useState<boolean>(false);
+  const [maketouTestResult, setMaketouTestResult] = useState<{ success: boolean; message: string } | null>(null);
   const [showApiKeyText, setShowApiKeyText] = useState<boolean>(false);
-  const [isSavingMarkettoSettings, setIsSavingMarkettoSettings] = useState<boolean>(false);
+  const [isSavingMaketouSettings, setIsSavingMaketouSettings] = useState<boolean>(false);
 
   // Users & Webhooks State
   const [userSearchQuery, setUserSearchQuery] = useState<string>('');
@@ -87,49 +87,52 @@ export const AdminDashboardView: React.FC = () => {
   const [simCustomerEmail, setSimCustomerEmail] = useState<string>(firebaseUser?.email || 'dekel@dekel-dev.com');
   const [isSimulating, setIsSimulating] = useState<boolean>(false);
 
-  // Synchronize Marketto states when subscriptionSettings updates from Firestore
+  // Synchronize Maketou states when subscriptionSettings updates from Firestore
   useEffect(() => {
     if (subscriptionSettings) {
       if (subscriptionSettings.paymentMethodType) setEditPaymentMethodType(subscriptionSettings.paymentMethodType);
       if (subscriptionSettings.activeGateway) setEditActiveGateway(subscriptionSettings.activeGateway);
-      if (subscriptionSettings.markettoApiKey !== undefined) setEditMarkettoApiKey(subscriptionSettings.markettoApiKey);
-      if (subscriptionSettings.markettoProductId !== undefined) setEditMarkettoProductId(subscriptionSettings.markettoProductId);
-      if (subscriptionSettings.markettoEnabled !== undefined) setEditMarkettoEnabled(subscriptionSettings.markettoEnabled);
+      const key = subscriptionSettings.maketouApiKey || subscriptionSettings.markettoApiKey;
+      if (key !== undefined) setEditMaketouApiKey(key);
+      const prod = subscriptionSettings.maketouProductId || subscriptionSettings.markettoProductId;
+      if (prod !== undefined) setEditMaketouProductId(prod);
+      const enabled = subscriptionSettings.maketouEnabled ?? subscriptionSettings.markettoEnabled;
+      if (enabled !== undefined) setEditMaketouEnabled(enabled);
     }
   }, [subscriptionSettings]);
 
-  const handleTestMarketoApiKeyAction = async () => {
-    if (!editMarkettoApiKey || !editMarkettoApiKey.trim()) {
-      showToast('Veuillez d\'abord saisir une clé API Marketto.');
-      setMarketoTestResult({ success: false, message: 'La clé API ne peut pas être vide.' });
+  const handleTestMaketouApiKeyAction = async () => {
+    if (!editMaketouApiKey || !editMaketouApiKey.trim()) {
+      showToast('Veuillez d\'abord saisir une clé API Maketou.');
+      setMaketouTestResult({ success: false, message: 'La clé API ne peut pas être vide.' });
       return;
     }
-    setIsTestingMarketoKey(true);
-    setMarketoTestResult(null);
+    setIsTestingMaketouKey(true);
+    setMaketouTestResult(null);
 
     try {
-      const res = await fetch('/api/admin/marketto/test-key', {
+      const res = await fetch('/api/admin/maketou/test-key', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          apiKey: editMarkettoApiKey,
-          productId: editMarkettoProductId
+          apiKey: editMaketouApiKey,
+          productId: editMaketouProductId
         })
       });
 
       const data = await res.json();
       if (res.ok && data.success) {
-        setMarketoTestResult({ success: true, message: data.message });
-        showToast('Clé API Marketto testée et validée avec succès !');
+        setMaketouTestResult({ success: true, message: data.message });
+        showToast('Clé API Maketou authentifiée avec succès !');
       } else {
-        setMarketoTestResult({ success: false, message: data.error || 'Clé API non reconnue ou invalide.' });
-        showToast(data.error || 'Échec du test de la clé API Marketto');
+        setMaketouTestResult({ success: false, message: data.error || 'Clé API Maketou non reconnue ou invalide.' });
+        showToast(data.error || 'Échec du test de la clé API Maketou');
       }
     } catch (err) {
-      setMarketoTestResult({ success: false, message: 'Impossible de contacter la passerelle Marketto.' });
-      showToast('Erreur lors du test de la clé API Marketto');
+      setMaketouTestResult({ success: false, message: 'Impossible de contacter api.maketou.net.' });
+      showToast('Erreur lors du test de la clé API Maketou');
     } finally {
-      setIsTestingMarketoKey(false);
+      setIsTestingMaketouKey(false);
     }
   };
 
@@ -1314,7 +1317,7 @@ export const AdminDashboardView: React.FC = () => {
                 <div>
                   <h1 className="text-2xl font-bold text-[#111c2d] tracking-tight">Paramètres des Abonnements &amp; Passerelles de Paiement</h1>
                   <p className="text-sm text-slate-500 mt-1">
-                    Définissez la méthode de paiement pour vos utilisateurs (lien externe ou intégration directe), configurez la passerelle Marketto et gérez les clés API.
+                    Définissez la méthode de paiement pour vos utilisateurs (lien externe ou intégration directe), configurez la passerelle Maketou et gérez les clés API.
                   </p>
                 </div>
 
@@ -1363,7 +1366,7 @@ export const AdminDashboardView: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Mode 2: Passerelle d'Intégration Spécialisée (ex: Marketto) */}
+                    {/* Mode 2: Passerelle d'Intégration Spécialisée (ex: Maketou) */}
                     <div
                       onClick={() => setEditPaymentMethodType('integrated_gateway')}
                       className={`cursor-pointer p-4 rounded-xl border text-left flex items-start gap-3.5 transition-all ${
@@ -1385,7 +1388,7 @@ export const AdminDashboardView: React.FC = () => {
                           )}
                         </div>
                         <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">
-                          Utilise une plateforme dédiée (ex. <strong>Marketto</strong>) via sa Clé API et son ID Produit.
+                          Utilise une plateforme dédiée (ex. <strong>Maketou</strong>) via sa Clé API et son ID Produit.
                         </p>
                       </div>
                     </div>
@@ -1403,22 +1406,22 @@ export const AdminDashboardView: React.FC = () => {
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                    {/* Carte 1: MARKETTO INTÉGRATION / PASSERELLE MARKETTO */}
+                    {/* Carte 1: MAKETOU INTÉGRATION / PASSERELLE MAKETOU */}
                     <div className="bg-white rounded-xl border border-slate-200/80 shadow-xs overflow-hidden flex flex-col justify-between hover:shadow-md transition-all">
                       <div className="p-5 space-y-4">
                         <div className="flex items-start justify-between">
                           <div className="flex items-center gap-3">
-                            <div className="w-11 h-11 rounded-xl bg-purple-600 text-white flex items-center justify-center shadow-md font-bold text-lg">
+                            <div className="w-11 h-11 rounded-xl bg-[#006b5f] text-white flex items-center justify-center shadow-md font-bold text-lg">
                               M
                             </div>
                             <div>
-                              <h3 className="font-bold text-sm text-[#111c2d]">Passerelle Marketto</h3>
+                              <h3 className="font-bold text-sm text-[#111c2d]">Passerelle Maketou</h3>
                               <span className="text-[11px] text-slate-400 font-mono">Intégration v1.0 API</span>
                             </div>
                           </div>
 
                           <div className="flex flex-col items-end gap-1">
-                            {editMarkettoApiKey ? (
+                            {editMaketouApiKey ? (
                               <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 border border-emerald-200">
                                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
                                 Configuré
@@ -1433,22 +1436,22 @@ export const AdminDashboardView: React.FC = () => {
                         </div>
 
                         <p className="text-xs text-slate-600 leading-relaxed">
-                          Intégration directe des paiements avec Marketto. Permet d'associer la clé API et l'ID du produit d'abonnement.
+                          Intégration directe des paiements avec Maketou. Permet d'associer la clé API et l'ID du produit d'abonnement.
                         </p>
 
                         <div className="bg-slate-50 p-3 rounded-lg border border-slate-100 space-y-1.5 text-xs font-mono">
                           <div className="flex items-center justify-between">
                             <span className="text-slate-400 text-[11px]">Clé API :</span>
                             <span className="font-bold text-[#111c2d]">
-                              {editMarkettoApiKey 
-                                ? `${editMarkettoApiKey.substring(0, 4)}••••••••${editMarkettoApiKey.substring(editMarkettoApiKey.length - 3)}`
+                              {editMaketouApiKey 
+                                ? `${editMaketouApiKey.substring(0, 4)}••••••••${editMaketouApiKey.substring(editMaketouApiKey.length - 3)}`
                                 : <em className="text-slate-400 font-normal">Non définie</em>}
                             </span>
                           </div>
                           <div className="flex items-center justify-between">
                             <span className="text-slate-400 text-[11px]">ID Produit :</span>
                             <span className="font-bold text-[#111c2d] truncate max-w-[140px]">
-                              {editMarkettoProductId || <em className="text-slate-400 font-normal">Non défini</em>}
+                              {editMaketouProductId || <em className="text-slate-400 font-normal">Non défini</em>}
                             </span>
                           </div>
                         </div>
@@ -1456,19 +1459,19 @@ export const AdminDashboardView: React.FC = () => {
 
                       <div className="p-4 bg-slate-50/70 border-t border-slate-100 flex items-center justify-between">
                         <span className="text-[11px] text-slate-500 font-medium">
-                          {editPaymentMethodType === 'integrated_gateway' && editActiveGateway === 'marketto'
+                          {editPaymentMethodType === 'integrated_gateway' && editActiveGateway === 'maketou'
                             ? '✓ Mode actif sélectionné'
                             : 'Passerelle disponible'}
                         </span>
                         <button
                           type="button"
                           onClick={() => {
-                            setMarketoTestResult(null);
-                            setShowMarkettoModal(true);
+                            setMaketouTestResult(null);
+                            setShowMaketouModal(true);
                           }}
                           className="px-3.5 py-1.5 rounded-lg bg-[#141b2c] hover:bg-slate-800 text-white text-xs font-semibold flex items-center gap-1.5 transition-all shadow-xs"
                         >
-                          <span className="material-symbols-outlined text-base text-purple-300">tune</span>
+                          <span className="material-symbols-outlined text-base text-teal-300">tune</span>
                           <span>Configurer</span>
                         </button>
                       </div>
@@ -1615,7 +1618,7 @@ export const AdminDashboardView: React.FC = () => {
                         <div className="p-3.5 bg-emerald-50 rounded-xl border border-emerald-200 text-xs text-emerald-900 flex items-start gap-2.5">
                           <span className="material-symbols-outlined text-emerald-700 text-lg shrink-0 mt-0.5">check_circle</span>
                           <div>
-                            <p className="font-bold">Mode Marketo / Maketou Sélectionné</p>
+                            <p className="font-bold">Mode Maketou Sélectionné</p>
                             <p className="text-[11px] text-emerald-800 mt-0.5 leading-relaxed">
                               La vérification de signature est effectuée automatiquement via la Clé Publique Ed25519 transmise dans l'en-tête <code className="font-mono bg-emerald-100/80 px-1 rounded">X-Cart-Signature</code>.
                             </p>
@@ -1660,9 +1663,9 @@ export const AdminDashboardView: React.FC = () => {
                                 webhookProvider: editWebhookProvider,
                                 paymentMethodType: editPaymentMethodType,
                                 activeGateway: editActiveGateway,
-                                markettoApiKey: editMarkettoApiKey,
-                                markettoProductId: editMarkettoProductId,
-                                markettoEnabled: editMarkettoEnabled
+                                maketouApiKey: editMaketouApiKey,
+                                maketouProductId: editMaketouProductId,
+                                maketouEnabled: editMaketouEnabled
                               });
                             } catch (e) {
                               showToast('Erreur lors de la sauvegarde des paramètres');
@@ -2085,24 +2088,24 @@ export const AdminDashboardView: React.FC = () => {
         </div>
       )}
 
-      {/* Modal: Configuration Passerelle Marketto */}
-      {showMarkettoModal && (
+      {/* Modal: Configuration Passerelle Maketou */}
+      {showMaketouModal && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-fadeIn">
           <div className="bg-white rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden border border-slate-100 flex flex-col">
             {/* Modal Header */}
             <div className="px-6 py-4 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-purple-600 text-white flex items-center justify-center font-bold text-lg shadow-xs">
+                <div className="w-10 h-10 rounded-xl bg-[#006b5f] text-white flex items-center justify-center font-bold text-lg shadow-xs">
                   M
                 </div>
                 <div>
-                  <h3 className="font-bold text-base text-[#111c2d]">Passerelle Marketto</h3>
+                  <h3 className="font-bold text-base text-[#111c2d]">Passerelle Maketou</h3>
                   <p className="text-xs text-slate-500">Configuration de l'intégration et des paramètres API</p>
                 </div>
               </div>
               <button
                 type="button"
-                onClick={() => setShowMarkettoModal(false)}
+                onClick={() => setShowMaketouModal(false)}
                 className="p-1.5 text-slate-400 hover:text-[#111c2d] rounded-lg hover:bg-slate-200/60 transition-colors"
               >
                 <span className="material-symbols-outlined text-[20px]">close</span>
@@ -2112,21 +2115,21 @@ export const AdminDashboardView: React.FC = () => {
             {/* Modal Body */}
             <div className="p-6 space-y-5">
               {/* Activation Switch */}
-              <div className="p-4 rounded-xl bg-purple-50/60 border border-purple-100 flex items-center justify-between">
+              <div className="p-4 rounded-xl bg-teal-50/60 border border-teal-100 flex items-center justify-between">
                 <div>
-                  <h4 className="text-xs font-bold text-purple-950">Activer la passerelle Marketto</h4>
-                  <p className="text-[11px] text-purple-800 mt-0.5">Autoriser cette passerelle pour les paiements d'abonnement</p>
+                  <h4 className="text-xs font-bold text-teal-950">Activer la passerelle Maketou</h4>
+                  <p className="text-[11px] text-teal-800 mt-0.5">Autoriser cette passerelle pour les paiements d'abonnement</p>
                 </div>
                 <button
                   type="button"
-                  onClick={() => setEditMarkettoEnabled(!editMarkettoEnabled)}
+                  onClick={() => setEditMaketouEnabled(!editMaketouEnabled)}
                   className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                    editMarkettoEnabled ? 'bg-purple-600' : 'bg-slate-300'
+                    editMaketouEnabled ? 'bg-[#006b5f]' : 'bg-slate-300'
                   }`}
                 >
                   <span
                     className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                      editMarkettoEnabled ? 'translate-x-5' : 'translate-x-0'
+                      editMaketouEnabled ? 'translate-x-5' : 'translate-x-0'
                     }`}
                   />
                 </button>
@@ -2135,24 +2138,24 @@ export const AdminDashboardView: React.FC = () => {
               {/* Field 1: Clé API (API Key) */}
               <div className="space-y-2">
                 <label className="text-xs font-semibold text-[#111c2d] flex items-center justify-between">
-                  <span>Clé API Marketto</span>
-                  <span className="text-[11px] font-mono text-purple-700 font-bold">Requis</span>
+                  <span>Clé API Maketou</span>
+                  <span className="text-[11px] font-mono text-[#006b5f] font-bold">Requis</span>
                 </label>
                 <p className="text-[11px] text-slate-500">
-                  Clé d'authentification API fournie par la plateforme Marketto.
+                  Clé d'authentification API fournie par la plateforme Maketou.
                 </p>
 
                 <div className="flex items-center gap-2">
                   <div className="relative flex-1">
                     <input
                       type={showApiKeyText ? 'text' : 'password'}
-                      value={editMarkettoApiKey}
+                      value={editMaketouApiKey}
                       onChange={(e) => {
-                        setEditMarkettoApiKey(e.target.value);
-                        setMarketoTestResult(null);
+                        setEditMaketouApiKey(e.target.value);
+                        setMaketouTestResult(null);
                       }}
                       placeholder="mkt_live_9f83a0429bf..."
-                      className="w-full h-10 pl-3 pr-10 rounded-lg bg-slate-50 text-xs font-mono text-[#111c2d] border border-slate-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-600"
+                      className="w-full h-10 pl-3 pr-10 rounded-lg bg-slate-50 text-xs font-mono text-[#111c2d] border border-slate-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#006b5f]/20 focus:border-[#006b5f]"
                     />
                     <button
                       type="button"
@@ -2169,11 +2172,11 @@ export const AdminDashboardView: React.FC = () => {
                   {/* Button: Tester la clé API */}
                   <button
                     type="button"
-                    disabled={isTestingMarketoKey || !editMarkettoApiKey}
-                    onClick={handleTestMarketoApiKeyAction}
-                    className="h-10 px-4 rounded-lg bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white text-xs font-semibold flex items-center gap-1.5 shrink-0 transition-all shadow-xs"
+                    disabled={isTestingMaketouKey || !editMaketouApiKey}
+                    onClick={handleTestMaketouApiKeyAction}
+                    className="h-10 px-4 rounded-lg bg-[#006b5f] hover:bg-[#005048] disabled:opacity-50 text-white text-xs font-semibold flex items-center gap-1.5 shrink-0 transition-all shadow-xs"
                   >
-                    {isTestingMarketoKey ? (
+                    {isTestingMaketouKey ? (
                       <>
                         <span className="material-symbols-outlined text-base animate-spin">progress_activity</span>
                         <span>Vérification...</span>
@@ -2188,16 +2191,16 @@ export const AdminDashboardView: React.FC = () => {
                 </div>
 
                 {/* API Test Feedback Banner */}
-                {marketoTestResult && (
+                {maketouTestResult && (
                   <div className={`p-3 rounded-lg text-xs flex items-start gap-2.5 transition-all ${
-                    marketoTestResult.success
+                    maketouTestResult.success
                       ? 'bg-emerald-50 border border-emerald-200 text-emerald-900'
                       : 'bg-rose-50 border border-rose-200 text-rose-900'
                   }`}>
                     <span className="material-symbols-outlined text-lg shrink-0 mt-0.5">
-                      {marketoTestResult.success ? 'check_circle' : 'error'}
+                      {maketouTestResult.success ? 'check_circle' : 'error'}
                     </span>
-                    <p className="leading-relaxed">{marketoTestResult.message}</p>
+                    <p className="leading-relaxed">{maketouTestResult.message}</p>
                   </div>
                 )}
               </div>
@@ -2205,18 +2208,18 @@ export const AdminDashboardView: React.FC = () => {
               {/* Field 2: ID du produit (Product ID) */}
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-[#111c2d] flex items-center justify-between">
-                  <span>ID du produit Marketto</span>
+                  <span>ID du produit Maketou</span>
                   <span className="text-[11px] font-mono text-slate-400 font-normal">Identifiant Produit</span>
                 </label>
                 <p className="text-[11px] text-slate-500">
-                  Identifiant UUID du produit d'abonnement configuré sur Marketto (ex: <code className="font-mono bg-slate-100 px-1 rounded">550e8400-e29b-41d4-a716-446655440000</code>).
+                  Identifiant UUID du produit d'abonnement configuré sur Maketou (ex: <code className="font-mono bg-slate-100 px-1 rounded">550e8400-e29b-41d4-a716-446655440000</code>).
                 </p>
                 <input
                   type="text"
-                  value={editMarkettoProductId}
-                  onChange={(e) => setEditMarkettoProductId(e.target.value)}
+                  value={editMaketouProductId}
+                  onChange={(e) => setEditMaketouProductId(e.target.value)}
                   placeholder="550e8400-e29b-41d4-a716-446655440000"
-                  className="w-full h-10 px-3 rounded-lg bg-slate-50 text-xs font-mono text-[#111c2d] border border-slate-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-600"
+                  className="w-full h-10 px-3 rounded-lg bg-slate-50 text-xs font-mono text-[#111c2d] border border-slate-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#006b5f]/20 focus:border-[#006b5f]"
                 />
               </div>
             </div>
@@ -2225,7 +2228,7 @@ export const AdminDashboardView: React.FC = () => {
             <div className="px-6 py-4 border-t border-slate-100 bg-slate-50 flex items-center justify-between">
               <button
                 type="button"
-                onClick={() => setShowMarkettoModal(false)}
+                onClick={() => setShowMaketouModal(false)}
                 className="px-4 py-2 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-semibold transition-colors"
               >
                 Annuler
@@ -2233,30 +2236,30 @@ export const AdminDashboardView: React.FC = () => {
 
               <button
                 type="button"
-                disabled={isSavingMarkettoSettings}
+                disabled={isSavingMaketouSettings}
                 onClick={async () => {
-                  setIsSavingMarkettoSettings(true);
+                  setIsSavingMaketouSettings(true);
                   try {
                     await updateSubscriptionSettings({
-                      markettoApiKey: editMarkettoApiKey,
-                      markettoProductId: editMarkettoProductId,
-                      markettoEnabled: editMarkettoEnabled,
+                      maketouApiKey: editMaketouApiKey,
+                      maketouProductId: editMaketouProductId,
+                      maketouEnabled: editMaketouEnabled,
                       paymentMethodType: 'integrated_gateway',
-                      activeGateway: 'marketto'
+                      activeGateway: 'maketou'
                     });
                     setEditPaymentMethodType('integrated_gateway');
-                    setEditActiveGateway('marketto');
-                    showToast('Configuration de la passerelle Marketto enregistrée !');
-                    setShowMarkettoModal(false);
+                    setEditActiveGateway('maketou');
+                    showToast('Configuration de la passerelle Maketou enregistrée !');
+                    setShowMaketouModal(false);
                   } catch (err) {
                     showToast('Erreur lors de l\'enregistrement de la passerelle');
                   } finally {
-                    setIsSavingMarkettoSettings(false);
+                    setIsSavingMaketouSettings(false);
                   }
                 }}
                 className="px-5 py-2 rounded-lg bg-[#141b2c] hover:bg-slate-800 disabled:opacity-50 text-white text-xs font-semibold flex items-center gap-2 shadow-sm transition-all"
               >
-                {isSavingMarkettoSettings ? (
+                {isSavingMaketouSettings ? (
                   <>
                     <span className="material-symbols-outlined text-base animate-spin">progress_activity</span>
                     <span>Enregistrement...</span>

@@ -115,7 +115,39 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [currentView, setCurrentView] = useState<ViewMode>('public-landing');
+  const getInitialView = (): ViewMode => {
+    if (typeof window !== 'undefined' && window.location.pathname === '/checkout') {
+      return 'public-checkout';
+    }
+    return 'public-landing';
+  };
+
+  const [currentView, setCurrentViewRaw] = useState<ViewMode>(getInitialView());
+
+  const setCurrentView = (view: ViewMode) => {
+    setCurrentViewRaw(view);
+    if (typeof window !== 'undefined') {
+      if (view === 'public-checkout') {
+        if (window.location.pathname !== '/checkout') {
+          window.history.pushState({ view }, '', '/checkout');
+        }
+      } else if (window.location.pathname === '/checkout') {
+        window.history.pushState({ view }, '', '/');
+      }
+    }
+  };
+
+  useEffect(() => {
+    const handlePopState = () => {
+      if (window.location.pathname === '/checkout') {
+        setCurrentViewRaw('public-checkout');
+      } else if (currentView === 'public-checkout') {
+        setCurrentViewRaw('public-landing');
+      }
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [currentView]);
   const [editingServiceId, setEditingServiceId] = useState<string | null>(null);
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);

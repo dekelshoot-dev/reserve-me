@@ -2,6 +2,7 @@ export type ViewMode =
   | 'public-landing'
   | 'public-explorer'
   | 'public-booking'
+  | 'public-checkout'
   | 'auth-signin'
   | 'auth-signup'
   | 'auth-verify-email'
@@ -55,7 +56,10 @@ export interface SubscriptionSettings {
   webhookSecret: string;
   webhookProvider?: 'custom' | 'maketou' | 'chariow';
   paymentMethodType?: 'checkout_link' | 'integrated_gateway';
-  activeGateway?: 'marketto' | 'custom';
+  activeGateway?: 'maketou' | 'marketto' | 'custom';
+  maketouApiKey?: string;
+  maketouProductId?: string;
+  maketouEnabled?: boolean;
   markettoApiKey?: string;
   markettoProductId?: string;
   markettoEnabled?: boolean;

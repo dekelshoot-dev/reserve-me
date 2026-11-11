@@ -103,6 +103,8 @@ function toFirestoreFields(obj: Record<string, any>): Record<string, any> {
   return fields;
 }
 
+let isAdminDbDisabled = false;
+
 /**
  * Retrieves subscription & webhook settings directly from Firestore /settings/subscription document
  */
@@ -112,7 +114,10 @@ export async function getSubscriptionSettingsFromFirestore(): Promise<{
   webhookSecret: string;
   webhookProvider?: 'custom' | 'maketou' | 'chariow';
   paymentMethodType?: 'checkout_link' | 'integrated_gateway';
-  activeGateway?: 'marketto' | 'custom';
+  activeGateway?: 'maketou' | 'marketto' | 'custom';
+  maketouApiKey?: string;
+  maketouProductId?: string;
+  maketouEnabled?: boolean;
   markettoApiKey?: string;
   markettoProductId?: string;
   markettoEnabled?: boolean;
@@ -125,7 +130,10 @@ export async function getSubscriptionSettingsFromFirestore(): Promise<{
     webhookSecret: 'whsec_wWyannB9BkCXJhSxk1D5FbqxoM1IWpHvvLhIphNR',
     webhookProvider: 'custom' as 'custom' | 'maketou' | 'chariow',
     paymentMethodType: 'checkout_link' as 'checkout_link' | 'integrated_gateway',
-    activeGateway: 'marketto' as 'marketto' | 'custom',
+    activeGateway: 'maketou' as 'maketou' | 'marketto' | 'custom',
+    maketouApiKey: '',
+    maketouProductId: '',
+    maketouEnabled: false,
     markettoApiKey: '',
     markettoProductId: '',
     markettoEnabled: false,
@@ -133,35 +141,55 @@ export async function getSubscriptionSettingsFromFirestore(): Promise<{
     proMaxServices: 999
   };
 
-  try {
-    const { adminDb: db } = await getAdminServices();
-    if (db) {
-      const docSnap = await db.collection('settings').doc('subscription').get();
-      if (docSnap.exists) {
-        const data = docSnap.data();
-        return {
-          proPriceXOF: Number(data.proPriceXOF) || defaultSettings.proPriceXOF,
-          checkoutUrl: String(data.checkoutUrl || defaultSettings.checkoutUrl),
-          webhookSecret: String(data.webhookSecret || defaultSettings.webhookSecret),
-          webhookProvider: (data.webhookProvider as any) || defaultSettings.webhookProvider,
-          paymentMethodType: (data.paymentMethodType as any) || defaultSettings.paymentMethodType,
-          activeGateway: (data.activeGateway as any) || defaultSettings.activeGateway,
-          markettoApiKey: String(data.markettoApiKey || ''),
-          markettoProductId: String(data.markettoProductId || ''),
-          markettoEnabled: Boolean(data.markettoEnabled),
-          freeMaxServices: Number(data.freeMaxServices) || defaultSettings.freeMaxServices,
-          proMaxServices: Number(data.proMaxServices) || defaultSettings.proMaxServices
-        };
+  // 1. Try Admin SDK if available and not disabled
+  if (!isAdminDbDisabled) {
+    try {
+      const { adminDb: db } = await getAdminServices();
+      if (db) {
+        const docSnap = await db.collection('settings').doc('subscription').get();
+        if (docSnap.exists) {
+          const data = docSnap.data();
+          const maketouKey = String(data.maketouApiKey || data.markettoApiKey || '');
+          const maketouProd = String(data.maketouProductId || data.markettoProductId || '');
+          const maketouActive = Boolean(data.maketouEnabled ?? data.markettoEnabled ?? false);
+
+          return {
+            proPriceXOF: Number(data.proPriceXOF) || defaultSettings.proPriceXOF,
+            checkoutUrl: String(data.checkoutUrl || defaultSettings.checkoutUrl),
+            webhookSecret: String(data.webhookSecret || defaultSettings.webhookSecret),
+            webhookProvider: (data.webhookProvider as any) || defaultSettings.webhookProvider,
+            paymentMethodType: (data.paymentMethodType as any) || defaultSettings.paymentMethodType,
+            activeGateway: (data.activeGateway as any) || defaultSettings.activeGateway,
+            maketouApiKey: maketouKey,
+            maketouProductId: maketouProd,
+            maketouEnabled: maketouActive,
+            markettoApiKey: maketouKey,
+            markettoProductId: maketouProd,
+            markettoEnabled: maketouActive,
+            freeMaxServices: Number(data.freeMaxServices) || defaultSettings.freeMaxServices,
+            proMaxServices: Number(data.proMaxServices) || defaultSettings.proMaxServices
+          };
+        }
+      }
+    } catch (err: any) {
+      if (err?.message?.includes('PERMISSION_DENIED') || err?.code === 7) {
+        isAdminDbDisabled = true;
       }
     }
+  }
 
-    // REST API fallback
+  // 2. REST API fallback
+  try {
     const url = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/${DATABASE_ID}/documents/settings/subscription?key=${API_KEY}`;
     const res = await fetch(url);
     if (res.ok) {
       const docData = await res.json();
       if (docData && docData.fields) {
         const fields = docData.fields;
+        const maketouKey = fields.maketouApiKey?.stringValue || fields.markettoApiKey?.stringValue || '';
+        const maketouProd = fields.maketouProductId?.stringValue || fields.markettoProductId?.stringValue || '';
+        const maketouActive = fields.maketouEnabled?.booleanValue ?? fields.markettoEnabled?.booleanValue ?? false;
+
         return {
           proPriceXOF: fields.proPriceXOF?.integerValue ? parseInt(fields.proPriceXOF.integerValue, 10) : (fields.proPriceXOF?.doubleValue || defaultSettings.proPriceXOF),
           checkoutUrl: fields.checkoutUrl?.stringValue || defaultSettings.checkoutUrl,
@@ -169,16 +197,19 @@ export async function getSubscriptionSettingsFromFirestore(): Promise<{
           webhookProvider: (fields.webhookProvider?.stringValue as any) || defaultSettings.webhookProvider,
           paymentMethodType: (fields.paymentMethodType?.stringValue as any) || defaultSettings.paymentMethodType,
           activeGateway: (fields.activeGateway?.stringValue as any) || defaultSettings.activeGateway,
-          markettoApiKey: fields.markettoApiKey?.stringValue || '',
-          markettoProductId: fields.markettoProductId?.stringValue || '',
-          markettoEnabled: fields.markettoEnabled?.booleanValue || false,
+          maketouApiKey: maketouKey,
+          maketouProductId: maketouProd,
+          maketouEnabled: maketouActive,
+          markettoApiKey: maketouKey,
+          markettoProductId: maketouProd,
+          markettoEnabled: maketouActive,
           freeMaxServices: fields.freeMaxServices?.integerValue ? parseInt(fields.freeMaxServices.integerValue, 10) : defaultSettings.freeMaxServices,
           proMaxServices: fields.proMaxServices?.integerValue ? parseInt(fields.proMaxServices.integerValue, 10) : defaultSettings.proMaxServices
         };
       }
     }
-  } catch (e) {
-    console.warn('[Firestore] Error fetching subscription settings:', e);
+  } catch (_restErr) {
+    // Ignore REST errors and return default settings
   }
 
   return defaultSettings;
@@ -193,7 +224,10 @@ export async function saveSubscriptionSettingsToFirestore(settings: {
   webhookSecret?: string;
   webhookProvider?: 'custom' | 'maketou' | 'chariow';
   paymentMethodType?: 'checkout_link' | 'integrated_gateway';
-  activeGateway?: 'marketto' | 'custom';
+  activeGateway?: 'maketou' | 'marketto' | 'custom';
+  maketouApiKey?: string;
+  maketouProductId?: string;
+  maketouEnabled?: boolean;
   markettoApiKey?: string;
   markettoProductId?: string;
   markettoEnabled?: boolean;
@@ -207,14 +241,18 @@ export async function saveSubscriptionSettingsToFirestore(settings: {
     updatedAt: new Date().toISOString()
   };
 
-  try {
-    const { adminDb: db } = await getAdminServices();
-    if (db) {
-      await db.collection('settings').doc('subscription').set(updated, { merge: true });
-      return true;
+  if (!isAdminDbDisabled) {
+    try {
+      const { adminDb: db } = await getAdminServices();
+      if (db) {
+        await db.collection('settings').doc('subscription').set(updated, { merge: true });
+        return true;
+      }
+    } catch (err: any) {
+      if (err?.message?.includes('PERMISSION_DENIED') || err?.code === 7) {
+        isAdminDbDisabled = true;
+      }
     }
-  } catch (err) {
-    console.warn('[Firebase Admin SDK Warning] Failed to save settings, using REST API:', err);
   }
 
   try {
@@ -333,30 +371,34 @@ export async function updateUserPlanByEmailInFirestore(
   let count = 0;
 
   const dbOperation = async () => {
-    // 1. Try Admin SDK if available
-    const { adminDb: db } = await getAdminServices();
-    if (db && email && email !== 'Inconnu') {
+    // 1. Try Admin SDK if available and not disabled
+    if (!isAdminDbDisabled && email && email !== 'Inconnu') {
       const cleanEmail = email.trim().toLowerCase();
       try {
-        const usersRef = db.collection('users');
-        const snapshot = await usersRef.where('email', '==', cleanEmail).get();
+        const { adminDb: db } = await getAdminServices();
+        if (db) {
+          const usersRef = db.collection('users');
+          const snapshot = await usersRef.where('email', '==', cleanEmail).get();
 
-        if (!snapshot.empty) {
-          for (const docSnap of snapshot.docs) {
-            await docSnap.ref.update({
-              plan,
-              subscriptionStatus: plan === 'pro' ? 'active' : 'inactive',
-              updatedAt: new Date().toISOString()
-            });
-            count++;
+          if (!snapshot.empty) {
+            for (const docSnap of snapshot.docs) {
+              await docSnap.ref.update({
+                plan,
+                subscriptionStatus: plan === 'pro' ? 'active' : 'inactive',
+                updatedAt: new Date().toISOString()
+              });
+              count++;
+            }
+          }
+
+          if (webhookLog) {
+            await db.collection('webhookLogs').doc(webhookLog.id).set(webhookLog);
           }
         }
-
-        if (webhookLog) {
-          await db.collection('webhookLogs').doc(webhookLog.id).set(webhookLog);
-        }
       } catch (err: any) {
-        console.warn('[Firebase Admin SDK Warning] PERMISSION_DENIED or error, falling back to REST API:', err?.message || err);
+        if (err?.message?.includes('PERMISSION_DENIED') || err?.code === 7) {
+          isAdminDbDisabled = true;
+        }
       }
     }
 
