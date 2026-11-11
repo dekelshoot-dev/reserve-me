@@ -1408,16 +1408,46 @@ export async function handleCreateMaketouCheckout(req: any, res: any) {
   }
 }
 
+/**
+ * Test Endpoint for Maketou Webhook Verification & Key Retrieval
+ */
+export async function handleTestMaketouWebhook(_req: any, res: any) {
+  try {
+    const pubKey = await getMaketouPublicKey();
+    return res.status(200).json({
+      success: true,
+      message: pubKey 
+        ? 'Clé publique de signature Webhook Ed25519 Maketou récupérée avec succès depuis api.maketou.net.' 
+        : 'Impossible d\'obtenir la clé publique Ed25519 de Maketou.',
+      publicKey: pubKey ? `${pubKey.substring(0, 35)}...` : null,
+      verificationEngine: 'Ed25519 canonical JSON (X-Cart-Signature: t=<timestamp>,v1=<signature>)'
+    });
+  } catch (err: any) {
+    return res.status(500).json({
+      success: false,
+      error: `Erreur lors du test Webhook Maketou : ${err.message}`
+    });
+  }
+}
+
 // Attach Maketou routes
 smtpRouter.post('/api/admin/maketou/test-key', handleTestMaketouApiKey);
 smtpRouter.post('/api/admin/marketto/test-key', handleTestMaketouApiKey);
+smtpRouter.get('/api/admin/maketou/test-webhook', handleTestMaketouWebhook);
 smtpRouter.post('/api/subscription/create-checkout', handleCreateMaketouCheckout);
 smtpRouter.post('/subscription/create-checkout', handleCreateMaketouCheckout);
 
-// Universal Route Attachments to guarantee 0% 404 rate
+// Universal Route Attachments for Webhooks to guarantee 0% 404 rate
 smtpRouter.all('/webhooks/subscription', handleIncomingWebhook);
+smtpRouter.all('/webhooks/maketou', handleIncomingWebhook);
+smtpRouter.all('/webhooks/maketou-cart', handleIncomingWebhook);
+smtpRouter.all('/webhooks/cart', handleIncomingWebhook);
 smtpRouter.all('/subscription', handleIncomingWebhook);
 smtpRouter.all('/api/webhooks/subscription', handleIncomingWebhook);
+smtpRouter.all('/api/webhooks/maketou', handleIncomingWebhook);
+smtpRouter.all('/api/webhooks/maketou-cart', handleIncomingWebhook);
+smtpRouter.all('/api/webhooks/cart', handleIncomingWebhook);
 smtpRouter.all('/api/subscription', handleIncomingWebhook);
 smtpRouter.all('/webhooks', handleIncomingWebhook);
+
 
