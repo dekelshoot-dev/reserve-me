@@ -6,11 +6,13 @@ import { ProHeader } from './components/ProHeader';
 import { Footer } from './components/Footer';
 import { Toast } from './components/Toast';
 import { AiAssistantModal } from './components/AiAssistantModal';
+import { SeoHead } from './components/SeoHead';
 
 import { PublicLandingView } from './views/PublicLandingView';
 import { PublicExplorerView } from './views/PublicExplorerView';
 import { PublicBookingView } from './views/PublicBookingView';
 import { PublicCheckoutView } from './views/PublicCheckoutView';
+import { NotFoundView } from './views/NotFoundView';
 import { AuthSignInView } from './views/AuthSignInView';
 import { AuthSignUpView } from './views/AuthSignUpView';
 import { AuthVerifyEmailView } from './views/AuthVerifyEmailView';
@@ -93,6 +95,7 @@ const MainRouter: React.FC = () => {
     }
     return (
       <div className="min-h-screen bg-[#f9f9ff] font-sans text-[#111c2d]">
+        <SeoHead />
         <Toast />
         <AdminDashboardView />
       </div>
@@ -101,6 +104,7 @@ const MainRouter: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#FAFAFC] font-sans text-[#101828] flex flex-col">
+      <SeoHead />
       <Toast />
       <AiAssistantModal />
 
@@ -126,7 +130,7 @@ const MainRouter: React.FC = () => {
       ) : (
         <>
           <PublicHeader />
-          <div key={currentView} className="flex-1 animate-fadeIn">
+          <main key={currentView} className="flex-1 animate-fadeIn">
             {currentView === 'public-landing' && <PublicLandingView />}
             {currentView === 'public-explorer' && <PublicExplorerView />}
             {currentView === 'public-booking' && <PublicBookingView />}
@@ -136,7 +140,8 @@ const MainRouter: React.FC = () => {
             {currentView === 'auth-verify-email' && <AuthVerifyEmailView />}
             {currentView === 'auth-forgot-password' && <AuthForgotPasswordView />}
             {currentView === 'user-profile' && <UserProfileView />}
-          </div>
+            {currentView === 'not-found' && <NotFoundView />}
+          </main>
           <Footer />
         </>
       )}

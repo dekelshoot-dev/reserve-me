@@ -11,5 +11,9 @@ services:
         value: production
       - key: PORT
         value: 10000
+      - key: PUBLIC_SITE_URL
+        value: https://reserve-me.dekel-dev.com
+      - key: VITE_PUBLIC_SITE_URL
+        value: https://reserve-me.dekel-dev.com
       - key: GEMINI_API_KEY
         sync: false

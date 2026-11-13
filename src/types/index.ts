@@ -18,7 +18,8 @@ export type ViewMode =
   | 'pro-facturation'
   | 'pro-promocodes'
   | 'pro-subscription'
-  | 'admin-dashboard';
+  | 'admin-dashboard'
+  | 'not-found';
 
 export type UserRole = 'customer' | 'business' | 'admin' | 'particulier' | 'professionnel';
 

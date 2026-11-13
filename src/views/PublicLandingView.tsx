@@ -114,22 +114,30 @@ export const PublicLandingView: React.FC = () => {
 
               {/* Action CTAs */}
               <div className="flex flex-wrap items-center gap-4 pt-2">
-                <button
-                  onClick={() => setCurrentView('public-explorer')}
+                <a
+                  href="/explorer"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setCurrentView('public-explorer');
+                  }}
                   className="inline-flex items-center justify-center px-6 py-3.5 rounded-xl bg-[#0f766e] text-white text-sm font-semibold hover:bg-[#115e59] shadow-md transition-all duration-300 gap-2 group"
                 >
                   <span>Trouver un créneau</span>
                   <span className="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform duration-200">
                     arrow_forward
                   </span>
-                </button>
+                </a>
 
-                <button
-                  onClick={() => setCurrentView('public-booking')}
+                <a
+                  href="/reserver"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setCurrentView('public-booking');
+                  }}
                   className="inline-flex items-center justify-center px-6 py-3.5 rounded-xl bg-white border border-[#E4E7EC] text-[#101828] text-sm font-semibold hover:bg-[#FAFAFC] hover:border-[#0f766e] transition-all duration-300 shadow-2xs"
                 >
                   Découvrir Cabinet Althéa
-                </button>
+                </a>
               </div>
 
               {/* Guarantees */}
@@ -162,12 +170,16 @@ export const PublicLandingView: React.FC = () => {
 
                 <div className="flex items-center gap-1.5">
                   <button
+                    type="button"
+                    aria-label="Professionnel précédent"
                     onClick={() => setActiveSlide(prev => (prev - 1 + heroSlides.length) % heroSlides.length)}
                     className="w-7 h-7 rounded-full bg-white border border-[#E4E7EC] hover:border-[#0f766e] hover:text-[#0f766e] text-[#475467] flex items-center justify-center transition-all shadow-2xs"
                   >
                     <span className="material-symbols-outlined text-[16px]">keyboard_arrow_up</span>
                   </button>
                   <button
+                    type="button"
+                    aria-label="Professionnel suivant"
                     onClick={() => setActiveSlide(prev => (prev + 1) % heroSlides.length)}
                     className="w-7 h-7 rounded-full bg-white border border-[#E4E7EC] hover:border-[#0f766e] hover:text-[#0f766e] text-[#475467] flex items-center justify-center transition-all shadow-2xs"
                   >
@@ -184,12 +196,15 @@ export const PublicLandingView: React.FC = () => {
                     <div className="flex items-center gap-3.5">
                       <img
                         src={currentHero.avatar}
-                        alt={currentHero.name}
+                        alt={`${currentHero.name} — ${currentHero.role}`}
+                        width={56}
+                        height={56}
+                        decoding="async"
                         className="w-14 h-14 rounded-xl object-cover ring-2 ring-[#E4E7EC]"
                       />
                       <div>
                         <div className="flex items-center gap-1.5">
-                          <h3 className="text-base font-bold text-[#101828]">{currentHero.name}</h3>
+                          <h2 className="text-base font-bold text-[#101828]">{currentHero.name}</h2>
                           <span className="material-symbols-outlined text-[#14B8A6] text-[18px]">check_circle</span>
                         </div>
                         <p className="text-xs text-[#667085]">{currentHero.role}</p>
@@ -271,15 +286,19 @@ export const PublicLandingView: React.FC = () => {
                       <span className="text-lg font-bold text-[#101828]">{currentHero.price}</span>
                     </div>
 
-                    <button
-                      onClick={() => setCurrentView('public-booking')}
+                    <a
+                      href="/reserver"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setCurrentView('public-booking');
+                      }}
                       className="px-5 py-2.5 rounded-lg bg-[#0f766e] text-white text-xs font-semibold hover:bg-[#115e59] shadow-sm transition-all flex items-center gap-1.5 group"
                     >
                       <span>Réserver un créneau</span>
                       <span className="material-symbols-outlined text-[14px] group-hover:translate-x-1 transition-transform duration-200">
                         arrow_forward
                       </span>
-                    </button>
+                    </a>
                   </div>
                 </div>
               </div>
@@ -290,9 +309,11 @@ export const PublicLandingView: React.FC = () => {
                   {activeSlide + 1} / {heroSlides.length} • {currentHero.name}
                 </span>
                 <div className="flex items-center gap-1.5">
-                  {heroSlides.map((_, idx) => (
+                  {heroSlides.map((slide, idx) => (
                     <button
                       key={idx}
+                      type="button"
+                      aria-label={`Afficher ${slide.name}`}
                       onClick={() => setActiveSlide(idx)}
                       className={`h-1.5 rounded-full transition-all ${
                         activeSlide === idx ? 'w-7 bg-[#0f766e]' : 'w-2 bg-[#D0D5DD] hover:bg-[#0f766e]/50'
@@ -322,15 +343,19 @@ export const PublicLandingView: React.FC = () => {
               </p>
             </div>
 
-            <button
-              onClick={() => setCurrentView('public-explorer')}
+            <a
+              href="/explorer"
+              onClick={(e) => {
+                e.preventDefault();
+                setCurrentView('public-explorer');
+              }}
               className="text-sm font-semibold text-[#14B8A6] hover:text-[#0d9488] transition-colors inline-flex items-center gap-1 group self-start md:self-auto"
             >
               <span>Voir toutes les catégories</span>
               <span className="material-symbols-outlined text-[18px] group-hover:translate-x-1.5 transition-transform duration-200">
                 arrow_forward
               </span>
-            </button>
+            </a>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -405,7 +430,7 @@ export const PublicLandingView: React.FC = () => {
       </section>
 
       {/* 3. COMMENT ÇA MARCHE SECTION */}
-      <section className="w-full bg-[#F2F4F7]/50 py-16 lg:py-20 border-b border-[#E4E7EC]">
+      <section id="comment-ca-marche" className="w-full bg-[#F2F4F7]/50 py-16 lg:py-20 border-b border-[#E4E7EC]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-14">
             <span className="text-xs font-bold uppercase tracking-wider text-[#14B8A6] block mb-2">
@@ -670,7 +695,7 @@ export const PublicLandingView: React.FC = () => {
                     <span className="material-symbols-outlined text-xl">check_circle</span>
                   </div>
                   <div>
-                    <h4 className="text-sm font-bold text-white">{item.title}</h4>
+                    <h3 className="text-sm font-bold text-white">{item.title}</h3>
                     <p className="text-xs text-white/70 mt-0.5">{item.desc}</p>
                   </div>
                 </div>

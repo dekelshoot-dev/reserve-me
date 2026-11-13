@@ -1,0 +1,19 @@
+User-agent: *
+Allow: /
+Allow: /explorer
+Allow: /reserver
+Disallow: /admin
+Disallow: /pro/
+Disallow: /pro
+Disallow: /profil
+Disallow: /checkout
+Disallow: /connexion
+Disallow: /inscription
+Disallow: /verifier-email
+Disallow: /mot-de-passe-oublie
+Disallow: /pro-subscription
+Disallow: /prosubscribe
+Disallow: /api/
+Disallow: /webhooks/
+
+Sitemap: https://reserve-me.dekel-dev.com/sitemap.xml

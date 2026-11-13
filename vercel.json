@@ -1,6 +1,14 @@
 {
   "rewrites": [
     {
+      "source": "/robots.txt",
+      "destination": "/api/index"
+    },
+    {
+      "source": "/sitemap.xml",
+      "destination": "/api/index"
+    },
+    {
       "source": "/api/(.*)",
       "destination": "/api/index"
     },
@@ -13,7 +21,7 @@
       "destination": "/api/index"
     },
     {
-      "source": "/((?!api|webhooks|subscription).*)",
+      "source": "/((?!api|webhooks|subscription|robots\\.txt|sitemap\\.xml).*)",
       "destination": "/index.html"
     }
   ]

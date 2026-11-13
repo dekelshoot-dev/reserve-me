@@ -92,10 +92,10 @@ export const PublicBookingView: React.FC = () => {
   const [paymentChoice, setPaymentChoice] = useState<'deposit' | 'full'>('deposit');
 
   // Client Details Form
-  const [clientName, setClientName] = useState('Éléonore Guérin');
-  const [clientPhone, setClientPhone] = useState('+221 77 123 45 67');
-  const [clientEmail, setClientEmail] = useState('e.guerin@innovatech.sn');
-  const [clientNotes, setClientNotes] = useState('Réservation effectuée depuis le portail public');
+  const [clientName, setClientName] = useState(userProfile?.displayName || user?.name || '');
+  const [clientPhone, setClientPhone] = useState('');
+  const [clientEmail, setClientEmail] = useState(userProfile?.email || user?.email || '');
+  const [clientNotes, setClientNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Month Names in French
@@ -240,7 +240,10 @@ export const PublicBookingView: React.FC = () => {
               <div className="relative shrink-0">
                 <img
                   src={practitionerAvatar}
-                  alt={practitionerName}
+                  alt={`${practitionerName} — ${cabinetName}`}
+                  width={96}
+                  height={96}
+                  decoding="async"
                   className="w-20 h-20 md:w-24 md:h-24 rounded-2xl object-cover shadow-md ring-4 ring-slate-100 bg-slate-100"
                 />
                 <div className="absolute -bottom-1 -right-1 bg-[#14B8A6] text-white p-1 rounded-full shadow-sm flex items-center justify-center">
@@ -518,6 +521,7 @@ export const PublicBookingView: React.FC = () => {
                       required
                       value={clientName}
                       onChange={(e) => setClientName(e.target.value)}
+                      placeholder="Ex: Camille Dupont"
                       className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#14B8A6]/30"
                     />
                   </div>
@@ -528,6 +532,7 @@ export const PublicBookingView: React.FC = () => {
                       required
                       value={clientPhone}
                       onChange={(e) => setClientPhone(e.target.value)}
+                      placeholder="Ex: +221 77 000 00 00"
                       className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#14B8A6]/30"
                     />
                   </div>
@@ -540,6 +545,7 @@ export const PublicBookingView: React.FC = () => {
                     required
                     value={clientEmail}
                     onChange={(e) => setClientEmail(e.target.value)}
+                    placeholder="vous@domaine.com"
                     className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#14B8A6]/30"
                   />
                 </div>
@@ -549,6 +555,7 @@ export const PublicBookingView: React.FC = () => {
                   <textarea
                     value={clientNotes}
                     onChange={(e) => setClientNotes(e.target.value)}
+                    placeholder="Précisez vos besoins ou informations utiles pour le rendez-vous..."
                     rows={2}
                     className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#14B8A6]/30 resize-none"
                   />

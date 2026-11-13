@@ -47,6 +47,7 @@ import {
   initialTransactions, 
   initialWeeklySchedule 
 } from '../data/mockData';
+import { getRouteConfigByView, normalizePathname, resolveRouteByPath } from '../seo/routes';
 
 interface AppContextType {
   currentView: ViewMode;
@@ -117,19 +118,15 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const getInitialView = (): ViewMode => {
     if (typeof window !== 'undefined') {
-      const pathname = window.location.pathname;
       const search = window.location.search || window.location.href;
-      if (pathname === '/checkout') {
-        return 'public-checkout';
-      }
       if (
-        pathname === '/prosubscribe' || 
-        pathname === '/pro-subscription' || 
-        search.includes('status=checkout_completed') || 
+        search.includes('status=checkout_completed') ||
         search.includes('status=checkout_complete')
       ) {
         return 'pro-subscription';
       }
+      const matched = resolveRouteByPath(window.location.pathname);
+      return matched.view;
     }
     return 'public-landing';
   };
@@ -139,40 +136,41 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const setCurrentView = (view: ViewMode) => {
     setCurrentViewRaw(view);
     if (typeof window !== 'undefined') {
-      if (view === 'public-checkout') {
-        if (window.location.pathname !== '/checkout') {
-          window.history.pushState({ view }, '', '/checkout');
+      const targetConfig = getRouteConfigByView(view);
+      const currentPath = normalizePathname(window.location.pathname);
+      const isCheckoutCompletion =
+        view === 'pro-subscription' &&
+        (window.location.search.includes('status=checkout_completed') ||
+          window.location.search.includes('status=checkout_complete'));
+
+      if (!isCheckoutCompletion && currentPath !== targetConfig.path) {
+        const isAliasForTarget = targetConfig.aliases?.some(
+          (a) => a.toLowerCase() === currentPath.toLowerCase()
+        );
+        if (!isAliasForTarget || view === 'public-landing') {
+          window.history.pushState({ view }, '', targetConfig.path);
         }
-      } else if (view === 'pro-subscription') {
-        if (window.location.pathname !== '/pro-subscription' && window.location.pathname !== '/prosubscribe') {
-          window.history.pushState({ view }, '', '/pro-subscription');
-        }
-      } else if (window.location.pathname === '/checkout' || window.location.pathname === '/prosubscribe') {
-        window.history.pushState({ view }, '', '/');
       }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
   useEffect(() => {
     const handlePopState = () => {
-      const pathname = window.location.pathname;
       const search = window.location.search || window.location.href;
-      if (pathname === '/checkout') {
-        setCurrentViewRaw('public-checkout');
-      } else if (
-        pathname === '/prosubscribe' || 
-        pathname === '/pro-subscription' || 
-        search.includes('status=checkout_completed') || 
+      if (
+        search.includes('status=checkout_completed') ||
         search.includes('status=checkout_complete')
       ) {
         setCurrentViewRaw('pro-subscription');
-      } else if (currentView === 'public-checkout') {
-        setCurrentViewRaw('public-landing');
+        return;
       }
+      const matched = resolveRouteByPath(window.location.pathname);
+      setCurrentViewRaw(matched.view);
     };
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
-  }, [currentView]);
+  }, []);
   const [editingServiceId, setEditingServiceId] = useState<string | null>(null);
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
